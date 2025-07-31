@@ -1,7 +1,7 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../configs/database.js";
 import Usuario from "./Usuario.js";
-import Pool from "./Servico.js";
+import Pool from "./Pool.js";
 
 class Chamado extends Model { }
 
