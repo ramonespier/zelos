@@ -4,6 +4,7 @@ import sequelize from './configs/database.js';
 
 // routes
 import usuarioRoutes from './routes/usuarioRoutes.js'
+import poolRoutes from './routes/poolRoutes.js'
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +20,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/usuarios', usuarioRoutes);
+app.use('/pools', poolRoutes);
 
 async function StartServer() {
     try {
