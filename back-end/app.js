@@ -1,13 +1,5 @@
 import dotenv from 'dotenv';
 import express from 'express';
-
-// models   
-import Usuario from './entities/Usuario.js';
-import Pool from './entities/Pool.js';
-import PoolTecnico from './entities/PoolTecnico.js';
-import Apontamento from './entities/Apontamento.js';
-import Avaliacao from './entities/Avaliacao.js';
-import Chamado from './entities/Chamado.js';
 import sequelize from './configs/database.js';
 
 // routes
