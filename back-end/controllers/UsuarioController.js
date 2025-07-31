@@ -20,6 +20,7 @@ class UsuarioController {
             if (!usuario) {
                 return res.status(404).json({ message: 'Usuário não encontrado' });
             };
+            res.status(201).json(usuario)
         } catch (err) {
             res.status(500).json({ message: 'Erro ao buscar usuário' });
         }
@@ -69,4 +70,4 @@ class UsuarioController {
 
 }
 
-export default UsuarioController;
+export default UsuarioController;   
