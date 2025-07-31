@@ -10,6 +10,9 @@ import Avaliacao from './entities/Avaliacao.js';
 import Chamado from './entities/Chamado.js';
 import sequelize from './configs/database.js';
 
+// routes
+import usuarioRoutes from './routes/usuarioRoutes.js'
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -22,6 +25,8 @@ app.use(express.json());
 app.get('/', (req, res) => {
     res.status(200).json({ message: 'Página inicial' })
 })
+
+app.use('/usuarios', usuarioRoutes);
 
 async function StartServer() {
     try {
