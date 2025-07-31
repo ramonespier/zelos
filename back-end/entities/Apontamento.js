@@ -3,7 +3,7 @@ import sequelize from "../configs/database.js";
 import Chamado from "./Chamado.js";
 import Usuario from "./Usuario.js";
 
-class Apontamento extends Model {}
+class Apontamento extends Model { }
 
 Apontamento.init({
     id: {
@@ -11,7 +11,7 @@ Apontamento.init({
         primaryKey: true,
         autoIncrement: true,
     },
-    inicio: {
+    comeco: {
         type: DataTypes.DATE,
         allowNull: false,
     },
@@ -21,21 +21,32 @@ Apontamento.init({
     descricao: {
         type: DataTypes.STRING,
     },
+     duracao: {
+        type: DataTypes.VIRTUAL,
+        get() {
+            const comeco = this.getDataValue('comeco');
+            const fim = this.getDataValue('fim');
+            if (comeco && fim) {
+                return Math.floor((new Date(fim) - new Date(comeco)) / 1000);
+            }
+            return null;
+        }
+    },
     criado_em: {
         type: DataTypes.DATE,
         allowNull: false
     },
-    id_chamado: {
+    chamado_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: {model: Chamado, key: 'id'},
+        references: { model: Chamado, key: 'id' },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
     },
-    id_tecnico: {
+    tecnico_id: {
         type: DataTypes.CHAR(36),
         allowNull: false,
-        references: {model: Usuario, key: 'id'},
+        references: { model: Usuario, key: 'id' },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
     }
@@ -46,7 +57,7 @@ Apontamento.init({
     timestamps: false
 })
 
-Apontamento.belongsTo(Chamado, {foreignKey: 'id_chamado', as: 'chamado'});
-Apontamento.belongsTo(Usuario, {foreignKey: 'id_tecnico', as: 'tecnico'});
+Apontamento.belongsTo(Chamado, { foreignKey: 'chamado_id', as: 'chamado' });
+Apontamento.belongsTo(Usuario, { foreignKey: 'tecnico_id', as: 'tecnico' });
 
 export default Apontamento;

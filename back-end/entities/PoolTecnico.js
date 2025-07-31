@@ -12,7 +12,7 @@ PoolTecnico.init({
         autoIncrement: true,
     },
     id_tecnico: {
-        type: DataTypes.CHAR(36),
+        type: DataTypes.UUID,
         allowNull: false,
         references: { model: Usuario, key: 'id' },
         onUpdate: 'CASCADE',

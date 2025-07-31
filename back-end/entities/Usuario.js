@@ -10,34 +10,39 @@ Usuario.init({
         primaryKey: true,
     },
     nome: {
-        type: DataTypes.STRING(100),
+        type: DataTypes.STRING(255),
         allowNull: false,
     },
     email: {
-        type: DataTypes.STRING(100),
+        type: DataTypes.STRING(255),
         allowNull: false,
         unique: true,
     },
     senha: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(255),
         allowNull: false,
     },
     funcao: {
-        type: DataTypes.ENUM('admin', 'tecnico', 'usuario'),
-        defaultValue: false,
+        type: DataTypes.STRING(100),
+        allowNull: false,
     },
     status: {
         type: DataTypes.ENUM('ativo', 'inativo'),
         defaultValue: 'ativo',
-
-    }
+    },
+    criado_em:{
+        type: DataTypes.DATE,
+    },
+    atualizado_em: {
+        type: DataTypes.DATE,
+    },
 }, {
     sequelize,
     modelName: 'Usuario',
     tableName: 'usuarios',
     timestamps: true,
     createdAt: 'criado_em',
-    updatedAt: false,
+    updatedAt: 'atualizado_em',
 });
 
 export default Usuario;

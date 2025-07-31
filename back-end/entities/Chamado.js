@@ -11,45 +11,39 @@ Chamado.init({
         primaryKey: true,
         autoIncrement: true,
     },
-    patrimonio: {
-        type: DataTypes.STRING,
+    titulo: {
+        type: DataTypes.STRING(255),
         allowNull: false,
     },
     descricao: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    prioridade: {
-        type: DataTypes.ENUM('baixa', 'média', 'alta', 'urgente'),
-        defaultValue: 'média',
-    },
     status: {
-        type: DataTypes.ENUM('aberto', 'em_andamento', 'finalizado', 'cancelado'),
+        type: DataTypes.ENUM('aberto', 'em andamento', 'finalizado', 'cancelado'),
         defaultValue: 'aberto',
     },
     criado_em: {
         type: DataTypes.DATE,
-        allowNull: false,
     },
     atualizado_em: {
         type: DataTypes.DATE,
-        allowNull: true,
     },
-    id_usuario: {
-        type: DataTypes.CHAR(36),
+    usuario_id: {
+        type: DataTypes.UUID,
         allowNull: false,
         references: {model: Usuario, key: 'id'},
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
     },
-    id_tecnico: {
-        type: DataTypes.CHAR(36),
+    tecnico_id: {
+        type: DataTypes.UUID,
         allowNull: false,
         references: {model: Usuario, key: 'id'},
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
     },
-    id_pool: {
+    tipo_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {model: Pool, key: 'id'},
@@ -64,9 +58,9 @@ Chamado.init({
     timestamps: false
 });
 
-Chamado.belongsTo(Usuario, {foreignKey: 'id_usuario', as: 'usuario'});
-Chamado.belongsTo(Usuario, {foreignKey: 'id_tecnico', as: 'tecnico'});
-Chamado.belongsTo(Pool, {foreignKey: 'id_pool', as: 'pool'});
+Chamado.belongsTo(Usuario, {foreignKey: 'usuario_id', as: 'usuario'});
+Chamado.belongsTo(Usuario, {foreignKey: 'tecnico_id', as: 'tecnico'});
+Chamado.belongsTo(Pool, {foreignKey: 'tipo_id', as: 'pool'});
 
 export default Chamado;
 
