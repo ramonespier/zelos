@@ -28,7 +28,7 @@ PoolTecnico.init({
 }, {
     sequelize,
     modelName: 'PoolTecnico',
-    tableName: 'pool_tecnicos',
+    tableName: 'pool_tecnico',
     timestamps: false
 });
 
