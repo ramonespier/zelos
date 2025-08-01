@@ -2,6 +2,7 @@ import PoolTecnico from '../entities/PoolTecnico.js'
 
 class PoolTecnicoController {
 
+    // listar pools de tecnicos
     static async listar(req, res) {
         try {
             const poolTecnico = await PoolTecnico.findAll();
@@ -11,12 +12,13 @@ class PoolTecnicoController {
         }
     }
 
+    // buscar pools de tecnicos por id
     static async buscarPorId(req, res) {
         try {
             const { id } = req.params;
             const poolTecnico = await PoolTecnico.findByPk(id);
             if (!poolTecnico) {
-                return res.status(404).json({ message: 'Pool de tecnico não encontrada' })  
+                return res.status(404).json({ message: 'Pool de tecnico não encontrada' })
             };
             res.json(poolTecnico);
         } catch (err) {
@@ -24,6 +26,7 @@ class PoolTecnicoController {
         }
     }
 
+    // criar pools de tecnico
     static async criar(req, res) {
         try {
             const { id_tecnico, id_pool } = req.body;
@@ -37,6 +40,7 @@ class PoolTecnicoController {
         }
     }
 
+    // atualizar
     static async atualizar(req, res) {
         try {
             const { id } = req.params;
@@ -52,6 +56,8 @@ class PoolTecnicoController {
         }
     }
 
+
+    //deletar
     static async deletar(req, res) {
         try {
             const { id } = req.params;
@@ -65,8 +71,6 @@ class PoolTecnicoController {
             res.status(500).json({ message: 'Erro ao deletar pool de tecnico' })
         }
     }
-
-
 }
 
 export default PoolTecnicoController;
