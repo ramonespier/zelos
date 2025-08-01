@@ -21,7 +21,7 @@ Apontamento.init({
     descricao: {
         type: DataTypes.STRING,
     },
-     duracao: {
+    duracao: {
         type: DataTypes.VIRTUAL,
         get() {
             const comeco = this.getDataValue('comeco');
@@ -30,11 +30,12 @@ Apontamento.init({
                 return Math.floor((new Date(fim) - new Date(comeco)) / 1000);
             }
             return null;
-        }
+        }   
     },
     criado_em: {
         type: DataTypes.DATE,
-        allowNull: false
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
     },
     chamado_id: {
         type: DataTypes.INTEGER,

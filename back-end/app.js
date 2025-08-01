@@ -7,6 +7,7 @@ import usuarioRoutes from './routes/usuarioRoutes.js'
 import poolRoutes from './routes/poolRoutes.js'
 import poolTecnicoRoutes from './routes/poolTecnicoRoutes.js'
 import chamadoRoutes from './routes/chamadoRoutes.js'
+import apontamentoRoutes from './routes/apontamentoRoutes.js'
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,6 +26,7 @@ app.use('/usuarios', usuarioRoutes);
 app.use('/pools', poolRoutes);
 app.use('/pools-tecnico', poolTecnicoRoutes);
 app.use('/chamados', chamadoRoutes);
+app.use('/apontamento', apontamentoRoutes);
 
 async function StartServer() {
     try {
