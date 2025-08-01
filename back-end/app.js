@@ -6,6 +6,7 @@ import sequelize from './configs/database.js';
 import usuarioRoutes from './routes/usuarioRoutes.js'
 import poolRoutes from './routes/poolRoutes.js'
 import poolTecnicoRoutes from './routes/poolTecnicoRoutes.js'
+import chamadoRoutes from './routes/chamadoRoutes.js'
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,6 +24,7 @@ app.get('/', (req, res) => {
 app.use('/usuarios', usuarioRoutes);
 app.use('/pools', poolRoutes);
 app.use('/pools-tecnico', poolTecnicoRoutes);
+app.use('/chamados', chamadoRoutes);
 
 async function StartServer() {
     try {
