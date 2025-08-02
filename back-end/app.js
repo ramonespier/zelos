@@ -11,6 +11,7 @@ import apontamentoRoutes from './routes/apontamentoRoutes.js';
 import avaliacaoRoutes from './routes/avaliacaoRoutes.js'
 import relatorioRoutes from './routes/relatorioRoutes.js'
 import patrimonioRoutes from './routes/patrimonioRoutes.js'
+import authRoutes from './routes/authRoutes.js'
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -33,6 +34,7 @@ app.use('/apontamento', apontamentoRoutes);
 app.use('/avaliacoes', avaliacaoRoutes);
 app.use('/relatorios', relatorioRoutes);
 app.use('/patrimonios', patrimonioRoutes);
+app.use('/auth', authRoutes);
 
 async function StartServer() {
     try {
