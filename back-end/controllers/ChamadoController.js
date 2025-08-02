@@ -26,14 +26,16 @@ class ChamadoController {
 
     static async criar(req, res) {
         try {
-            const { titulo, descricao, status, usuario_id, tecnico_id, tipo_id } = req.body;
+            const { titulo, descricao, status, usuario_id, tecnico_id, tipo_id, patrimonio_id } = req.body;
             const chamado = await Chamado.create({
                 titulo,
                 descricao,
                 status,
                 usuario_id,
                 tecnico_id,
-                tipo_id
+                tipo_id,
+                patrimonio_id
+
             })
             res.status(201).json(chamado);
         } catch (err) {
@@ -55,7 +57,8 @@ class ChamadoController {
                 status,
                 usuario_id,
                 tecnico_id,
-                tipo_id
+                tipo_id,
+                patrimonio_id
             })
             res.status(201).json(chamado)
         } catch (err){
