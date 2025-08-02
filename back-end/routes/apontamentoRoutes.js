@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/', ApontamentoController.listar);
 router.get('/:id', ApontamentoController.buscarPorId);
 router.post('/', ApontamentoController.criar);
-router.put('/:id', ApontamentoController.atualizar);
+router.put('/:id', ApontamentoController.atualizar);     // PROVALVEMENTE IREI RETIRAR
 router.delete('/:id', ApontamentoController.deletar);
 
 export default router;
