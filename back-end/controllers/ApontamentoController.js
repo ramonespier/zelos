@@ -36,6 +36,7 @@ class ApontamentoController {
         }
     }
 
+    // PROVALVEMNTE IREI RETIRAR
     static async atualizar(req, res) {
         try {
             const { id } = req.params;

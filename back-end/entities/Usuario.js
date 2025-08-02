@@ -9,6 +9,11 @@ Usuario.init({
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
     },
+    username: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        unique: true,
+    },
     nome: {
         type: DataTypes.STRING(255),
         allowNull: false,
@@ -30,7 +35,7 @@ Usuario.init({
         type: DataTypes.ENUM('ativo', 'inativo'),
         defaultValue: 'ativo',
     },
-    criado_em:{
+    criado_em: {
         type: DataTypes.DATE,
     },
     atualizado_em: {
