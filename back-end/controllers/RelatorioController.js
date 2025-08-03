@@ -11,6 +11,11 @@ class RelatorioController {
     try {
       let resultado;
 
+      // http://localhost:3000/relatorios?tipo=status
+      // http://localhost:3000/relatorios?tipo=chamado
+      // http://localhost:3000/relatorios?tipo=tecnico
+      // http://localhost:3000/relatorios?tipo=historico_patrimonio
+      // http://localhost:3000/relatorios?tipo=pool
       switch (tipo) {
         case 'status': 
           resultado = await RelatorioChamados.findAll();
