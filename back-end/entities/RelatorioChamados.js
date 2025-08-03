@@ -1,10 +1,10 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../configs/database.js";
 
-class Relatorio extends Model {}
+class RelatorioChamados extends Model {}
 
-Relatorio.init({
-    status:{
+RelatorioChamados.init({
+    status: {
         type: DataTypes.ENUM('pendente', 'em andamento', 'concluido'),
         allowNull: false,
     },
@@ -12,12 +12,11 @@ Relatorio.init({
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-},{
+}, {
     sequelize,
+    modelName: 'RelatorioChamados',
     tableName: 'vw_relatorio_chamados',
     timestamps: false,
-    createdAt: false,
-    updatedAt: false,
     freezeTableName: true,
     underscored: true,
     defaultScope: {
@@ -25,4 +24,4 @@ Relatorio.init({
     }
 });
 
-export default Relatorio;
+export default RelatorioChamados;
