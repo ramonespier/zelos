@@ -29,7 +29,7 @@ router.post('/',
 );
 
 router.put('/:id',
-    AuthMiddleware.verifyToken,
+    AuthMiddleware.verifyToken,         
     permitir(['admin']),
     ChamadoController.atualizar);
 

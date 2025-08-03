@@ -21,8 +21,8 @@ Chamado.init({
         allowNull: false,
     },
     status: {
-        type: DataTypes.ENUM('aberto', 'em andamento', 'concluido', 'cancelado'),
-        defaultValue: 'aberto',
+        type: DataTypes.ENUM('pendente', 'em andamento', 'concluido'),
+        defaultValue: 'pendente',
     },
     criado_em: {
         type: DataTypes.DATE,
