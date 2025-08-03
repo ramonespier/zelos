@@ -8,7 +8,7 @@ class AuthController {
     constructor() {
         this.login = this.login.bind(this);
     }
-
+    
     gerarToken(payload) {
         return jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
     }
