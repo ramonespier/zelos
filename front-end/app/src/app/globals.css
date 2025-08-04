@@ -11,10 +11,6 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* Colors */
-  --color-brightColor: #039bab;
-  --color-backgroundColor: #03c9d7;
-  --color-textColor: #333333;
 }
 
 @media (prefers-color-scheme: dark) {
