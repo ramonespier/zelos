@@ -1,4 +1,5 @@
 import Usuario from "../entities/Usuario.js";
+import bcrypt from "bcryptjs";
 
 class UsuarioController {
 
@@ -29,8 +30,13 @@ class UsuarioController {
     // criar novo user
     static async criar(req, res) {
         try {
-            const { nome, email, senha, funcao, status } = req.body;
-            const novoUsuario = await Usuario.create({ nome, email, senha, funcao, status });
+            const { username, nome, email, senha, funcao, status } = req.body;
+
+            // hash password
+            const salt = await bcrypt.genSalt(10);
+            const senhaHasheada = await bcrypt.hash(senha, salt);
+
+            const novoUsuario = await Usuario.create({ username, nome, email, senha: senhaHasheada, funcao, status });
             res.status(201).json(novoUsuario);
         } catch (err) {
             res.status(500).json({ message: 'Erro ao criar usuário' });

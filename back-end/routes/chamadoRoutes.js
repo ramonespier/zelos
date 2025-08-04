@@ -1,12 +1,41 @@
 import ChamadoController from "../controllers/ChamadoController.js";
+import Autorizar from "../middlewares/Autorizar.js";
+import AuthMiddleware from "../middlewares/AuthMiddleware.js";
 import express from "express";
 
 const router = express.Router();
+const autorizar = new Autorizar();
 
-router.get('/', ChamadoController.listar);
-router.get('/:id', ChamadoController.buscarPorId);
-router.post('/', ChamadoController.criar);
-router.put('/:id', ChamadoController.atualizar);
-router.delete('/:id', ChamadoController.deletar);
+const permitir = (perfisPermitidos) => (req, res, next) => {
+    return autorizar.autorizacao(req.user, perfisPermitidos)(req, res, next);
+}
+
+router.get('/',
+    AuthMiddleware.verifyToken,
+    permitir(['admin']),
+    ChamadoController.listar
+);
+
+router.get('/:id',
+    AuthMiddleware.verifyToken,
+    permitir(['usuario', 'admin', 'tecnico']),
+    ChamadoController.buscarPorId
+);
+
+router.post('/',
+    AuthMiddleware.verifyToken,
+    permitir(['usuario', 'admin']),
+    ChamadoController.criar
+);
+
+router.put('/:id',
+    AuthMiddleware.verifyToken,         
+    permitir(['admin']),
+    ChamadoController.atualizar);
+
+router.delete('/:id',
+    AuthMiddleware.verifyToken,
+    permitir(['admin']),
+    ChamadoController.deletar);
 
 export default router;

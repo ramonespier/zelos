@@ -2,6 +2,7 @@ import { Model, DataTypes } from "sequelize";
 import sequelize from "../configs/database.js";
 import Usuario from "./Usuario.js";
 import Pool from "./Pool.js";
+import Patrimonio from "./Patrimonio.js";
 
 class Chamado extends Model { }
 
@@ -20,8 +21,8 @@ Chamado.init({
         allowNull: false,
     },
     status: {
-        type: DataTypes.ENUM('aberto', 'em andamento', 'finalizado', 'cancelado'),
-        defaultValue: 'aberto',
+        type: DataTypes.ENUM('pendente', 'em andamento', 'concluido'),
+        defaultValue: 'pendente',
     },
     criado_em: {
         type: DataTypes.DATE,
@@ -32,35 +33,44 @@ Chamado.init({
     usuario_id: {
         type: DataTypes.UUID,
         allowNull: false,
-        references: {model: Usuario, key: 'id'},
+        references: { model: Usuario, key: 'id' },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
     },
     tecnico_id: {
         type: DataTypes.UUID,
         allowNull: false,
-        references: {model: Usuario, key: 'id'},
+        references: { model: Usuario, key: 'id' },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
     },
     tipo_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: {model: Pool, key: 'id'},
+        references: { model: Pool, key: 'id' },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
     },
-    
-},{
+    patrimonio_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: { model: Patrimonio, key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+    }
+}, {
     sequelize,
-    modelName:'Chamado',
+    modelName: 'Chamado',
     tableName: 'chamados',
-    timestamps: false
+    timestamps: true,
+    createdAt: 'criado_em',
+    updatedAt: 'atualizado_em'
 });
 
-Chamado.belongsTo(Usuario, {foreignKey: 'usuario_id', as: 'usuario'});
-Chamado.belongsTo(Usuario, {foreignKey: 'tecnico_id', as: 'tecnico'});
-Chamado.belongsTo(Pool, {foreignKey: 'tipo_id', as: 'pool'});
+Chamado.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'usuario' });
+Chamado.belongsTo(Usuario, { foreignKey: 'tecnico_id', as: 'tecnico' });
+Chamado.belongsTo(Pool, { foreignKey: 'tipo_id', as: 'pool' });
+Chamado.belongsTo(Patrimonio, { foreignKey: 'patrimonio_id', as: 'patrimonio' });
 
 export default Chamado;
 
