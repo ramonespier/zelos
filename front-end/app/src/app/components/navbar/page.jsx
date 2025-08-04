@@ -1,12 +1,13 @@
 'use client'
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 
 export default function Navbar() {
   const [activeTab, setActiveTab] = useState('inicio')
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'inicio':
+      case 'chamado':
         return (
           <div className="max-w-xl mx-auto mt-10 bg-white p-6 rounded shadow-md">
             <h2 className="text-2xl font-semibold text-center text-red-600 mb-6">Abrir novo chamado</h2>
@@ -38,36 +39,36 @@ export default function Navbar() {
             </form>
           </div>
         )
-      case 'sobre':
-        return <p className="text-center text-xl mt-10">Essa é a seção Meus chamados.</p>
-      case 'contato':
+      case 'inicio':
         return <p className="text-center text-xl mt-10">Aqui estarão os comunicados importantes!</p>
+      case 'meus':
+        return <p className="text-center text-xl mt-10">Essa é a seção Meus chamados.</p>
       default:
         return null
     }
   }
 
+  const AnimatedButton = ({ tab, children }) => (
+    <motion.button
+      onClick={() => setActiveTab(tab)}
+      className="relative text-white font-medium text-lg pb-1 overflow-hidden cursor-pointer"
+    >
+      {children}
+      <motion.span
+        className="absolute bottom-0 left-0 h-[2px] bg-white block"
+        initial={{ width: 0 }}
+        animate={{ width: activeTab === tab ? '100%' : '0%' }}
+        transition={{ duration: 0.4, ease: 'easeInOut' }}
+      />
+    </motion.button>
+  )
+
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-red-600 text-white flex justify-center gap-10 p-4">
-        <button
-          onClick={() => setActiveTab('inicio')}
-          className={`hover:underline ${activeTab === 'inicio' ? 'font-bold underline' : ''}`}
-        >
-          Abrir chamado
-        </button>
-        <button
-          onClick={() => setActiveTab('sobre')}
-          className={`hover:underline ${activeTab === 'sobre' ? 'font-bold underline' : ''}`}
-        >
-          Meus chamados
-        </button>
-        <button
-          onClick={() => setActiveTab('contato')}
-          className={`hover:underline ${activeTab === 'contato' ? 'font-bold underline' : ''}`}
-        >
-          Comunicados
-        </button>
+      <nav className="bg-red-600 text-white flex gap-6 p-4">
+        <AnimatedButton tab="inicio">Início</AnimatedButton>
+        <AnimatedButton tab="chamado">Abrir chamado</AnimatedButton>
+        <AnimatedButton tab="meus">Meus chamados</AnimatedButton>
       </nav>
 
       <main className="p-6">
