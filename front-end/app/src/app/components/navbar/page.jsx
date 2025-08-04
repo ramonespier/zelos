@@ -1,46 +1,35 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion'
+import Inicio from '../inicio/page'
+import InstrucoesRapidas from '../instrucoes/page'
+import Footer from '../footer/page'
+import Chamado from '../chamado/page'
 
 export default function Navbar() {
   const [activeTab, setActiveTab] = useState('inicio')
+
+  useEffect(() => {
+    const tabSalva = localStorage.getItem('activeTab');
+    if (tabSalva) setActiveTab(tabSalva);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('activeTab', activeTab);
+  }, [activeTab]);
 
   const renderContent = () => {
     switch (activeTab) {
       case 'chamado':
         return (
-          <div className="max-w-xl mx-auto mt-10 bg-white p-6 rounded shadow-md">
-            <h2 className="text-2xl font-semibold text-center text-red-600 mb-6">Abrir novo chamado</h2>
-            <form className="space-y-4">
-              <div>
-                <label className="block font-medium mb-1">Nome do responsável:</label>
-                <input type="text" placeholder="Seu nome" className="w-full border border-gray-300 p-2 rounded" />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Número do patrimônio:</label>
-                <input type="text" placeholder="Ex: 123456" className="w-full border border-gray-300 p-2 rounded" />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Tipo de problema:</label>
-                <select className="w-full border border-gray-300 p-2 rounded">
-                  <option>Elétrico</option>
-                  <option>Hidráulico</option>
-                  <option>Informática</option>
-                  <option>Outro</option>
-                </select>
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Descrição do problema:</label>
-                <textarea placeholder="Descreva o problema com detalhes..." className="w-full border border-gray-300 p-2 rounded h-24" />
-              </div>
-              <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-                Enviar chamado
-              </button>
-            </form>
-          </div>
+          <Chamado />
         )
       case 'inicio':
-        return <p className="text-center text-xl mt-10">Aqui estarão os comunicados importantes!</p>
+        return (
+          <div className="flex flex-col items-center justify-center min-h-[60vh]">
+            <Inicio onVerInstrucoes={() => setActiveTab('inicio')} />
+          </div>
+        )
       case 'meus':
         return <p className="text-center text-xl mt-10">Essa é a seção Meus chamados.</p>
       default:
@@ -48,32 +37,45 @@ export default function Navbar() {
     }
   }
 
-  const AnimatedButton = ({ tab, children }) => (
-    <motion.button
-      onClick={() => setActiveTab(tab)}
-      className="relative text-white font-medium text-lg pb-1 overflow-hidden cursor-pointer"
-    >
-      {children}
-      <motion.span
-        className="absolute bottom-0 left-0 h-[2px] bg-white block"
-        initial={{ width: 0 }}
-        animate={{ width: activeTab === tab ? '100%' : '0%' }}
-        transition={{ duration: 0.4, ease: 'easeInOut' }}
-      />
-    </motion.button>
-  )
-
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen flex flex-col bg-gray-100">
       <nav className="bg-red-600 text-white flex gap-6 p-4">
-        <AnimatedButton tab="inicio">Início</AnimatedButton>
-        <AnimatedButton tab="chamado">Abrir chamado</AnimatedButton>
-        <AnimatedButton tab="meus">Meus chamados</AnimatedButton>
+        <motion.button
+          onClick={() => setActiveTab('inicio')}
+          className="relative text-white font-medium text-lg pb-1 overflow-hidden cursor-pointer"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Início
+        </motion.button>
+        <motion.button
+          onClick={() => setActiveTab('chamado')}
+          className="relative text-white font-medium text-lg pb-1 overflow-hidden cursor-pointer"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Abrir chamado
+        </motion.button>
+        <motion.button
+          onClick={() => setActiveTab('meus')}
+          className="relative text-white font-medium text-lg pb-1 overflow-hidden cursor-pointer"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Meus chamados
+        </motion.button>
       </nav>
 
-      <main className="p-6">
+      <main className="flex-grow p-6 flex flex-col items-center justify-center space-y-10">
         {renderContent()}
+        {activeTab === 'inicio' && (
+          <div className="max-w-4xl w-full mx-auto flex justify-center">
+            <InstrucoesRapidas />
+          </div>
+        )}
       </main>
+
+      <Footer />
     </div>
   )
 }

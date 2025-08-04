@@ -37,7 +37,6 @@ export default function Header() {
           ></div>
           <div className="font-semibold text-[#b30000]">Maria Silva</div>
 
-          {/* Dropdown animado */}
           <AnimatePresence>
             {isOpen && (
               <motion.ul
