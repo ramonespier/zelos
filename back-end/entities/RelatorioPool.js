@@ -13,9 +13,15 @@ RelatorioPool.init({
     }
 }, {
     sequelize,
-    modelName: 'RelatorioPool',
-    tableName: 'vw_relatorio_por_tipo',
+    modelName: 'RelatorioPool', 
+    tableName: 'vw_relatorio_por_pool',
     timestamps: false,
-})
+    indexes: [],
+    defaultScope: {
+        attributes: {
+            exclude: ['id']
+        }
+    }
+});
 
 export default RelatorioPool;
