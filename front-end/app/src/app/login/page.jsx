@@ -1,55 +1,93 @@
+'use client';
+
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
 export default function Login() {
+  const [activeTab, setActiveTab] = useState('adm');
+
+  const welcomeMessages = {
+    adm: 'Administrador',
+    user: 'Usuário',
+    tecnico: 'Técnico',
+  };
+
   return (
-    <>
-      <div className="bg-[url(/bglogin.jpg)] bg-cover bg-center h-screen w-full flex items-center justify-center">
-        <div className="bg-white p-8 rounded shadow-lg w-80">
-          {/* Botões de seleção de tipo de usuário - exatamente como na imagem */}
-          <div className="flex mb-6 space-x-2">
-            <button className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300">
-              adm
-            </button>
-            <button className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300">
-              user
-            </button>
-            <button className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300">
-              técnico
-            </button>
-          </div>
-          
-          {/* Formulário de login - estilo idêntico ao da imagem */}
-          <div className="space-y-4">
-            <div>
-              <div className="block text-sm font-medium text-gray-700 mb-1">
-                Username  
-              </div>
+    <div className="bg-[url(/bglogin.svg)] bg-cover bg-center h-screen w-full">
+      <div className="flex flex-col items-center justify-center h-full">
+
+
+        <div className="relative w-[300px] sm:w-[450px]">
+
+          <motion.div
+            initial={{ opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex justify-center absolute -top-7 left-0 right-0 z-10">
+            {['adm', 'user', 'tecnico'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-1 mx-0.5 rounded-t-[10px] text-sm font-semibold transition-all
+                  ${activeTab === tab
+                    ? 'bg-red-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                style={{ boxShadow: 'inset 0 4px 8px rgba(0, 0, 0, 0.3)' }}
+              >
+                {tab}
+              </button>
+            ))}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white p-5 pt-10 rounded-[10px] w-full relative z-0"
+            style={{
+              boxShadow: 'inset 0 4px 8px rgba(0, 0, 0, 0.4)',
+            }}
+          >
+            <div className="mt-2 text-center h-[60px] relative overflow-hidden">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, x: 40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -40 }}
+                  transition={{ duration: 0.3 }}
+                  className="absolute inset-0"
+                >
+                  <span className="block text-base text-black font-medium">
+                    Bem-vindo,
+                  </span>
+                  <span className="block text-[25px] text-red-600 font-semibold">
+                    {welcomeMessages[activeTab]}
+                  </span>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+
+            <div className="space-y-4 m-8">
               <input
                 type="text"
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md"
+                placeholder="Username"
+                className="block w-full px-4 py-2 border border-gray-400 rounded-full focus:outline-none"
               />
-            </div>
-            
-            <div>
-              <div className="block text-sm font-medium text-gray-700 mb-1">
-                Password  
-              </div>
               <input
                 type="password"
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md"
+                placeholder="Password"
+                className="block w-full px-4 py-2 border border-gray-400 rounded-full focus:outline-none"
               />
+              <button className="w-full bg-red-600 text-white font-bold mt-5 py-2 rounded-full hover:bg-red-800 transition-colors">
+                Login
+              </button>
             </div>
-            
-            <div className="text-right mb-4">
-              <a href="#" className="text-sm text-gray-600 hover:text-gray-800">
-                Forgot Password?  
-              </a>
-            </div>
-            
-            <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
-              Login
-            </button>
-          </div>
+          </motion.div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
