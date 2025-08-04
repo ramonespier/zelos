@@ -1,22 +1,16 @@
-import knex from 'knex';
+import { Sequelize } from "sequelize";
+import dotenv from 'dotenv';
+dotenv.config();
 
-class Database {
-    constructor() {
-        this.connection = knex({
-            client: 'mysql2',
-            connection: {
-                host: 'localhost',       
-                user: 'root',             
-                password: '',    
-                database: 'sistema_chamados'
-            },
-            useNullAsDefault: true,
-        });
+const sequelize = new Sequelize(
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASS,
+    {
+        host: process.env.DB_HOST,
+        dialect: process.env.DB_DIALECT || 'mysql',
+        logging: false,
     }
+);
 
-    getConnection() {
-        return this.connection;
-    }
-}
-
-export default new Database();
+export default sequelize;
