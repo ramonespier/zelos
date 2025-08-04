@@ -17,14 +17,11 @@ router.get('/',
 );
 
 router.get('/:id',
-    AuthMiddleware.verifyToken,
-    permitir(['usuario', 'admin', 'tecnico']),
-    UsuarioController.buscarPorId
+    UsuarioController.criar
 );
 
 router.post('/',
-    AuthMiddleware.verifyToken,
-    permitir(['admin']),
+    
     UsuarioController.criar
 );
 

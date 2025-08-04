@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import sequelize from './configs/database.js';
-
+import passport from './configs/ldap.js';
+import cors from 'cors';
+import session from 'express-session';
 // routes
 import usuarioRoutes from './routes/usuarioRoutes.js';
 import poolRoutes from './routes/poolRoutes.js';
@@ -20,6 +22,32 @@ const PORT = process.env.PORT || 3000;
 dotenv.config();
 // middleware
 app.use(express.json());
+
+try {
+    app.use(cors({
+      origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+      credentials: true
+    }));
+    app.use(express.json());
+    
+    app.use(session({
+      secret: 'sJYMmuCB2Z187XneUuaOVYTVUlxEOb2K94tFZy370HjOY7T7aiCKvwhNQpQBYL9e',
+      resave: false,
+      saveUninitialized: false,
+      cookie: { secure: false }
+    }));
+  
+    // 4. Inicialização segura do Passport
+    if (!passport) {
+      throw new Error('Passport não foi importado corretamente');
+    }
+    app.use(passport.initialize());
+    app.use(passport.session());
+  
+  } catch (err) {
+    console.error('Erro na configuração inicial:', err);
+    process.exit(1);
+  }
 
 // rota inicial
 app.get('/', (req, res) => {

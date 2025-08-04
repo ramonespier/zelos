@@ -20,7 +20,13 @@ RelatorioHistoricoPatrimonio.init({
     sequelize,
     modelName: 'RelatorioHistoricoPatrimonio',
     tableName: 'vw_historico_patrimonio',
-    timestamps: false
+    timestamps: false,
+    indexes: [],
+    defaultScope:{
+        attributes: {
+            exclude: ['id']
+        }
+    }
 })
 
 export default RelatorioHistoricoPatrimonio;

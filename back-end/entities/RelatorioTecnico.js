@@ -25,13 +25,12 @@ RelatorioTecnico.init({
     modelName: 'RelatorioTecnico',
     tableName: 'vw_atividades_tecnicos',
     timestamps: false,
-    // 👇 força o Sequelize a aceitar que não há chave primária
     createdAt: false,
     updatedAt: false,
-    indexes: [], // impede erro de PK implícita
+    indexes: [], 
     defaultScope: {
         attributes: {
-            exclude: ['id'] // garante que ele não tente buscar um campo id
+            exclude: ['id'] 
         }
     }
 });
