@@ -2,7 +2,6 @@ import { Model, DataTypes } from "sequelize";
 import sequelize from "../configs/database.js";
 import Usuario from "./Usuario.js";
 import Pool from "./Pool.js";
-import Patrimonio from "./Patrimonio.js";
 
 class Chamado extends Model { }
 
@@ -51,13 +50,7 @@ Chamado.init({
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
     },
-    patrimonio_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: { model: Patrimonio, key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
-    }
+    
 }, {
     sequelize,
     modelName: 'Chamado',
@@ -70,7 +63,6 @@ Chamado.init({
 Chamado.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'usuario' });
 Chamado.belongsTo(Usuario, { foreignKey: 'tecnico_id', as: 'tecnico' });
 Chamado.belongsTo(Pool, { foreignKey: 'tipo_id', as: 'pool' });
-Chamado.belongsTo(Patrimonio, { foreignKey: 'patrimonio_id', as: 'patrimonio' });
 
 export default Chamado;
 
