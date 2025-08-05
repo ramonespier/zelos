@@ -15,7 +15,7 @@ class AuthController {
 
     async login(req, res) {
 
-        const { username, senha } = req.body;
+        const { username, password } = req.body;
         try {
             const usuario = await Usuario.findOne({ where: { username } });
 
@@ -23,15 +23,15 @@ class AuthController {
                 return res.status(404).json({ message: 'Usuário não encontrado' });
             }
 
-            const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
+            const senhaCorreta = await bcrypt.compare(password, usuario.password);
 
             if (!senhaCorreta) {
                 return res.status(401).json({ message: 'Senha incorreta' });
             }
 
             const token = this.gerarToken({
-                id: usuario.id,
                 username: usuario.username,
+                displayName: usuario.displayName,
                 funcao: usuario.funcao
             });
 
