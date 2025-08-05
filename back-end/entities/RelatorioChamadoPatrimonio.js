@@ -25,8 +25,9 @@ RelatorioChamadoPatrimonio.init({
     criado_em: {
         type: DataTypes.DATE,
     },
-    nome_patrimonio: {
+    numero_patrimonio: {
         type: DataTypes.STRING(255),
+        allowNull: false,
     }
 }, {
     sequelize,

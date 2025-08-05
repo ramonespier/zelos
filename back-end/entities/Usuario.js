@@ -28,7 +28,7 @@ Usuario.init({
         allowNull: false,
     },
     funcao: {
-        type: DataTypes.STRING(100),
+        type: DataTypes.ENUM('admin', 'tecnico', 'usuario'),
         allowNull: false,
     },
     status: {

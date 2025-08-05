@@ -15,6 +15,9 @@ Chamado.init({
         type: DataTypes.STRING(255),
         allowNull: false,
     },
+    numero_patrimonio: {
+        type: DataTypes.STRING(255),
+    },
     descricao: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -43,7 +46,7 @@ Chamado.init({
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
     },
-    tipo_id: {
+    pool_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: { model: Pool, key: 'id' },
@@ -62,7 +65,7 @@ Chamado.init({
 
 Chamado.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'usuario' });
 Chamado.belongsTo(Usuario, { foreignKey: 'tecnico_id', as: 'tecnico' });
-Chamado.belongsTo(Pool, { foreignKey: 'tipo_id', as: 'pool' });
+Chamado.belongsTo(Pool, { foreignKey: 'pool_id', as: 'pool' });
 
 export default Chamado;
 
