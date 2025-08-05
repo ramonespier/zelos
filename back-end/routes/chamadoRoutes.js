@@ -28,7 +28,7 @@ router.post('/',
     ChamadoController.criar
 );
 
-router.put('/:id',
+router.patch('/:id',
     AuthMiddleware.verifyToken,         
     // permitir(['admin']),
     ChamadoController.atualizar);

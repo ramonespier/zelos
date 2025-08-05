@@ -26,16 +26,14 @@ class ChamadoController {
 
     static async criar(req, res) {
         try {
-            const { titulo, descricao, status, usuario_id, tecnico_id, tipo_id, patrimonio_id } = req.body;
+            const { titulo, numero_patrimonio, descricao, status, usuario_id, tipo_id, } = req.body;
             const chamado = await Chamado.create({
                 titulo,
+                numero_patrimonio,
                 descricao,
                 status,
                 usuario_id,
-                tecnico_id,
-                tipo_id,
-                patrimonio_id
-
+                tipo_id
             })
             res.status(201).json(chamado);
         } catch (err) {
@@ -43,40 +41,33 @@ class ChamadoController {
         }
     }
 
-    static async atualizar(req, res){
-        try{
-            const {id} = req.params;
-            const { titulo, descricao, status, usuario_id, tecnico_id, tipo_id } = req.body;
+    static async atualizar(req, res) {
+        try {
+            const { id } = req.params;
+            const { tecnico_id } = req.body;
             const chamado = await Chamado.findByPk(id);
-            if(!chamado){
-                res.status(404).json({message: 'Chamado não encontrado'})
+            if (!chamado) {
+                return res.status(404).json({ message: 'Chamado não encontrado' });
             }
-            await chamado.update({
-             titulo,
-                descricao,
-                status,
-                usuario_id,
-                tecnico_id,
-                tipo_id,
-                patrimonio_id
-            })
-            res.status(201).json(chamado)
+
+            await chamado.update({tecnico_id});
+            res.status(200).json(chamado);
         } catch (err){
-            res.status(500).json({message: 'Erro ao atualizar chamado'})
+            res.status(500).json({message: "Erro ao atualiar chamado"})
         }
     }
 
-    static async deletar(req, res){
-        try{
-            const {id} = req.params;
+    static async deletar(req, res) {
+        try {
+            const { id } = req.params;
             const chamado = await Chamado.findByPk(id);
-            if(!chamado){
-                res.status(404).json({message: 'Chamado não encontrado'});
+            if (!chamado) {
+                res.status(404).json({ message: 'Chamado não encontrado' });
             }
             await chamado.destroy();
-            res.status(200).json({message: 'Chamado excluido com sucesso'});
+            res.status(200).json({ message: 'Chamado excluido com sucesso' });
         } catch (err) {
-            res.status(500).json({message: 'Erro ao deletar chamado'})
+            res.status(500).json({ message: 'Erro ao deletar chamado' })
         }
     }
 
