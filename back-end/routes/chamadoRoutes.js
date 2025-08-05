@@ -18,24 +18,24 @@ router.get('/',
 
 router.get('/:id',
     AuthMiddleware.verifyToken,
-    permitir(['usuario', 'admin', 'tecnico']),
+    // permitir(['usuario', 'admin', 'tecnico']),
     ChamadoController.buscarPorId
 );
 
 router.post('/',
     AuthMiddleware.verifyToken,
-    permitir(['usuario', 'admin']),
+    // permitir(['usuario', 'admin']),
     ChamadoController.criar
 );
 
 router.put('/:id',
     AuthMiddleware.verifyToken,         
-    permitir(['admin']),
+    // permitir(['admin']),
     ChamadoController.atualizar);
 
 router.delete('/:id',
     AuthMiddleware.verifyToken,
-    permitir(['admin']),
+    // permitir(['admin']),
     ChamadoController.deletar);
 
 export default router;

@@ -32,7 +32,7 @@ class AuthController {
             const token = this.gerarToken({
                 username: usuario.username,
                 displayName: usuario.displayName,
-                funcao: usuario.funcao
+                email: usuario.email
             });
 
 

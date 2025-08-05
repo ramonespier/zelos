@@ -32,13 +32,14 @@ router.post('/login', (req, res, next) => {
           email: user.mail
         });
 
+        console.log('Usuário autenticado:', user.displayName);
         return res.json({
           message: 'Autenticado com sucesso',
-          token,
           user: {
             username: user.username,
             displayName: user.displayName,
-            email: user.mail
+            email: user.email,
+            token
           }
         });
       });
