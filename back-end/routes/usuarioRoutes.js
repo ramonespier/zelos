@@ -17,17 +17,20 @@ router.get('/',
 );
 
 router.get('/:id',
-    UsuarioController.criar
+    AuthMiddleware.verifyToken,
+    permitir(['admin', 'usuario', 'tecnico']),
+    UsuarioController.buscarPorId
 );
 
 router.post('/',
-    
+    AuthMiddleware.verifyToken,
+    permitir(['admin']),
     UsuarioController.criar
 );
 
 router.put('/:id',
     AuthMiddleware.verifyToken,
-    permitir(['usuario', 'admin', 'tecnico']), // só pode trocar a senha e NO MAXIMO A FOTO 
+    permitir(['admin',]), 
     UsuarioController.atualizar);
 
 router.delete('/:id',
