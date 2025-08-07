@@ -11,8 +11,8 @@ const permitir = (perfisPermitidos) => (req, res, next) => {
 }
 
 router.get('/',
-    AuthMiddleware.verifyToken,
-    permitir(['admin']),
+    // AuthMiddleware.verifyToken,
+    // permitir(['admin']),
     ChamadoController.listar
 );
 
@@ -23,19 +23,15 @@ router.get('/:id',
 );
 
 router.post('/',
-    AuthMiddleware.verifyToken,
+    // AuthMiddleware.verifyToken,
     // permitir(['usuario', 'admin']),
     ChamadoController.criar
 );
 
-router.patch('/:id',
-    AuthMiddleware.verifyToken,         
+router.patch('/:id/atribuir',
+    // AuthMiddleware.verifyToken,         
     // permitir(['admin']),
-    ChamadoController.atualizar);
-
-router.delete('/:id',
-    AuthMiddleware.verifyToken,
-    // permitir(['admin']),
-    ChamadoController.deletar);
+    ChamadoController.atribuir
+);
 
 export default router;
