@@ -23,8 +23,8 @@ Chamado.init({
         allowNull: false,
     },
     status: {
-        type: DataTypes.ENUM('pendente', 'em andamento', 'concluido'),
-        defaultValue: 'pendente',
+        type: DataTypes.ENUM('aberto', 'em andamento', 'concluido'),
+        defaultValue: 'aberto',
     },
     criado_em: {
         type: DataTypes.DATE,
@@ -34,14 +34,12 @@ Chamado.init({
     },
     usuario_id: {
         type: DataTypes.UUID,
-        allowNull: false,
         references: { model: Usuario, key: 'id' },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
     },
     tecnico_id: {
         type: DataTypes.UUID,
-        allowNull: false,
         references: { model: Usuario, key: 'id' },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',

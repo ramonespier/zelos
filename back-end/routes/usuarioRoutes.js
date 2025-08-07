@@ -22,21 +22,4 @@ router.get('/:id',
     UsuarioController.buscarPorId
 );
 
-router.post('/',
-    AuthMiddleware.verifyToken,
-    // permitir(['admin']),
-    UsuarioController.criar
-);
-
-router.put('/:id',
-    AuthMiddleware.verifyToken,
-    // permitir(['admin',]), 
-    UsuarioController.atualizar);
-
-router.delete('/:id',
-    AuthMiddleware.verifyToken,
-    // permitir(['admin']),
-    UsuarioController.deletar
-);
-
 export default router;
