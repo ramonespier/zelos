@@ -91,9 +91,16 @@ class ChamadoController {
         try {
             const { id } = req.params;
             const chamado = await Chamado.findByPk(id);
+
             if (!chamado) {
                 return res.status(404).json({ message: 'Chamado não encontrado' });
             }
+            // verifica se o chamado está em andamento
+            if (chamado.status !== 'em andamento') {
+                return res.status(400).json({ message: 'Chamado não está em andamento' });
+            }
+
+
             await chamado.update({ status: 'concluido' });
             res.status(200).json(chamado);
         } catch (err) {
