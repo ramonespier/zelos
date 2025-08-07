@@ -23,10 +23,7 @@ Usuario.init({
         allowNull: false,
         unique: true,
     },
-    senha: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-    },
+
     funcao: {
         type: DataTypes.ENUM('admin', 'tecnico', 'usuario'),
         allowNull: false,
@@ -35,12 +32,6 @@ Usuario.init({
         type: DataTypes.ENUM('ativo', 'inativo'),
         defaultValue: 'ativo',
     },
-    criado_em: {
-        type: DataTypes.DATE,
-    },
-    atualizado_em: {
-        type: DataTypes.DATE,
-    },
 }, {
     sequelize,
     modelName: 'Usuario',
@@ -48,6 +39,10 @@ Usuario.init({
     timestamps: true,
     createdAt: 'criado_em',
     updatedAt: 'atualizado_em',
+    // Desativa comportamentos padrão que podem procurar por senha
+    defaultScope: {
+        attributes: { exclude: ['senha', 'password'] } // Garante que não tentará buscar esses campos
+    }
 });
 
 export default Usuario;
