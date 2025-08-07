@@ -81,7 +81,7 @@ export default function Login() {
                 placeholder="Password"
                 className="block w-full px-4 py-2 border border-gray-400 rounded-full focus:outline-none"
               />
-              <button className="w-full bg-red-600 text-white font-bold mt-5 py-2 rounded-full hover:bg-red-800 transition-colors">
+              <button className="w-full bg-red-600 text-white font-bold mt-5 py-2 rounded-full hover:bg-red-800 transition-colors cursor-pointer">
                 Login
               </button>
             </div>
