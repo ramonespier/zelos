@@ -9,13 +9,6 @@ export default function Footer() {
             </p>
           </div>
   
-          <nav className="flex gap-6 text-sm">
-            <a href="#" className="hover:text-red-400 transition">Início</a>
-            <a href="#" className="hover:text-red-400 transition">Abrir Chamado</a>
-            <a href="#" className="hover:text-red-400 transition">Meus Chamados</a>
-            <a href="#" className="hover:text-red-400 transition">Contato</a>
-          </nav>
-  
           <div className="flex gap-4 text-gray-300">
             <a href="#" aria-label="Facebook" className="hover:text-red-400 transition">
               <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">

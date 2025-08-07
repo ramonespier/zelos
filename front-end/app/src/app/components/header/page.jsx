@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-export default function Header() {
+export default function Header({ setActiveTab }) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
 
@@ -15,6 +15,15 @@ export default function Header() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  const handleSelecao = (opcao) => {
+    if (opcao === 'sair') {
+      alert('Logout aqui!') // ou faça sua ação de logout
+    } else {
+      setActiveTab(opcao)
+    }
+    setIsOpen(false)
+  }
 
   return (
     <>
@@ -29,6 +38,12 @@ export default function Header() {
           tabIndex={0}
           onClick={() => setIsOpen((prev) => !prev)}
           ref={dropdownRef}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') setIsOpen((prev) => !prev)
+          }}
+          aria-haspopup="true"
+          aria-expanded={isOpen}
+          aria-label="Menu do usuário"
         >
           <div
             role="img"
@@ -45,9 +60,30 @@ export default function Header() {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
                 className="absolute top-14 right-0 w-48 bg-white shadow-lg rounded-md border border-gray-200 z-50"
+                role="menu"
               >
-                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Informações</li>
-                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600">Sair</li>
+                <li
+                  onClick={() => handleSelecao('info')}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  role="menuitem"
+                  tabIndex={0}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') handleSelecao('info')
+                  }}
+                >
+                  Informações
+                </li>
+                <li
+                  onClick={() => handleSelecao('sair')}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600"
+                  role="menuitem"
+                  tabIndex={0}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') handleSelecao('sair')
+                  }}
+                >
+                  Sair
+                </li>
               </motion.ul>
             )}
           </AnimatePresence>
