@@ -24,14 +24,20 @@ router.get('/:id',
 
 router.post('/',
     // AuthMiddleware.verifyToken,
-    // permitir(['usuario', 'admin']),
+    // permitir(['usuario', 'admin', 'tecnico']),
     ChamadoController.criar
 );
 
 router.patch('/:id/atribuir',
     // AuthMiddleware.verifyToken,         
-    // permitir(['admin']),
+    // permitir(['admin', 'tecnico']),
     ChamadoController.atribuir
+);
+
+router.patch('/:id/fechar',
+    // AuthMiddleware.verifyToken,         
+    // permitir(['admin']),
+    ChamadoController.fechar
 );
 
 export default router;
