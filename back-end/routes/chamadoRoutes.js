@@ -24,13 +24,13 @@ router.get('/:id',
 
 router.post('/',
     // AuthMiddleware.verifyToken,
-    // permitir(['usuario', 'admin']),
+    // permitir(['usuario', 'admin', 'tecnico']),
     ChamadoController.criar
 );
 
 router.patch('/:id/atribuir',
     // AuthMiddleware.verifyToken,         
-    // permitir(['admin']),
+    // permitir(['admin', 'tecnico']),
     ChamadoController.atribuir
 );
 
