@@ -1,12 +1,17 @@
+'use client'
+import { useState } from 'react'
 import Header from './components/header/page'
-import Carrossel from './components/carrossel/page';
+
 import Navbar from './components/navbar/page';
-export default function Home() {
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('inicio')
+
   return (
-   <>
-   <Header/>
-   {/* <Carrossel/> */}
-   <Navbar/>
-   </>
-  );
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      <Header setActiveTab={setActiveTab} />
+      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+    </div>
+  )
 }
+
