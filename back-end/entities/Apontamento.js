@@ -27,7 +27,7 @@ Apontamento.init({
             const comeco = this.getDataValue('comeco');
             const fim = this.getDataValue('fim');
             if (comeco && fim) {
-                return Math.floor((new Date(fim) - new Date(comeco)) / 1000);
+                return Math.floor((new Date(fim) - new Date(comeco)) / 60000 );
             }
             return null;
         }   

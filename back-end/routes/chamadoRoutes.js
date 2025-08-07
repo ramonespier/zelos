@@ -34,4 +34,10 @@ router.patch('/:id/atribuir',
     ChamadoController.atribuir
 );
 
+router.patch('/:id/fechar',
+    // AuthMiddleware.verifyToken,         
+    // permitir(['admin']),
+    ChamadoController.fechar
+);
+
 export default router;

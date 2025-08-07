@@ -26,9 +26,9 @@ class ApontamentoController {
 
     static async criar(req, res) {
         try {
-            const { comeco, fim, descricao, duracao, chamado_id, tecnico_id } = req.body;
+            const { comeco, fim, descricao, chamado_id, tecnico_id } = req.body;
             const apontamento = await Apontamento.create({
-                comeco, fim, descricao, duracao, chamado_id, tecnico_id
+                chamado_id, tecnico_id, descricao, comeco, fim, 
             })
             res.status(200).json(apontamento);
         } catch (err) {
@@ -42,29 +42,29 @@ class ApontamentoController {
             const { id } = req.params;
             const { comeco, fim, descricao, duracao, chamado_id, tecnico_id } = req.body;
             const apontamento = await Apontamento.findByPk(id);
-            if(!apontamento){
-                return res.status(404).json({message: 'Apontamento não encontrado'})
+            if (!apontamento) {
+                return res.status(404).json({ message: 'Apontamento não encontrado' })
             }
             await apontamento.update({
                 comeco, fim, descricao, duracao, chamado_id, tecnico_id
             })
             res.json(apontamento);
-        } catch (err){
-            res.status(500).json({message: 'Erro ao atualizar apontamento'});
+        } catch (err) {
+            res.status(500).json({ message: 'Erro ao atualizar apontamento' });
         }
     }
 
-    static async deletar(req, res){
-        try{
-            const {id} = req.params;
+    static async deletar(req, res) {
+        try {
+            const { id } = req.params;
             const apontamento = await Apontamento.findByPk(id);
-            if(!apontamento){
-                return res.status(404).json({message: 'Apontamento não encontrado'})
+            if (!apontamento) {
+                return res.status(404).json({ message: 'Apontamento não encontrado' })
             }
             await apontamento.destroy();
-            res.status(200).json({message: 'Apontamento deletado com sucesso'});
-        } catch (err){
-            res.status(500).json({message: 'Erro ao deletar apontamento'});
+            res.status(200).json({ message: 'Apontamento deletado com sucesso' });
+        } catch (err) {
+            res.status(500).json({ message: 'Erro ao deletar apontamento' });
         }
     }
 
