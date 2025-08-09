@@ -17,7 +17,7 @@ router.get('/',
 );
 
 router.get('/:id',
-    AuthMiddleware.verifyToken,
+    // AuthMiddleware.verifyToken,
     // permitir(['usuario', 'admin', 'tecnico']),
     ChamadoController.buscarPorId
 );
@@ -32,6 +32,12 @@ router.patch('/:id/atribuir',
     // AuthMiddleware.verifyToken,         
     // permitir(['admin', 'tecnico']),
     ChamadoController.atribuir
+);
+
+router.patch('/:id/status',
+    AuthMiddleware.verifyToken,
+    permitir(['admin', 'tecnico']),
+    ChamadoController.status 
 );
 
 router.patch('/:id/fechar',

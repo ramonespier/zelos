@@ -11,13 +11,13 @@ const permitir = (perfisPermitidos) => (req, res, next) => {
 }
 
 router.get('/',
-    AuthMiddleware.verifyToken,
+    // AuthMiddleware.verifyToken,
     // permitir(['admin']),
     UsuarioController.listar
 );
 
 router.get('/:id',
-    AuthMiddleware.verifyToken,
+    // AuthMiddleware.verifyToken,
     // permitir(['admin', 'usuario', 'tecnico']),
     UsuarioController.buscarPorId
 );
