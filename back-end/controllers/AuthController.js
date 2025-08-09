@@ -1,17 +1,21 @@
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from '../configs/jwt.js';
+const jwtSecret = process.env.JWT_SECRET;
 import Usuario from '../entities/Usuario.js';
 
 class AuthController {
-    
+
     gerarToken(payload) {
-        return jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+        if (!jwtSecret) {
+            throw new Error('JWT_SECRET não definido no ambiente');
+        }
+
+          return jwt.sign(payload, jwtSecret, { expiresIn: '1h' });
     }
 
     // este método não será mais usado 
     async login(req, res) {
-        return res.status(400).json({ 
-            message: 'Método não suportado. Use a autenticação LDAP diretamente.' 
+        return res.status(400).json({
+            message: 'Método não suportado. Use a autenticação LDAP diretamente.'
         });
     }
 

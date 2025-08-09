@@ -29,7 +29,7 @@ class PoolController {
         }
     }
 
-
+    
     // criar pool
     static async criar(req, res) {
         try {
