@@ -32,7 +32,7 @@ Usuario.init({
         type: DataTypes.STRING(255),
         allowNull: false,
         unique: true,
-        // criptografar usuario
+        // criptografar email
         set(value) {
             this.setDataValue('email', encrypt(value));
         },
