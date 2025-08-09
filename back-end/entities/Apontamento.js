@@ -2,6 +2,7 @@ import { Model, DataTypes } from "sequelize";
 import sequelize from "../configs/database.js";
 import Chamado from "./Chamado.js";
 import Usuario from "./Usuario.js";
+import { encrypt, decrypt } from '../utils/crypto.js'
 
 class Apontamento extends Model { }
 
@@ -19,7 +20,16 @@ Apontamento.init({
         type: DataTypes.DATE,
     },
     descricao: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
+        allowNull: false,
+        set(value) {
+            this.setDataValue('descricao', encrypt(value));
+        },
+        get() {
+            const val = this.getDataValue('descricao');
+            if (!val) return null;
+            return decrypt(val);
+        }
     },
     duracao: {
         type: DataTypes.VIRTUAL,
@@ -27,10 +37,10 @@ Apontamento.init({
             const comeco = this.getDataValue('comeco');
             const fim = this.getDataValue('fim');
             if (comeco && fim) {
-                return Math.floor((new Date(fim) - new Date(comeco)) / 60000 );
+                return Math.floor((new Date(fim) - new Date(comeco)) / 60000);
             }
             return null;
-        }   
+        }
     },
     criado_em: {
         type: DataTypes.DATE,

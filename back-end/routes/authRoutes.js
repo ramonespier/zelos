@@ -28,7 +28,7 @@ router.post('/login', (req, res, next) => {
         usuario = await Usuario.create({
           username: user.sAMAccountName,
           nome: user.displayName,
-          email: user.mail || `${user.sAMAccountName}@senai.com`,
+          email: user.mail || user.userPrincipalName,
           funcao: 'usuario'
         });
       }

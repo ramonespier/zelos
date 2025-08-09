@@ -1,5 +1,6 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../configs/database.js";
+import { encrypt, decrypt } from '../utils/crypto.js';
 import Usuario from "./Usuario.js";
 import Pool from "./Pool.js";
 
@@ -17,21 +18,31 @@ Chamado.init({
     },
     numero_patrimonio: {
         type: DataTypes.STRING(255),
+        set(value) {
+            this.setDataValue('numero_patrimonio', encrypt(value));
+        },
+        get() {
+            const val = this.getDataValue('numero_patrimonio');
+            if (!val) return null;
+            return decrypt(val);
+        }
     },
     descricao: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
+        set(value) {
+            this.setDataValue('descricao', encrypt(value));
+        },
+        get() {
+            const val = this.getDataValue('descricao');
+            if (!val) return null;
+            return decrypt(val);
+        }
     },
     status: {
         type: DataTypes.ENUM('aberto', 'em andamento', 'concluido'),
         defaultValue: 'aberto',
-    },
-    criado_em: {
-        type: DataTypes.DATE,
-    },
-    atualizado_em: {
-        type: DataTypes.DATE,
-    },
+    },  
     usuario_id: {
         type: DataTypes.UUID,
         references: { model: Usuario, key: 'id' },
@@ -51,7 +62,7 @@ Chamado.init({
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
     },
-    
+
 }, {
     sequelize,
     modelName: 'Chamado',

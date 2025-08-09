@@ -10,7 +10,6 @@ import poolRoutes from './routes/poolRoutes.js';
 import poolTecnicoRoutes from './routes/poolTecnicoRoutes.js';
 import chamadoRoutes from './routes/chamadoRoutes.js';
 import apontamentoRoutes from './routes/apontamentoRoutes.js';
-import avaliacaoRoutes from './routes/avaliacaoRoutes.js'
 import relatorioRoutes from './routes/relatorioRoutes.js'
 import authRoutes from './routes/authRoutes.js'
 
@@ -58,7 +57,6 @@ app.use('/pools', poolRoutes);
 app.use('/pools-tecnico', poolTecnicoRoutes);
 app.use('/chamados', chamadoRoutes);
 app.use('/apontamento', apontamentoRoutes);
-app.use('/avaliacoes', avaliacaoRoutes);
 app.use('/relatorios', relatorioRoutes);
 app.use('/auth', authRoutes);
 
