@@ -73,7 +73,7 @@ class ChamadoController {
     static async atribuir(req, res) {
         try {
             const { id } = req.params;
-            const { tecnico_id, status } = req.body;
+            const { tecnico_id } = req.body;
             const chamado = await Chamado.findByPk(id);
 
             if (!chamado) {
@@ -89,7 +89,34 @@ class ChamadoController {
                 return res.status(404).json({ message: 'Técnico não encontrado' });
             }
 
-            await chamado.update({ tecnico_id, status: 'em andamento' });
+            await chamado.update({ tecnico_id });
+            res.status(200).json(chamado);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: "Erro ao atualizar chamado" });
+        }
+    }
+
+     static async status(req, res) {
+        try {
+            const { id } = req.params;
+            const { status } = req.body;
+            const chamado = await Chamado.findByPk(id);
+
+            if (!chamado) {
+                return res.status(404).json({ message: 'Chamado não encontrado' });
+            }
+
+            if (chamado.tecnico_id) {
+                return res.status(400).json({ message: 'Chamado já está atribuído a um técnico' });
+            }
+
+            const tecnico = await Usuario.findByPk(tecnico_id);
+            if (!tecnico) {
+                return res.status(404).json({ message: 'Técnico não encontrado' });
+            }
+
+            await chamado.update({ status: 'em andamento' });
             res.status(200).json(chamado);
         } catch (err) {
             console.error(err);

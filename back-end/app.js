@@ -56,7 +56,7 @@ app.use('/usuarios', usuarioRoutes);
 app.use('/pools', poolRoutes);
 app.use('/pools-tecnico', poolTecnicoRoutes);
 app.use('/chamados', chamadoRoutes);
-app.use('/apontamento', apontamentoRoutes);
+app.use('/apontamentos', apontamentoRoutes);
 app.use('/relatorios', relatorioRoutes);
 app.use('/auth', authRoutes);
 
