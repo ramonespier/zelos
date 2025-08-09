@@ -97,7 +97,7 @@ class ChamadoController {
         }
     }
 
-     static async status(req, res) {
+    static async status(req, res) {
         try {
             const { id } = req.params;
             const { status } = req.body;
@@ -105,15 +105,6 @@ class ChamadoController {
 
             if (!chamado) {
                 return res.status(404).json({ message: 'Chamado não encontrado' });
-            }
-
-            if (chamado.tecnico_id) {
-                return res.status(400).json({ message: 'Chamado já está atribuído a um técnico' });
-            }
-
-            const tecnico = await Usuario.findByPk(tecnico_id);
-            if (!tecnico) {
-                return res.status(404).json({ message: 'Técnico não encontrado' });
             }
 
             await chamado.update({ status: 'em andamento' });
