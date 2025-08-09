@@ -3,6 +3,9 @@ import sequelize from "../configs/database.js";
 import { encrypt, decrypt } from '../utils/crypto.js';
 import Usuario from "./Usuario.js";
 import Pool from "./Pool.js";
+import crypto from 'crypto';
+
+
 
 class Chamado extends Model { }
 
@@ -18,14 +21,22 @@ Chamado.init({
     },
     numero_patrimonio: {
         type: DataTypes.STRING(255),
+        allowNull: false,
         set(value) {
             this.setDataValue('numero_patrimonio', encrypt(value));
+            
+            const hash = crypto.createHash('sha256').update(value).digest('hex');
+            this.setDataValue('hash_numero_patrimonio', hash);
         },
         get() {
             const val = this.getDataValue('numero_patrimonio');
             if (!val) return null;
             return decrypt(val);
         }
+    },
+    hash_numero_patrimonio: {
+        type: DataTypes.STRING(64),
+        allowNull: false,
     },
     descricao: {
         type: DataTypes.TEXT,
@@ -42,7 +53,7 @@ Chamado.init({
     status: {
         type: DataTypes.ENUM('aberto', 'em andamento', 'concluido'),
         defaultValue: 'aberto',
-    },  
+    },
     usuario_id: {
         type: DataTypes.UUID,
         references: { model: Usuario, key: 'id' },

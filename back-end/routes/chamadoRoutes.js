@@ -17,7 +17,7 @@ router.get('/',
 );
 
 router.get('/:id',
-    AuthMiddleware.verifyToken,
+    // AuthMiddleware.verifyToken,
     // permitir(['usuario', 'admin', 'tecnico']),
     ChamadoController.buscarPorId
 );
