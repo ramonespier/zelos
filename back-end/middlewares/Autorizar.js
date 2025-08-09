@@ -1,4 +1,3 @@
-
 class Autorizar {
     autorizacao(usuario, perfisPermitidos){
         return (req, res, next) => {
