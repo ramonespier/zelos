@@ -114,7 +114,7 @@ export default function Inicio({ onAbrirChamado }) {
                 <InstrucoesRapidas isOpen={modalAberto} onClose={() => setModalAberto(false)} />
             </motion.section>
 
-            {/* Seção Perguntas Frequentes */}
+
             <motion.section
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}

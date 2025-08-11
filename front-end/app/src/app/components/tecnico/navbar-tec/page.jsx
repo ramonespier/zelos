@@ -3,9 +3,10 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion'
 import Inicio from '../inicio-tec/page'
 import InstrucoesRapidas from '../instrucoes-tec/page'
-import Footer from '../footer-tec/page'
+import Footer from '../../footer/page'
 import Chamado from '../chamado-tec/page'
-import Historico from '../historico-tec/page'
+import Historico from '../meus-chamados-tec/page'
+import ChamadosAbertos from '../chamados-abertos-tec/page'
 
 export default function Navbar() {
   const [activeTab, setActiveTab] = useState('inicio')
@@ -31,10 +32,10 @@ export default function Navbar() {
             <Inicio onVerInstrucoes={() => setActiveTab('inicio')} />
           </div>
         )
-      case 'meus':
-        return (
-          <p className="text-center text-xl mt-10">Essa é a seção Meus chamados.</p>
-        )
+        case 'abertos':
+          return(
+            <ChamadosAbertos />
+          )
         case 'abrir':
         return (
           <Chamado />
@@ -57,14 +58,26 @@ export default function Navbar() {
         >
           Início
         </motion.button>
+
+        <motion.button
+        onClick={() => setActiveTab('abertos')}
+        className="relative text-white font-medium text-lg pb-1 overflow-hidden cursor-pointer"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        >
+          Chamados Abertos
+        </motion.button>
+
         <motion.button
           onClick={() => setActiveTab('chamado')}
           className="relative text-white font-medium text-lg pb-1 overflow-hidden cursor-pointer"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          Meus chamados
+         Meus chamados
         </motion.button>
+
+
       <motion.button
       onClick={() => setActiveTab('abrir')}
       className="relative text-white font-medium text-lg pb-1 overflow-hidden cursor-pointer"
