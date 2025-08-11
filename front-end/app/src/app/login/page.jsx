@@ -2,10 +2,13 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 
 export default function Login() {
-  const [activeTab, setActiveTab] = useState('adm');
+  const router = useRouter()
+
+  const [activeTab, setActiveTab] = useState('admin');
   const [formData, setFormData] = useState({
     username: "",
     password: ""
@@ -33,22 +36,32 @@ export default function Login() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, role: activeTab })
       })
 
       const data = await response.json()
 
-      if(data.token) {
-        Cookies.set("token", data.token, {
-          path: "/auth/login"
-        })
-        return;
-      }
+      if (data.token && data.role) {
+        Cookies.set("token", data.token, { expires: 7 })
+        Cookies.set("userRole", data.role, { expires: 7 })
 
-      if (response.ok) {
-        console.log(data.message)
+        let destination = '/'
+        switch (data.role) {
+          case 'admin':
+            destination = '/admin';
+            break;
+          case 'tecnico':
+            destination = '/tecnico';
+            break;
+          case 'usuario':
+            destination = '/usuario';
+            break;
+        }
+      
+        router.push(destination)
+
       } else {
-        console.log(data.error)
+        console.error(data.error || "Falha no login")
       }
 
     } catch (err) {
@@ -56,7 +69,7 @@ export default function Login() {
     }
   }
 
-  
+
 
   return (
     <div className="bg-[url(/bglogin.svg)] bg-cover bg-center h-screen w-full">
@@ -68,7 +81,7 @@ export default function Login() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
             className="flex justify-center absolute -top-7 left-0 right-0 z-10">
-            {['adm', 'user', 'tecnico'].map((tab) => (
+            {['admin', 'usuario', 'tecnico'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -123,7 +136,7 @@ export default function Login() {
                   value={formData.username}
                   placeholder="Username"
                   className="block w-full px-4 py-2 border border-gray-400 rounded-full focus:outline-none"
-                  />
+                />
                 <input
                   type="password"
                   placeholder="Password"
@@ -136,7 +149,7 @@ export default function Login() {
                   Login
                 </button>
               </div>
-            </form> 
+            </form>
           </motion.div>
         </div>
       </div>
