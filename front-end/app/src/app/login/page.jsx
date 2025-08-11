@@ -11,6 +11,14 @@ export default function Login() {
     password: ""
   })
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const welcomeMessages = {
     adm: 'Administrador',
     user: 'Usuário',
@@ -32,7 +40,7 @@ export default function Login() {
 
       if(data.token) {
         Cookies.set("token", data.token, {
-          path: "/admin/*"
+          path: "/auth/login"
         })
         return;
       }
@@ -40,12 +48,15 @@ export default function Login() {
       if (response.ok) {
         console.log(data.message)
       } else {
-        console.log(data.message)
+        console.log(data.error)
       }
+
     } catch (err) {
       console.error('Erro na requisição', err)
     }
   }
+
+  
 
   return (
     <div className="bg-[url(/bglogin.svg)] bg-cover bg-center h-screen w-full">
@@ -107,12 +118,18 @@ export default function Login() {
               <div className="space-y-4 m-8">
                 <input
                   type="text"
+                  onChange={handleChange}
+                  name="username"
+                  value={formData.username}
                   placeholder="Username"
                   className="block w-full px-4 py-2 border border-gray-400 rounded-full focus:outline-none"
-                />
+                  />
                 <input
                   type="password"
                   placeholder="Password"
+                  name="password"
+                  onChange={handleChange}
+                  value={formData.password}
                   className="block w-full px-4 py-2 border border-gray-400 rounded-full focus:outline-none"
                 />
                 <button className="w-full bg-red-600 text-white font-bold mt-5 py-2 rounded-full hover:bg-red-800 transition-colors">
