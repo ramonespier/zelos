@@ -10,13 +10,11 @@ import poolRoutes from './routes/poolRoutes.js';
 import poolTecnicoRoutes from './routes/poolTecnicoRoutes.js';
 import chamadoRoutes from './routes/chamadoRoutes.js';
 import apontamentoRoutes from './routes/apontamentoRoutes.js';
-import avaliacaoRoutes from './routes/avaliacaoRoutes.js'
 import relatorioRoutes from './routes/relatorioRoutes.js'
-import patrimonioRoutes from './routes/patrimonioRoutes.js'
 import authRoutes from './routes/authRoutes.js'
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // .env
 dotenv.config();
@@ -58,10 +56,8 @@ app.use('/usuarios', usuarioRoutes);
 app.use('/pools', poolRoutes);
 app.use('/pools-tecnico', poolTecnicoRoutes);
 app.use('/chamados', chamadoRoutes);
-app.use('/apontamento', apontamentoRoutes);
-app.use('/avaliacoes', avaliacaoRoutes);
+app.use('/apontamentos', apontamentoRoutes);
 app.use('/relatorios', relatorioRoutes);
-app.use('/patrimonios', patrimonioRoutes);
 app.use('/auth', authRoutes);
 
 async function StartServer() {

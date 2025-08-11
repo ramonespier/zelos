@@ -11,29 +11,15 @@ const permitir = (perfisPermitidos) => (req, res, next) => {
 }
 
 router.get('/',
-    AuthMiddleware.verifyToken,
-    permitir(['admin']),
+    // AuthMiddleware.verifyToken,
+    // permitir(['admin']),
     UsuarioController.listar
 );
 
 router.get('/:id',
-    UsuarioController.criar
-);
-
-router.post('/',
-    
-    UsuarioController.criar
-);
-
-router.put('/:id',
-    AuthMiddleware.verifyToken,
-    permitir(['usuario', 'admin', 'tecnico']), // só pode trocar a senha e NO MAXIMO A FOTO 
-    UsuarioController.atualizar);
-
-router.delete('/:id',
-    AuthMiddleware.verifyToken,
-    permitir(['admin']),
-    UsuarioController.deletar
+    // AuthMiddleware.verifyToken,
+    // permitir(['admin', 'usuario', 'tecnico']),
+    UsuarioController.buscarPorId
 );
 
 export default router;

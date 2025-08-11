@@ -52,7 +52,7 @@ export default function Chamado() {
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                className="max-w-xl mx-auto mt-12 mb-20 bg-white p-8 rounded-3xl shadow-xl border border-gray-200"
+                className="max-w-xl mx-auto mt-10 mb-20 bg-white p-8 rounded-3xl shadow-xl border border-gray-200"
             >
                 <h2 className="text-4xl font-extrabold mb-10 text-red-600 text-center tracking-wide drop-shadow-sm">
                     Abrir Novo Chamado
