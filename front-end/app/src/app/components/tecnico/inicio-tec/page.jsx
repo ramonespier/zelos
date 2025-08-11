@@ -1,90 +1,90 @@
 'use client';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import InstrucoesRapidas from '../instrucoes-tec/page';
 import {
-    FaHeadset,
-    FaClock,
-    FaShieldAlt,
-    FaQuestionCircle,
-    FaCheckCircle,
+    FaTicketAlt,
+    FaUserClock,
+    FaRegListAlt,
+    FaBook,
     FaChevronDown,
     FaChevronUp,
+    FaClipboardList,
 } from 'react-icons/fa';
 
-export default function Inicio({ onAbrirChamado }) {
-    const [modalAberto, setModalAberto] = useState(false);
+
+export default function InicioTecnico({ onVerChamados }) {
+    const [modalConhecimentoAberto, setModalConhecimentoAberto] = useState(false);
     const [openIndex, setOpenIndex] = useState(null);
 
     const toggleOpen = (index) => {
         setOpenIndex(openIndex === index ? null : index);
     };
 
-    const features = [
+
+    const painelTecnico = [
         {
-            icon: <FaHeadset size={40} className="text-red-600" />,
-            title: 'Suporte 24/7',
-            description: 'Nossa equipe está sempre disponível para te ajudar, a qualquer hora do dia.',
+            icon: <FaTicketAlt size={40} className="text-red-600" />,
+            title: 'Novos Chamados',
+            description: 'Visualize e atribua os chamados que acabaram de chegar na fila.',
+            action: () => console.log("Navegar para novos chamados"), 
         },
         {
-            icon: <FaClock size={40} className="text-red-600" />,
-            title: 'Resolução Rápida',
-            description: 'Atendimento ágil para minimizar seu tempo de espera e resolver problemas rápido.',
+            icon: <FaRegListAlt size={40} className="text-red-600" />,
+            title: 'Meus Chamados Atribuídos',
+            description: 'Acesse a lista de chamados que estão sob sua responsabilidade.',
+            action: () => console.log("Navegar para meus chamados"), 
         },
         {
-            icon: <FaShieldAlt size={40} className="text-red-600" />,
-            title: 'Segurança',
-            description: 'Seus dados e chamados estão protegidos com criptografia e boas práticas.',
+            icon: <FaUserClock size={40} className="text-red-600" />,
+            title: 'Chamados Pendentes',
+            description: 'Acompanhe os chamados que aguardam resposta do usuário ou de terceiros.',
+            action: () => console.log("Navegar para chamados pendentes"), 
         },
     ];
 
-    const faqs = [
+
+    const faqsTecnico = [
         {
-            question: 'Como abrir um chamado?',
-            answer: 'Clique no botão "Abrir Novo Chamado", preencha o formulário com os detalhes do problema e envie.',
+            question: 'Como atribuo um chamado para mim?',
+            answer: 'Na aba "Chamados abertos", clique no chamado desejado e use o botão "Atribuir chamado". Um pedido de atribuição srá enviado para a administração.',
         },
         {
-            question: 'Posso anexar documentos?',
-            answer: 'Sim, é possível anexar imagens e documentos para ajudar na análise do problema.',
-        },
-        {
-            question: 'Qual o tempo médio de resposta?',
-            answer: 'Nosso tempo médio de resposta é de até 24 horas úteis.',
-        },
-        {
-            question: 'Como acompanhar meu chamado?',
-            answer: 'Você pode ver seus chamados na seção "Meus chamados" após fazer login.',
-        },
+            question: 'Como eu sei que um chamado foi atribuído?',
+            answer: 'Assim que a administração aprovar o pedido, o chamado estará disponível na aba "Chamados atribuídos.'
+         },
+        
+    
     ];
 
     return (
         <>
-
             <motion.section
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
                 className="max-w-4xl mx-auto flex-grow flex flex-col justify-center px-6 text-center"
-                aria-label="Seção de boas-vindas"
+                aria-label="Painel de Controle do Técnico"
             >
                 <h1 className="text-5xl mt-20 font-extrabold text-red-600 mb-6 leading-tight drop-shadow-md">
-                    Bem-vindo ao Sistema de Chamados!
+                    Painel do Técnico
                 </h1>
 
                 <p className="text-gray-700 text-lg italic mb-12 max-w-xl mx-auto">
-                    Gerencie seus chamados com agilidade, segurança e total suporte para que seus problemas sejam resolvidos rapidamente.
+                    Gerencie os chamados de forma eficiente, acompanhe suas tarefas e resolva os problemas com agilidade.
                 </p>
 
+   
                 <div className="flex flex-col sm:flex-row justify-center gap-12 mb-16">
-                    {features.map(({ icon, title, description }, i) => (
+                    {painelTecnico.map(({ icon, title, description, action }, i) => (
                         <motion.div
                             key={i}
-                            className="bg-red-50 rounded-lg p-6 shadow-md flex flex-col items-center text-red-700 cursor-default hover:shadow-xl transition-transform duration-300"
+                            className="bg-red-50 rounded-lg p-6 shadow-md flex flex-col items-center text-red-700 cursor-pointer hover:shadow-xl transition-transform duration-300"
                             whileHover={{ scale: 1.07 }}
+                            onClick={action}
                             title={title}
                             role="region"
                             aria-label={title}
-                            tabIndex={-1}
+                            tabIndex={0}
                         >
                             <div className="mb-4">{icon}</div>
                             <h3 className="font-semibold text-xl mb-2">{title}</h3>
@@ -93,39 +93,39 @@ export default function Inicio({ onAbrirChamado }) {
                     ))}
                 </div>
 
+             
                 <div className="flex flex-col sm:flex-row justify-center gap-8 mb-20">
                     <button
-                        onClick={onAbrirChamado}
+                        onClick={onVerChamados} 
                         className="bg-red-600 text-white px-10 py-4 rounded-xl shadow-lg hover:bg-red-700 transition-colors font-semibold flex items-center justify-center gap-3 cursor-pointer"
-                        aria-label="Abrir novo chamado"
+                        aria-label="Ver todos os chamados"
                     >
-                        Abrir Novo Chamado <FaCheckCircle size={20} />
+                        Ver Todos os Chamados <FaClipboardList size={20} />
                     </button>
 
                     <button
-                        onClick={() => setModalAberto(true)}
+                        onClick={() => setModalConhecimentoAberto(true)}
                         className="border-2 border-red-600 text-red-600 px-10 py-4 rounded-xl shadow-md hover:bg-red-600 hover:text-white transition-colors font-semibold flex items-center justify-center gap-3 cursor-pointer"
-                        aria-label="Ver instruções rápidas"
+                        aria-label="Acessar base de conhecimento"
                     >
-                        Instruções Rápidas <FaQuestionCircle size={20} />
+                        Meus chamado atribuídos <FaBook size={20} />
                     </button>
                 </div>
 
-                <InstrucoesRapidas isOpen={modalAberto} onClose={() => setModalAberto(false)} />
             </motion.section>
 
-
+       
             <motion.section
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
                 className="max-w-5xl mx-auto p-8 bg-red-50 rounded-2xl shadow-lg my-20"
-                aria-label="Perguntas Frequentes"
+                aria-label="Perguntas Frequentes do Técnico"
             >
-                <h2 className="text-4xl font-extrabold text-red-600 text-center mb-12">Perguntas Frequentes</h2>
+                <h2 className="text-4xl font-extrabold text-red-600 text-center mb-12">Dúvidas Comuns da Equipe</h2>
 
                 <div className="space-y-4">
-                    {faqs.map(({ question, answer }, i) => {
+                    {faqsTecnico.map(({ question, answer }, i) => {
                         const isOpen = openIndex === i;
 
                         return (
