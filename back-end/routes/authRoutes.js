@@ -18,6 +18,14 @@ router.post('/login', (req, res, next) => {
         return res.status(401).json({ error: info?.message || 'Autenticação falhou' });
       }
 
+      console.log('LDAP retornou:', user);
+
+      // aqui estou fazendo com que 3 users tenha o padrao de acesso do sistema
+      let funcao = 'usuario';
+      if (user.sAMAccountName === '24250492') funcao = 'usuario';
+      if (user.sAMAccountName === '24250246') funcao = 'admin';
+      if (user.sAMAccountName === '24250492') funcao = 'tecnico';
+
       // aqui estou bucando e se não estiver cadastrado no meu banco eu crio
       let usuario = await Usuario.findOne({
         where: { username: user.sAMAccountName },
@@ -28,9 +36,14 @@ router.post('/login', (req, res, next) => {
         usuario = await Usuario.create({
           username: user.sAMAccountName,
           nome: user.displayName,
-          email: user.mail || user.userPrincipalName,
-          funcao: 'usuario'
+          email: user.userPrincipalName,
+          funcao: funcao
         });
+      } else {
+        if (usuario.funcao !== funcao) {
+          usuario.funcao = funcao;
+          await usuario.save();
+        }
       }
 
       // Loga o usuário manualmente para garantir a sessão
@@ -48,7 +61,7 @@ router.post('/login', (req, res, next) => {
           funcao: usuario.funcao
         });
 
-        console.log('Usuário autenticado:', usuario.nome);
+        console.log('Usuário autenticado:', user.displayName);
         return res.json({
           message: 'Autenticado com sucesso',
           user: {
