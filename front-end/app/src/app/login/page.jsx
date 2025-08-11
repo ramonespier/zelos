@@ -2,9 +2,22 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Cookies from 'js-cookie';
 
 export default function Login() {
   const [activeTab, setActiveTab] = useState('adm');
+  const [formData, setFormData] = useState({
+    username: "",
+    password: ""
+  })
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const welcomeMessages = {
     adm: 'Administrador',
@@ -12,11 +25,42 @@ export default function Login() {
     tecnico: 'Técnico',
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('http://localhost:3001/auth/login', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      })
+
+      const data = await response.json()
+
+      if(data.token) {
+        Cookies.set("token", data.token, {
+          path: "/auth/login"
+        })
+        return;
+      }
+
+      if (response.ok) {
+        console.log(data.message)
+      } else {
+        console.log(data.error)
+      }
+
+    } catch (err) {
+      console.error('Erro na requisição', err)
+    }
+  }
+
+  
+
   return (
     <div className="bg-[url(/bglogin.svg)] bg-cover bg-center h-screen w-full">
       <div className="flex flex-col items-center justify-center h-full">
-
-
         <div className="relative w-[300px] sm:w-[450px]">
 
           <motion.div
@@ -70,21 +114,29 @@ export default function Login() {
             </div>
 
 
-            <div className="space-y-4 m-8">
-              <input
-                type="text"
-                placeholder="Username"
-                className="block w-full px-4 py-2 border border-gray-400 rounded-full focus:outline-none"
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                className="block w-full px-4 py-2 border border-gray-400 rounded-full focus:outline-none"
-              />
-              <button className="w-full bg-red-600 text-white font-bold mt-5 py-2 rounded-full hover:bg-red-800 transition-colors">
-                Login
-              </button>
-            </div>
+            <form onSubmit={handleSubmit}>
+              <div className="space-y-4 m-8">
+                <input
+                  type="text"
+                  onChange={handleChange}
+                  name="username"
+                  value={formData.username}
+                  placeholder="Username"
+                  className="block w-full px-4 py-2 border border-gray-400 rounded-full focus:outline-none"
+                  />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  name="password"
+                  onChange={handleChange}
+                  value={formData.password}
+                  className="block w-full px-4 py-2 border border-gray-400 rounded-full focus:outline-none"
+                />
+                <button className="w-full bg-red-600 text-white font-bold mt-5 py-2 rounded-full hover:bg-red-800 transition-colors">
+                  Login
+                </button>
+              </div>
+            </form> 
           </motion.div>
         </div>
       </div>

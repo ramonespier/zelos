@@ -14,7 +14,7 @@ import relatorioRoutes from './routes/relatorioRoutes.js'
 import authRoutes from './routes/authRoutes.js'
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // .env
 dotenv.config();
