@@ -1,4 +1,4 @@
-import { JWT_SECRET } from '../configs/jwt.js';
+const jwtSecret = process.env.JWT_SECRET;
 import jwt from 'jsonwebtoken';
 
 class AuthMiddleware {
@@ -13,7 +13,7 @@ class AuthMiddleware {
         const [, token] = authHeader.split(' ');
 
         try{
-            const decoded = jwt.verify(token, JWT_SECRET);
+            const decoded = jwt.verify(token, jwtSecret);
             req.user = decoded;
             next();
         } catch (err){

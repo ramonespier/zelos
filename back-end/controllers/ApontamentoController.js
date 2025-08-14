@@ -1,4 +1,5 @@
 import Apontamento from '../entities/Apontamento.js'
+import Chamado from '../entities/Chamado.js';
 
 class ApontamentoController {
 
@@ -26,45 +27,51 @@ class ApontamentoController {
 
     static async criar(req, res) {
         try {
-            const { comeco, fim, descricao, duracao, chamado_id, tecnico_id } = req.body;
+            const { comeco, fim, descricao, chamado_id, tecnico_id } = req.body;
+
+            // verifica se o chamado existe
+            const chamado = await Chamado.findByPk(chamado_id);
+
+            if (!chamado) {
+                return res.status(404).json({ message: 'Chamado não encontrado' });
+            }
+
+            // verifica se o chamado está atribuído ao técnico
+            if (chamado.tecnico_id !== tecnico_id) {
+                return res.status(403).json({ message: 'Chamado não está atribuído a este técnico' });
+            }
+
+            // verifica se o chamado está em andamento
+            if (chamado.status !== 'em andamento') {
+                return res.status(400).json({ message: 'Chamado não está em andamento' });
+            }
+
             const apontamento = await Apontamento.create({
-                comeco, fim, descricao, duracao, chamado_id, tecnico_id
-            })
-            res.status(200).json(apontamento);
+                chamado_id,
+                tecnico_id,
+                descricao,
+                comeco,
+                fim,
+            });
+
+            res.status(201).json(apontamento);
         } catch (err) {
-            res.status(500).json({ message: 'Erro ao criar apontamento' })
+            console.error(err);
+            res.status(500).json({ message: 'Erro ao criar apontamento' });
         }
     }
 
-    // PROVALVEMNTE IREI RETIRAR
-    static async atualizar(req, res) {
+    static async deletar(req, res) {
         try {
             const { id } = req.params;
-            const { comeco, fim, descricao, duracao, chamado_id, tecnico_id } = req.body;
             const apontamento = await Apontamento.findByPk(id);
-            if(!apontamento){
-                return res.status(404).json({message: 'Apontamento não encontrado'})
-            }
-            await apontamento.update({
-                comeco, fim, descricao, duracao, chamado_id, tecnico_id
-            })
-            res.json(apontamento);
-        } catch (err){
-            res.status(500).json({message: 'Erro ao atualizar apontamento'});
-        }
-    }
-
-    static async deletar(req, res){
-        try{
-            const {id} = req.params;
-            const apontamento = await Apontamento.findByPk(id);
-            if(!apontamento){
-                return res.status(404).json({message: 'Apontamento não encontrado'})
+            if (!apontamento) {
+                return res.status(404).json({ message: 'Apontamento não encontrado' })
             }
             await apontamento.destroy();
-            res.status(200).json({message: 'Apontamento deletado com sucesso'});
-        } catch (err){
-            res.status(500).json({message: 'Erro ao deletar apontamento'});
+            res.status(200).json({ message: 'Apontamento deletado com sucesso' });
+        } catch (err) {
+            res.status(500).json({ message: 'Erro ao deletar apontamento' });
         }
     }
 

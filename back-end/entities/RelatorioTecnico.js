@@ -5,21 +5,41 @@ class RelatorioTecnico extends Model {}
 
 RelatorioTecnico.init({
     nome_tecnico: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING,
         allowNull: true,
     },
     tecnico_id: {
         type: DataTypes.UUID,
         allowNull: true,
     },
-    total_chamados: {
+    chamado_id: {
         type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    numero_patrimonio: {
+        type: DataTypes.STRING,
         allowNull: true,
     },
-    tempo_medio_minutos: {
-        type: DataTypes.INTEGER,
+    status: {
+        type: DataTypes.STRING,
         allowNull: true,
     },
+    titulo: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    criado_em: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
+    atualizado_em: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
+    duracao_total_minutos: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+    }
 }, {
     sequelize,
     modelName: 'RelatorioTecnico',
@@ -27,7 +47,6 @@ RelatorioTecnico.init({
     timestamps: false,
     createdAt: false,
     updatedAt: false,
-    indexes: [], 
     defaultScope: {
         attributes: {
             exclude: ['id'] 

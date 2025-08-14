@@ -4,17 +4,26 @@ import sequelize from "../configs/database.js";
 class RelatorioHistoricoPatrimonio extends Model { }
 
 RelatorioHistoricoPatrimonio.init({
-    patrimonio: {
+    numero_patrimonio: {
         type: DataTypes.STRING(255)
     },
     titulo: {
         type: DataTypes.STRING
+    },
+    descricao: {
+        type: DataTypes.STRING(255),
     },
     status: {
         type: DataTypes.ENUM('pendente', 'em andamento', 'concluido')
     },
     criado_em: {
         type: DataTypes.DATE
+    },
+    tecnico_nome: {
+        type: DataTypes.STRING(255),
+    },
+    tecnico_id: {
+        type: DataTypes.UUID,
     }
 }, {
     sequelize,
