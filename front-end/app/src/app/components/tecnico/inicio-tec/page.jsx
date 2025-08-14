@@ -78,7 +78,7 @@ export default function InicioTecnico({ onVerChamados }) {
                     {painelTecnico.map(({ icon, title, description, action }, i) => (
                         <motion.div
                             key={i}
-                            className="bg-red-50 rounded-lg p-6 shadow-md flex flex-col items-center text-red-700 cursor-pointer hover:shadow-xl transition-transform duration-300"
+                            className="bg-red-50 rounded-lg p-6 shadow-md flex flex-col items-center text-red-700 hover:shadow-xl transition-transform duration-300"
                             whileHover={{ scale: 1.07 }}
                             onClick={action}
                             title={title}
