@@ -11,21 +11,15 @@ Pool.init({
         autoIncrement: true,
     },
     titulo: {
-        type: DataTypes.ENUM('externo', 'manutencao', 'apoio_tecnico', 'limpeza'),
+        type: DataTypes.ENUM('externo', 'manutencao', 'apoio_tecnico', 'limpeza', 'outro'),
         allowNull: false,
     },
     descricao: {
         type: DataTypes.STRING,
     },
     status: {
-        type: DataTypes.ENUM('ativo', 'inativo'),
-        defaultValue: 'ativo',
-    },
-    criado_em: {
-        type: DataTypes.DATE,
-    },
-    atualizado_em: {
-        type: DataTypes.DATE,
+        type: DataTypes.ENUM('aguardando aprovação', 'ativo', 'rejeitado'),
+        defaultValue: 'aguardando aprovação',
     },
     usuario_id: {
         type: DataTypes.UUID,
@@ -53,8 +47,10 @@ Pool.init({
 }, {
     sequelize,
     modelName: 'Pool',
-    tableName: 'pool',
-    timestamps: false,
+    tableName: 'pools',
+    timestamps: true,
+    createdAt: 'criado_em',
+    updatedAt: 'atualizado_em',
 })
 
 Pool.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'usuarioResponsavel' });

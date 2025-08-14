@@ -1,9 +1,8 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../configs/database.js";
-import { encrypt, decrypt } from '../utils/crypto.js';
 import Usuario from "./Usuario.js";
 import Pool from "./Pool.js";
-import crypto from 'crypto';
+import Equipamento from "./Equipamento.js";
 
 
 
@@ -22,33 +21,16 @@ Chamado.init({
     numero_patrimonio: {
         type: DataTypes.STRING(255),
         allowNull: false,
-        set(value) {
-            this.setDataValue('numero_patrimonio', encrypt(value));
-            
-            const hash = crypto.createHash('sha256').update(value).digest('hex');
-            this.setDataValue('hash_numero_patrimonio', hash);
-        },
-        get() {
-            const val = this.getDataValue('numero_patrimonio');
-            if (!val) return null;
-            return decrypt(val);
-        }
-    },
-    hash_numero_patrimonio: {
-        type: DataTypes.STRING(64),
-        allowNull: false,
+        references: { model: Equipamento, key: 'patrimonio' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
     },
     descricao: {
         type: DataTypes.TEXT,
         allowNull: false,
-        set(value) {
-            this.setDataValue('descricao', encrypt(value));
-        },
-        get() {
-            const val = this.getDataValue('descricao');
-            if (!val) return null;
-            return decrypt(val);
-        }
+    },
+    img_url: {
+        type: DataTypes.STRING(1000)
     },
     status: {
         type: DataTypes.ENUM('aberto', 'em andamento', 'concluido'),
@@ -78,6 +60,12 @@ Chamado.init({
     sequelize,
     modelName: 'Chamado',
     tableName: 'chamados',
+    indexes: [
+        {
+            unique: true,
+            fields: ['numero_patrimonio', 'status']
+        }
+    ],
     timestamps: true,
     createdAt: 'criado_em',
     updatedAt: 'atualizado_em'
@@ -86,6 +74,8 @@ Chamado.init({
 Chamado.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'usuario' });
 Chamado.belongsTo(Usuario, { foreignKey: 'tecnico_id', as: 'tecnico' });
 Chamado.belongsTo(Pool, { foreignKey: 'pool_id', as: 'pool' });
+Chamado.belongsTo(Equipamento, { foreignKey: 'numero_patrimonio', targetKey: 'patrimonio', as: 'equipamento' });
+
 
 export default Chamado;
 
