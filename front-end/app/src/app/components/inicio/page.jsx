@@ -99,7 +99,7 @@ export default function Inicio({ onAbrirChamado }) {
                         className="bg-red-600 text-white px-10 py-4 rounded-xl shadow-lg hover:bg-red-700 transition-colors font-semibold flex items-center justify-center gap-3 cursor-pointer"
                         aria-label="Abrir novo chamado"
                     >
-                        Abrir Novo Chamado <FaCheckCircle size={20} />
+                        Solicitar chamado<FaCheckCircle size={20} />
                     </button>
 
                     <button

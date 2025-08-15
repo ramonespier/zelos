@@ -42,17 +42,18 @@ const chamados = [
 ];
 
 export default function ChamadosAbertos() {
-    const [modalAberto, setModalAberto] = useState(false);
-    // 1. Adicionado estado para controlar o modal da imagem
+    const [atribuidos, setAtribuidos] = useState([]); 
     const [imagemModal, setImagemModal] = useState(null);
+    const [modalAberto, setModalAberto] = useState(false);
 
-    const handleAtribuir = (chamadoId) => {
-        console.log(`Chamado ${chamadoId} atribuído!`);
-        setModalAberto(true);
+    const handleAtribuir = (id) => {
+        if (!atribuidos.includes(id)) {
+            setAtribuidos(prev => [...prev, id]);
+            setModalAberto(true);
+        }
     };
 
-    // 2. Adicionadas funções para abrir e fechar o modal da imagem
-    const abrirModalImagem = (imagemUrl) => setImagemModal(imagemUrl);
+    const abrirModalImagem = (url) => setImagemModal(url);
     const fecharModalImagem = () => setImagemModal(null);
 
     return (
@@ -63,32 +64,44 @@ export default function ChamadosAbertos() {
                 transition={{ duration: 0.8 }}
                 className="h-[42rem] flex flex-col w-full"
             >
-                <h1 className='text-[20px] font-semibold text-gray-700 mb-6 drop-shadow-md flex justify-center'>Aqui estão todos os chamados abertos</h1>
-                <div className="flex-1 flex justify-center overflow-y-auto ">
+                <h1 className='text-[20px] font-semibold text-gray-700 mb-6 drop-shadow-md flex justify-center'>
+                    Chamados Abertos
+                </h1>
+
+                <div className="flex-1 flex justify-center overflow-y-auto">
                     <div className="space-y-5 p-4">
                         {chamados.map(chamado => (
-                            <div key={chamado.id} className="bg-white p-5 rounded-3xl shadow-xl border w-200  border-gray-200">
+                            <motion.div
+                                key={chamado.id}
+                                layout
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="bg-white p-5 rounded-3xl shadow-xl border border-gray-200"
+                            >
                                 <div className="flex flex-col md:flex-row gap-5">
                                     <div className="flex-1">
-                                        <h1 className="text-3xl font-extrabold text-red-600 tracking-wide drop-shadow-sm mb-3">{chamado.titulo}</h1>
-                                        <div className="flex gap-3 items-center">
-                                            <img className="w-7 h-7 rounded-full bg-cover bg-center shadow-md shadow-[#b30000]/60"
-                                                 src={chamado.usuarioImg}
-                                                 alt={`Foto de ${chamado.usuario}`} />
-                                            <h1 className="font-semibold text-[#b30000]">{chamado.usuario}</h1>
+                                        <h1 className="text-3xl font-extrabold text-red-600 mb-3">{chamado.titulo}</h1>
+                                        <div className="flex gap-3 items-center mb-3">
+                                            <img 
+                                                className="w-7 h-7 rounded-full shadow-md" 
+                                                src={chamado.usuarioImg} 
+                                                alt={`Foto de ${chamado.usuario}`} 
+                                            />
+                                            <h2 className="font-semibold text-red-600">{chamado.usuario}</h2>
                                         </div>
-                                        <h2 className='py-3 font-bold text-gray-800'>N. Patrimônio: {chamado.patrimonio}</h2>
-                                        <h2 className="font-sans">{chamado.descricao}</h2>
-                                        <div className="mt-4">
-                                            <button
-                                                onClick={() => handleAtribuir(chamado.id)}
-                                                className="px-6 py-2 bg-red-600 text-white font-bold rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-75 transition duration-300 ease-in-out cursor-pointer"
-                                            >
-                                                Atribuir Chamado
-                                            </button>
-                                        </div>
+                                        <p className='font-bold text-gray-800 mb-2'>N. Patrimônio: {chamado.patrimonio}</p>
+                                        <p className="text-gray-700 mb-4">{chamado.descricao}</p>
+                                        <button
+                                            onClick={() => handleAtribuir(chamado.id)}
+                                            className={`px-6 py-2 rounded-lg font-bold shadow-md transition duration-300 ease-in-out 
+                                                ${atribuidos.includes(chamado.id) 
+                                                    ? 'bg-gray-300 text-gray-700 cursor-not-allowed' 
+                                                    : 'bg-red-600 text-white hover:bg-red-700'}`}
+                                        >
+                                            {atribuidos.includes(chamado.id) ? 'Pedido Enviado' : 'Atribuir Chamado'}
+                                        </button>
                                     </div>
-                                    {/* 3. Estrutura da imagem modificada para ter tamanho fixo e abrir o modal */}
                                     <div className="flex items-center justify-center md:justify-end">
                                         <div
                                             className="w-70 h-47 rounded-2xl shadow-md overflow-hidden cursor-pointer"
@@ -102,11 +115,10 @@ export default function ChamadosAbertos() {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
                 </div>
-
 
                 <AnimatePresence>
                     {modalAberto && (
@@ -115,37 +127,23 @@ export default function ChamadosAbertos() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50"
-                            aria-modal="true"
-                            role="dialog"
-                            aria-labelledby="modal-title"
-                            tabIndex={-1}
+                            className="fixed inset-0 backdrop-blur-sm bg-black/50 flex items-center justify-center z-50"
                             onClick={() => setModalAberto(false)}
                         >
                             <motion.div
-                                initial={{ opacity: 0, y: 50, scale: 0.95 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                                exit={{ scale: 0.8, opacity: 0 }}
-                                className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center relative shadow-lg"
+                                initial={{ scale: 0.8 }}
+                                animate={{ scale: 1 }}
+                                exit={{ scale: 0.8 }}
+                                className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center shadow-lg"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                <button
-                                    onClick={() => setModalAberto(false)}
-                                    className="absolute top-4 right-4 text-red-500 hover:text-red-600 transition"
-                                    aria-label="Fechar modal"
-                                >
-                                </button>
-                                <h3 id="modal-title" className="text-2xl font-extrabold text-red-600 mb-4">
-                                    Permissão necessária!
-                                </h3>
+                                <h3 className="text-2xl font-extrabold text-red-600 mb-4">Permissão necessária!</h3>
                                 <p className="text-gray-700 mb-6">
-                                    O seu pedido de atribuição de chamado foi enviado para a administração e está em análise. Nossa equipe entrará em contato o mais breve possível.
+                                    O seu pedido de atribuição de chamado foi enviado para a administração e está em análise. Nossa equipe entrará em contato em breve.
                                 </p>
                                 <button
                                     onClick={() => setModalAberto(false)}
                                     className="mt-2 bg-red-600 text-white py-3 px-6 rounded-xl font-semibold shadow hover:bg-red-700 transition cursor-pointer"
-                                    aria-label="Fechar modal"
                                 >
                                     Fechar
                                 </button>
@@ -155,19 +153,15 @@ export default function ChamadosAbertos() {
                 </AnimatePresence>
             </motion.div>
 
-          
             {imagemModal && (
                 <div
-                    className="fixed inset-0 bg-[rgba(0,0,0,0.5)] backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50 p-4"
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
                     onClick={fecharModalImagem}
                 >
-                    <div
-                        className="relative rounded-lg shadow-2xl"
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="relative rounded-lg shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <button
                             onClick={fecharModalImagem}
-                            className="absolute -top-4 -right-4 bg-white cursor-pointer text-black rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold shadow-lg"
+                            className="absolute -top-4 -right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold shadow-lg"
                         >
                             &times;
                         </button>
