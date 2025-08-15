@@ -2,18 +2,13 @@ import Notificacao from '../entities/Notificacao.js';
 
 class NotificacaoController {
 
-  
     static async listar(req, res) {
         try {
-            const { usuario_id } = req.query;
-            const filtros = {};
-            if (usuario_id) filtros.usuario_id = usuario_id;
-
+            const usuario_id = req.user.id;
             const notificacoes = await Notificacao.findAll({
-                where: filtros,
+                where: { usuario_id },
                 order: [['created_at', 'DESC']]
             });
-
             res.json(notificacoes);
         } catch (err) {
             console.error(err);
@@ -21,11 +16,13 @@ class NotificacaoController {
         }
     }
 
-  
     static async buscarPorId(req, res) {
         try {
             const { id } = req.params;
-            const notificacao = await Notificacao.findByPk(id);
+            const usuario_id = req.user.id;
+            const notificacao = await Notificacao.findOne({
+                where: { id, usuario_id }
+            });
 
             if (!notificacao) {
                 return res.status(404).json({ message: 'Notificação não encontrada' });
@@ -38,11 +35,13 @@ class NotificacaoController {
         }
     }
 
-    // marcar notificação como lida
     static async marcarComoLida(req, res) {
         try {
             const { id } = req.params;
-            const notificacao = await Notificacao.findByPk(id);
+            const usuario_id = req.user.id;
+            const notificacao = await Notificacao.findOne({
+                where: { id, usuario_id }
+            });
 
             if (!notificacao) {
                 return res.status(404).json({ message: 'Notificação não encontrada' });
@@ -58,11 +57,13 @@ class NotificacaoController {
         }
     }
 
-    // deletar notificação individual
     static async deletar(req, res) {
         try {
             const { id } = req.params;
-            const notificacao = await Notificacao.findByPk(id);
+            const usuario_id = req.user.id;
+            const notificacao = await Notificacao.findOne({
+                where: { id, usuario_id }
+            });
 
             if (!notificacao) {
                 return res.status(404).json({ message: 'Notificação não encontrada' });
@@ -76,16 +77,11 @@ class NotificacaoController {
         }
     }
 
-    // limpar todas notificações de um usuário
     static async limparTodas(req, res) {
         try {
-            const { usuario_id } = req.query;
-            if (!usuario_id) {
-                return res.status(400).json({ message: 'Informe o usuário para limpar notificações.' });
-            }
-
+            const usuario_id = req.user.id;
             await Notificacao.destroy({ where: { usuario_id } });
-            res.json({ message: 'Todas notificações do usuário foram deletadas.' });
+            res.json({ message: 'Todas as suas notificações foram deletadas.' });
         } catch (err) {
             console.error(err);
             res.status(500).json({ message: 'Erro ao limpar notificações' });

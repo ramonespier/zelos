@@ -9,8 +9,11 @@ import usuarioRoutes from './routes/usuarioRoutes.js';
 import poolRoutes from './routes/poolRoutes.js';
 import chamadoRoutes from './routes/chamadoRoutes.js';
 import apontamentoRoutes from './routes/apontamentoRoutes.js';
-import relatorioRoutes from './routes/relatorioRoutes.js'
-import authRoutes from './routes/authRoutes.js'
+import relatorioRoutes from './routes/relatorioRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+import equipamentoRoutes from './routes/equipamentoRoutes.js';
+import mensagemRoutes from './routes/mensagemRoutes.js';
+import notificacaoRoutes from './routes/notificacaoRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -57,6 +60,9 @@ app.use('/chamados', chamadoRoutes);
 app.use('/apontamentos', apontamentoRoutes);
 app.use('/relatorios', relatorioRoutes);
 app.use('/auth', authRoutes);
+app.use('/equipamentos', equipamentoRoutes);
+app.use('/mensagens', mensagemRoutes);
+app.use('/notificacao', notificacaoRoutes);
 
 async function StartServer() {
     try {
