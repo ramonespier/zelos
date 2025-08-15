@@ -7,7 +7,6 @@ import session from 'express-session';
 // routes
 import usuarioRoutes from './routes/usuarioRoutes.js';
 import poolRoutes from './routes/poolRoutes.js';
-import poolTecnicoRoutes from './routes/poolTecnicoRoutes.js';
 import chamadoRoutes from './routes/chamadoRoutes.js';
 import apontamentoRoutes from './routes/apontamentoRoutes.js';
 import relatorioRoutes from './routes/relatorioRoutes.js'
@@ -54,7 +53,6 @@ app.get('/', (req, res) => {
 
 app.use('/usuarios', usuarioRoutes);
 app.use('/pools', poolRoutes);
-app.use('/pools-tecnico', poolTecnicoRoutes);
 app.use('/chamados', chamadoRoutes);
 app.use('/apontamentos', apontamentoRoutes);
 app.use('/relatorios', relatorioRoutes);

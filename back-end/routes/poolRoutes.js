@@ -8,7 +8,6 @@ const router = express.Router();
 router.get('/', PoolController.listar);
 router.get('/:id', PoolController.buscarPorId);
 router.post('/', PoolController.criar);
-router.put('/:id', PoolController.atualizar);
 router.delete('/:id', PoolController.deletar);
 
 export default router;

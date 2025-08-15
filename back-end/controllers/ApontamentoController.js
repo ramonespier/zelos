@@ -5,7 +5,9 @@ class ApontamentoController {
 
     static async listar(req, res) {
         try {
-            const apontamento = await Apontamento.findAll();
+            const apontamento = await Apontamento.findAll({
+                include: ['chamado', 'tecnico']
+            });
             res.json(apontamento);
         } catch (err) {
             res.status(500).json({ message: 'Erro ao listar apontamento' });
@@ -15,7 +17,7 @@ class ApontamentoController {
     static async buscarPorId(req, res) {
         try {
             const { id } = req.params;
-            const apontamento = await Apontamento.findByPk(id);
+            const apontamento = await Apontamento.findByPk(id, { include: ['chamado', 'tecnico'] });
             if (!apontamento) {
                 res.status(404).json({ message: 'Apontamento não encontrado' });
             }
@@ -29,9 +31,13 @@ class ApontamentoController {
         try {
             const { comeco, fim, descricao, chamado_id, tecnico_id } = req.body;
 
+            // validação de campos obrigatórios
+            if (!comeco || !descricao || !chamado_id || !tecnico_id) {
+                return res.status(400).json({ message: 'Campos obrigatórios faltando.' });
+            }
+
             // verifica se o chamado existe
             const chamado = await Chamado.findByPk(chamado_id);
-
             if (!chamado) {
                 return res.status(404).json({ message: 'Chamado não encontrado' });
             }
@@ -46,15 +52,21 @@ class ApontamentoController {
                 return res.status(400).json({ message: 'Chamado não está em andamento' });
             }
 
+            // cria o apontamento
             const apontamento = await Apontamento.create({
                 chamado_id,
                 tecnico_id,
                 descricao,
                 comeco,
-                fim,
+                fim
             });
 
-            res.status(201).json(apontamento);
+            // retorna o apontamento com dados relacionados
+            const apontamentoCompleto = await Apontamento.findByPk(apontamento.id, {
+                include: ['chamado', 'tecnico']
+            });
+
+            res.status(201).json(apontamentoCompleto);
         } catch (err) {
             console.error(err);
             res.status(500).json({ message: 'Erro ao criar apontamento' });
@@ -77,4 +89,4 @@ class ApontamentoController {
 
 }
 
-export default ApontamentoController;
+export default ApontamentoController;   

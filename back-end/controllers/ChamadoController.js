@@ -1,29 +1,34 @@
-import crypto from 'crypto';
 import Chamado from '../entities/Chamado.js';
 import Usuario from '../entities/Usuario.js';
-
 
 class ChamadoController {
 
     static async listar(req, res) {
         try {
-            const chamado = await Chamado.findAll();
-            res.json(chamado)
+            const chamados = await Chamado.findAll({
+                include: ['tecnico', 'pool']
+            });
+            res.json(chamados);
         } catch (err) {
-            res.status(500).json({ message: 'Erro ao buscar chamados' })
+            console.error(err);
+            res.status(500).json({ message: 'Erro ao buscar chamados' });
         }
     }
 
+    // Buscar chamado por ID com técnico e pool
     static async buscarPorId(req, res) {
         try {
             const { id } = req.params;
-            const chamado = await Chamado.findByPk(id);
+
+            // aq incluo os dados de ql tecnico e pool to chamando
+            const chamado = await Chamado.findByPk(id, { include: ['tecnico', 'pool'] });
             if (!chamado) {
-                return res.status(404).json({ message: 'Chamado não encontrado' })
+                return res.status(404).json({ message: 'Chamado não encontrado' });
             }
             res.json(chamado);
         } catch (err) {
-            res.status(500).json({ message: 'Erro ao buscar chamado' })
+            console.error(err);
+            res.status(500).json({ message: 'Erro ao buscar chamado' });
         }
     }
 
@@ -31,21 +36,14 @@ class ChamadoController {
         try {
             const { titulo, numero_patrimonio, descricao, pool_id, status } = req.body;
 
-            // campos
             if (!numero_patrimonio || !pool_id || !titulo || !descricao) {
                 return res.status(400).json({ message: 'Campos obrigatórios faltando.' });
             }
 
-            // gerar hash do número de patrimônio para busca eficiente
-            const hashNumeroPatrimonio = crypto
-                .createHash('sha256')
-                .update(numero_patrimonio)
-                .digest('hex');
-
             // verifica se já existe chamado aberto com mesmo patrimônio e pool
             const chamadoExistente = await Chamado.findOne({
                 where: {
-                    hash_numero_patrimonio: hashNumeroPatrimonio,
+                    numero_patrimonio,
                     pool_id,
                     status: 'aberto'
                 }
@@ -60,7 +58,7 @@ class ChamadoController {
                 numero_patrimonio,
                 descricao,
                 pool_id,
-                status
+                status: status || 'aberto'
             });
 
             res.status(201).json(chamado);
@@ -76,20 +74,14 @@ class ChamadoController {
             const { tecnico_id } = req.body;
             const chamado = await Chamado.findByPk(id);
 
-            if (!chamado) {
-                return res.status(404).json({ message: 'Chamado não encontrado' });
-            }
-
-            if (chamado.tecnico_id) {
-                return res.status(400).json({ message: 'Chamado já está atribuído a um técnico' });
-            }
+            if (!chamado) return res.status(404).json({ message: 'Chamado não encontrado' });
+            if (chamado.tecnico_id) return res.status(400).json({ message: 'Chamado já está atribuído a um técnico' });
 
             const tecnico = await Usuario.findByPk(tecnico_id);
-            if (!tecnico) {
-                return res.status(404).json({ message: 'Técnico não encontrado' });
-            }
+            if (!tecnico) return res.status(404).json({ message: 'Técnico não encontrado' });
 
             await chamado.update({ tecnico_id });
+            await chamado.reload();
             res.status(200).json(chamado);
         } catch (err) {
             console.error(err);
@@ -97,42 +89,39 @@ class ChamadoController {
         }
     }
 
+    // atualizar status do chamado 
     static async status(req, res) {
         try {
             const { id } = req.params;
             const { status } = req.body;
             const chamado = await Chamado.findByPk(id);
 
-            if (!chamado) {
-                return res.status(404).json({ message: 'Chamado não encontrado' });
-            }
+            if (!chamado) return res.status(404).json({ message: 'Chamado não encontrado' });
 
-            await chamado.update({ status: 'em andamento' });
+            await chamado.update({ status });
+            await chamado.reload();
             res.status(200).json(chamado);
         } catch (err) {
             console.error(err);
-            res.status(500).json({ message: "Erro ao atualizar chamado" });
+            res.status(500).json({ message: "Erro ao atualizar status do chamado" });
         }
     }
 
+    // fechar chamado (só se estiver em andamento)
     static async fechar(req, res) {
         try {
             const { id } = req.params;
             const chamado = await Chamado.findByPk(id);
 
-            if (!chamado) {
-                return res.status(404).json({ message: 'Chamado não encontrado' });
-            }
-
-            if (chamado.status !== 'em andamento') {
-                return res.status(400).json({ message: 'Chamado não está em andamento' });
-            }
+            if (!chamado) return res.status(404).json({ message: 'Chamado não encontrado' });
+            if (chamado.status !== 'em andamento') return res.status(400).json({ message: 'Chamado não está em andamento' });
 
             await chamado.update({ status: 'concluido' });
+            await chamado.reload();
             res.status(200).json(chamado);
         } catch (err) {
             console.error(err);
-            res.status(500).json({ message: "Erro ao atualizar chamado" });
+            res.status(500).json({ message: "Erro ao fechar chamado" });
         }
     }
 
