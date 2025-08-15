@@ -28,5 +28,11 @@ router.post('/',
     ApontamentoController.criar
 );
 
+router.patch('/:id',
+    // AuthMiddleware.verifyToken,
+    // permitir(['tecnico']),
+    ApontamentoController.fechar
+);
+
 
 export default router;

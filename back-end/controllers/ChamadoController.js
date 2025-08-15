@@ -3,6 +3,7 @@ import Usuario from '../entities/Usuario.js';
 
 class ChamadoController {
 
+    // lista de chamados
     static async listar(req, res) {
         try {
             const chamados = await Chamado.findAll({
@@ -15,22 +16,30 @@ class ChamadoController {
         }
     }
 
-    // Buscar chamado por ID com técnico e pool
+    // buscar por id
     static async buscarPorId(req, res) {
         try {
             const { id } = req.params;
 
-            // aq incluo os dados de ql tecnico e pool to chamando
-            const chamado = await Chamado.findByPk(id, { include: ['tecnico', 'pool'] });
+            // inclui dados do técnico e da pool
+            const chamado = await Chamado.findByPk(id, {
+                include: [
+                    { association: 'tecnico', required: false }, // técnico pode ser null
+                    { association: 'pool' }
+                ]
+            });
+
             if (!chamado) {
                 return res.status(404).json({ message: 'Chamado não encontrado' });
             }
+
             res.json(chamado);
         } catch (err) {
             console.error(err);
             res.status(500).json({ message: 'Erro ao buscar chamado' });
         }
     }
+
 
     static async criar(req, res) {
         try {
@@ -57,6 +66,7 @@ class ChamadoController {
                 titulo,
                 numero_patrimonio,
                 descricao,
+                usuario_id: req.user.id, // pega do token
                 pool_id,
                 status: status || 'aberto'
             });
@@ -67,7 +77,9 @@ class ChamadoController {
             res.status(500).json({ message: 'Erro ao criar chamado' });
         }
     }
+    
 
+    // atribuir chamado para um técnico
     static async atribuir(req, res) {
         try {
             const { id } = req.params;

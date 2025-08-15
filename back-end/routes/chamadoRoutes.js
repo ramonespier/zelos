@@ -35,8 +35,8 @@ router.patch('/:id/atribuir',
 );
 
 router.patch('/:id/status',
-    AuthMiddleware.verifyToken,
-    permitir(['admin', 'tecnico']),
+    // AuthMiddleware.verifyToken,
+    // permitir(['admin', 'tecnico']),
     ChamadoController.status 
 );
 

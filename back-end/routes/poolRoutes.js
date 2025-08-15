@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/', PoolController.listar);
 router.get('/:id', PoolController.buscarPorId);
 router.post('/', PoolController.criar);
-router.patch('/:id', PoolController.aprovarOuRejeitar);
+router.patch('/status/:id', PoolController.aprovarOuRejeitar);
 router.delete('/:id', PoolController.deletar);
 
 export default router;

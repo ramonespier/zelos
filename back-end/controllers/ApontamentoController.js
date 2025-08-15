@@ -73,6 +73,27 @@ class ApontamentoController {
         }
     }
 
+    static async fechar(req, res) {
+        try {
+            const { id } = req.params;
+            const apontamento = await Apontamento.findByPk(id);
+
+            if (!apontamento)
+                return res.status(404).json({ message: 'Apontamento não encontrado' });
+
+            if (apontamento.fim !== null)
+                return res.status(400).json({ message: 'Apontamento já finalizado' });
+
+            await apontamento.update({ fim: new Date() });
+            const apontamentoAtualizado = await Apontamento.findByPk(id, { include: ['chamado', 'tecnico'] });
+
+            res.status(200).json(apontamentoAtualizado);
+
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: "Erro ao fechar apontamento" });
+        }
+    }
 
 
 }

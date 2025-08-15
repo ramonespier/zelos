@@ -21,7 +21,6 @@ class PoolController {
             if (!pool) {
                 return res.status(404).json({ message: 'Pool não encontrada' });
             }
-
             res.json(pool);
         } catch (err) {
             res.status(500).json({ message: 'Erro ao buscar pool' });
@@ -40,6 +39,7 @@ class PoolController {
         }
     }
 
+    // função para aprovar ou rejeitar solicitação de pool (apenas admin)
     static async aprovarOuRejeitar(req, res) {
         try {
             const { id } = req.params;

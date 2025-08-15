@@ -27,6 +27,7 @@ class UsuarioController {
         }
     }
 
+    // edita especialidade (apenas do técnico)
     static async editarEspecialidade(req, res) {
         try {
             const { id } = req.params;
@@ -43,7 +44,7 @@ class UsuarioController {
                 return res.status(400).json({ message: 'Usuário não é um técnico.' });
             }
 
-            // Atualiza a especialidade
+            // atualiza a especialidade
             await tecnico.update({ especialidade });
             await tecnico.reload();
 
