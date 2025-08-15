@@ -53,7 +53,7 @@ export default function Chamado() {
                 className="max-w-xl mx-auto mt-10 mb-20 bg-white p-8 rounded-3xl shadow-xl border border-gray-200"
             >
                 <h2 className="text-4xl font-extrabold mb-10 text-red-600 text-center tracking-wide drop-shadow-sm">
-                    Abrir Novo Chamado
+                    Solicitar Novo Chamado
                 </h2>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-8" noValidate>
@@ -89,7 +89,7 @@ export default function Chamado() {
                         {erros.descricao && <p id="error-descricao" className="text-red-600 mt-1 text-sm font-medium absolute bottom-[-1.5rem] left-0">{erros.descricao}</p>}
                     </label>
 
-                    <button type="submit" className="mt-6 bg-red-600 text-white py-4 rounded-xl font-semibold shadow-xl hover:bg-red-700 transition flex items-center justify-center gap-3 text-lg">
+                    <button type="submit" className="mt-6 bg-red-600 text-white py-4 rounded-xl font-semibold shadow-xl hover:bg-red-700 transition flex items-center justify-center gap-3 text-lg cursor-pointer">
                         Enviar Chamado <FaPaperPlane size={20} />
                     </button>
                 </form>
