@@ -7,8 +7,9 @@ import Footer from '../footer/page'
 // Páginas
 import Inicio from '../inicio/page'
 import Chamado from '../chamado/page'
-import MeusChamados from '../relatorio/page'
+import MeusChamados from '../meus-chamados/page'
 import InstrucoesRapidas from '../instrucoes/page'
+import Contato from '../contato/page'
 
 // Ícones
 import {
@@ -70,6 +71,7 @@ export default function Dashboard() {
     { id: 'inicio', label: 'Início' },
     { id: 'chamado', label: 'Abrir chamado' },
     { id: 'meus', label: 'Meus chamados' },
+    { id: 'contato', label: 'Contato' },
     { id: 'info', label: 'Perfil' },
   ]
 
@@ -78,6 +80,7 @@ export default function Dashboard() {
       case 'inicio': return <Inicio onAbrirChamado={() => setActiveTab('chamado')} />
       case 'chamado': return <Chamado />
       case 'meus': return <MeusChamados />
+      case 'contato': return <Contato />
       case 'info': return (
         <section className="max-w-md w-full mt-12 mb-20 p-8 bg-white rounded-2xl shadow-lg border border-gray-300 mx-auto text-center">
           <h2 className="text-3xl font-extrabold text-red-600 mb-8">Informações do Perfil</h2>
@@ -111,7 +114,7 @@ export default function Dashboard() {
             <motion.button
               key={tab.id}
               onClick={() => handleSelecao(tab.id)}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out ${activeTab === tab.id ? 'bg-red-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'}`}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out ${activeTab === tab.id ? 'bg-red-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800 cursor-pointer'}`}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >

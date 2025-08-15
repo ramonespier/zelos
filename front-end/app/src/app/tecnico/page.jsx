@@ -1,4 +1,4 @@
-import DashboardTecnico from "../components/tecnico/dashboard/page"
+import DashboardTecnico from "../components/tecnico/dashboard-tec/page"
 
 export default function tecnico() {
     return(

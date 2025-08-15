@@ -62,14 +62,14 @@ export default function ChamadosAbertos() {
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                className="h-[42rem] flex flex-col w-full"
+                className="h-[51rem] flex flex-col w-full"
             >
                 <h1 className='text-[20px] font-semibold text-gray-700 mb-6 drop-shadow-md flex justify-center'>
-                    Chamados Abertos
+                    Aqui estão seus chamados abertos
                 </h1>
 
                 <div className="flex-1 flex justify-center overflow-y-auto">
-                    <div className="space-y-5 p-4">
+                    <div className=" space-y-5 p-4">
                         {chamados.map(chamado => (
                             <motion.div
                                 key={chamado.id}
@@ -77,7 +77,7 @@ export default function ChamadosAbertos() {
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
-                                className="bg-white p-5 rounded-3xl shadow-xl border border-gray-200"
+                                className="bg-white p-5 rounded-3xl shadow-xl w-240 border border-gray-200"
                             >
                                 <div className="flex flex-col md:flex-row gap-5">
                                     <div className="flex-1">

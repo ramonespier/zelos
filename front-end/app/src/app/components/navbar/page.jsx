@@ -5,7 +5,7 @@ import Inicio from '../inicio/page';
 import InstrucoesRapidas from '../instrucoes/page';
 import Footer from '../footer/page';
 import Chamado from '../chamado/page';
-import MeusChamados from '../relatorio/page';
+import MeusChamados from '../meus-chamados/page';
 import { ChevronDownIcon, UserCircleIcon, IdentificationIcon, BriefcaseIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 export default function Navbar({ activeTab, setActiveTab }) {
