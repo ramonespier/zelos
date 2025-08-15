@@ -28,10 +28,5 @@ router.post('/',
     ApontamentoController.criar
 );
 
-router.delete('/:id',
-    // AuthMiddleware.verifyToken,
-    // permitir(['admin']),
-    ApontamentoController.deletar
-);
 
 export default router;

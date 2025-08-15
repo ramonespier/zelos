@@ -73,19 +73,7 @@ class ApontamentoController {
         }
     }
 
-    static async deletar(req, res) {
-        try {
-            const { id } = req.params;
-            const apontamento = await Apontamento.findByPk(id);
-            if (!apontamento) {
-                return res.status(404).json({ message: 'Apontamento não encontrado' })
-            }
-            await apontamento.destroy();
-            res.status(200).json({ message: 'Apontamento deletado com sucesso' });
-        } catch (err) {
-            res.status(500).json({ message: 'Erro ao deletar apontamento' });
-        }
-    }
+
 
 }
 

@@ -22,4 +22,10 @@ router.get('/:id',
     UsuarioController.buscarPorId
 );
 
+router.patch('/:id',
+    // AuthMiddleware.verifyToken,
+    // permitir(['admin', 'usuario', 'tecnico']),
+    UsuarioController.editarEspecialidade
+);
+
 export default router;
