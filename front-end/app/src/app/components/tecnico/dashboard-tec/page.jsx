@@ -10,6 +10,7 @@ import ChamadosAtribuidos from '../chamados-atribuidos-tec/page'
 import ChamadosAbertos from '../chamados-abertos-tec/page'
 import MeusChamadosTec from '../meus-chamados-tec/page'
 import InstrucoesTec from '../instrucoes-tec/page'
+import ContatosTec from '../contato-tec/page'
 
 // Ícones
 import {
@@ -24,7 +25,8 @@ import {
   HiOutlinePlusCircle,
   HiOutlineBell,
   HiOutlineBriefcase,
-  HiOutlineUser
+  HiOutlineUser,
+  HiOutlineMail 
 } from 'react-icons/hi'
 
 export default function DashboardTecnico() {
@@ -36,7 +38,7 @@ export default function DashboardTecnico() {
   const dropdownRef = useRef(null)
   const notificationsRef = useRef(null)
 
-  const funcionario = { nome: 'José Silva', funcao: 'Técnico', matricula: '12345678' }
+  const funcionario = { nome: 'José Silva', funcao: 'Técnico', matricula: '12345678', especializacao:'T.I' }
   const getInitials = (name) => name.split(' ').map(n => n[0]).join('').toUpperCase()
 
   useEffect(() => {
@@ -80,7 +82,10 @@ export default function DashboardTecnico() {
     { id: 'abertos', label: 'Chamados Abertos', icon: <HiOutlineClipboardList size={22} /> },
     { id: 'atribuidos', label: 'Chamados Atribuídos', icon: <HiOutlineBriefcase size={22} /> },
     { id: 'meus', label: 'Meus Chamados', icon: <HiOutlineUser size={22} /> },
-    { id: 'abrir', label: 'Solicitar chamado', icon: <HiOutlinePlusCircle size={22} /> }
+    { id: 'abrir', label: 'Solicitar chamado', icon: <HiOutlinePlusCircle size={22} /> },
+    { id: 'contatos', label: 'Contatos', icon: <HiOutlineMail size={22} /> },
+    { id: 'info', label: 'Perfil', icon: <HiOutlineUser size={22} /> }
+
   ]
 
   const renderContent = () => {
@@ -90,6 +95,24 @@ export default function DashboardTecnico() {
       case 'abertos': return <ChamadosAbertos />
       case 'meus': return <MeusChamadosTec />
       case 'abrir': return <ChamadoTec />
+      case 'contatos': return <ContatosTec />
+      // Conteúdo da aba de perfil adicionado
+      case 'info': return (
+        <section className="max-w-md w-full mt-12 mb-20 p-8 bg-white rounded-2xl shadow-lg border border-gray-300 mx-auto text-center">
+          <h2 className="text-3xl font-extrabold text-red-600 mb-8">Informações do Perfil</h2>
+          <div className="flex justify-center mb-8">
+            <div className="w-32 h-32 bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-4xl">
+              {getInitials(funcionario.nome)}
+            </div>
+          </div>
+          <div className="space-y-6 text-gray-800">
+            <p><strong>Nome:</strong> {funcionario.nome}</p>
+            <p><strong>Função:</strong> {funcionario.funcao}</p>
+            <p><strong>Matrícula:</strong> {funcionario.matricula}</p>
+            <p><strong>Especialização:</strong> {funcionario.especializacao}</p>
+          </div>
+        </section>
+      )
       default: return null
     }
   }
@@ -107,7 +130,7 @@ export default function DashboardTecnico() {
             <motion.button
               key={tab.id}
               onClick={() => handleSelecao(tab.id)}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out ${activeTab === tab.id ? 'bg-red-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'}`}
+              className={`w-full flex items-center space-x-3 px-1 py-3 rounded-lg transition-all duration-200 ease-in-out ${activeTab === tab.id ? 'bg-red-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800 cursor-pointer'}`}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >

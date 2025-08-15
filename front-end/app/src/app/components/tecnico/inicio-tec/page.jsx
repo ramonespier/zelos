@@ -71,9 +71,8 @@ export default function InicioTecnico({ setActiveTab }) {
                     {painelTecnico.map(({ icon, title, description, action }, i) => (
                         <motion.div
                             key={i}
-                            className="bg-red-50 rounded-lg p-6 shadow-md flex flex-col items-center text-red-700 hover:shadow-xl transition-transform duration-300 cursor-pointer"
+                            className="bg-red-50 rounded-lg p-6 shadow-md flex flex-col items-center text-red-700 hover:shadow-xl transition-transform duration-300"
                             whileHover={{ scale: 1.07 }}
-                            onClick={action}
                             title={title}
                             role="region"
                             aria-label={title}
@@ -87,11 +86,11 @@ export default function InicioTecnico({ setActiveTab }) {
                 </div>
 
                 <div className="flex flex-col sm:flex-row justify-center gap-8 mb-20">
-                    <button onClick={() => setActiveTab('abrir')} className="bg-red-600 text-white px-10 py-4 rounded-xl shadow-lg hover:bg-red-700 transition-colors font-semibold flex items-center justify-center gap-3">
+                    <button onClick={() => setActiveTab('abrir')} className="bg-red-600 text-white px-10 py-4 rounded-xl shadow-lg hover:bg-red-700 transition-colors font-semibold flex items-center justify-center gap-3 cursor-pointer">
                         Solicitar chamado <FaClipboardList size={20} />
                     </button>
 
-                    <button onClick={() => setActiveTab('atribuidos')} className="border-2 border-red-600 text-red-600 px-10 py-4 rounded-xl shadow-md hover:bg-red-600 hover:text-white transition-colors font-semibold flex items-center justify-center gap-3">
+                    <button onClick={() => setActiveTab('atribuidos')} className="border-2 border-red-600 text-red-600 px-10 py-4 rounded-xl shadow-md hover:bg-red-600 hover:text-white transition-colors font-semibold flex items-center justify-center gap-3 cursor-pointer">
                         Meus chamados atribuídos <FaBook size={20} />
                     </button>
                 </div>

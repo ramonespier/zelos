@@ -4,9 +4,7 @@ export default function Footer() {
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-center md:text-left">
             <h3 className="text-lg font-bold">SENAI</h3>
-            <p className="text-sm text-white mt-1">
-              Sistema de chamados rápido e confiável.
-            </p>
+            
           </div>
   
           <div className="flex gap-4 text-gray-300">
