@@ -77,7 +77,7 @@ export default function MeusChamados() {
                 transition={{ duration: 0.8 }}
             >
                 <h1 className='text-[20px] font-semibold text-gray-700 mb-6 drop-shadow-md flex justify-center'>
-                    Aqui estão os chamados que você abriu.
+                    Aqui estão os chamados que você solicitou.
                 </h1>
 
                 <div className="max-h-150 min-h-150 w-220 overflow-y-auto mx-auto bg-white p-8 rounded-3xl shadow-xl border border-gray-200">
