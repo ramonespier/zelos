@@ -30,12 +30,29 @@ export default function InicioTecnico({ setActiveTab }) {
   const faqsTecnico = [
     {
       question: 'Como atribuo um chamado para mim?',
-      answer: 'Na aba "Chamados abertos", clique no chamado desejado e use o botão "Atribuir chamado".',
+      answer: 'Na aba "Chamados abertos", clique no chamado desejado e use o botão "Enviar pedido".',
     },
     {
       question: 'Como eu sei que um chamado foi atribuído?',
       answer: 'Assim que a administração aprovar o pedido, o chamado estará disponível na aba "Chamados atribuídos."'
     },
+    {
+      question: 'Como faço apontamentos?',
+      answer: 'Na aba "Chamados Atribuídos", você pode enviar seus apontamentos diretamente no chamado.'
+    },
+    {
+      question: 'Como fecho um chamado resolvido?',
+      answer: 'Na aba "Chamados Atribuídos", clique em "Detalhes" no chamado e selecione "Solicitar Fechamento". A solicitação será enviada para a administração.'
+    },
+    {
+      question: 'Como envio uma mensagem para a administração?',
+      answer: 'Na aba "Contato", você pode enviar sua mensagem, e nossa equipe irá respondê-la.'
+    },
+    {
+      question: 'Como atribuo minhas especialidades no meu perfil?',
+      answer: 'Na aba "Perfil", clique no ícone de lápis no campo "Especialidade" para adicionar suas especialidades.'
+    }
+
   ];
 
   return (
