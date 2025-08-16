@@ -58,14 +58,14 @@ export default function ChamadoDetailView({ chamado, tecnicoId, onGoBack, onAbri
             <div className="flex justify-end gap-3 mt-6 pt-5 border-t">
                 <button 
                     onClick={() => onAbrirApontamento(chamado)} 
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2 cursor-pointer"
                 >
                     <PlusCircleIcon className="w-5 h-5"/> Criar Apontamento
                 </button>
                 <button 
                     onClick={solicitarFechamento} 
                     disabled={pedidoEnviado}
-                    className={`px-4 py-2 rounded-lg flex items-center gap-2 ${pedidoEnviado ? 'bg-gray-300 text-gray-700 cursor-not-allowed' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+                    className={`px-4 py-2 rounded-lg flex items-center gap-2 ${pedidoEnviado ? 'bg-gray-300 text-gray-700 cursor-not-allowed' : 'bg-gray-200 cursor-pointer text-gray-800 hover:bg-gray-300'}`}
                 >
                     <ArrowUpOnSquareIcon className="w-5 h-5"/>
                     {pedidoEnviado ? 'Pedido Enviado' : 'Solicitar Fechamento'}

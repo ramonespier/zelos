@@ -75,7 +75,7 @@ export default function CardChamado({ chamado, atribuidos, onAtribuir, onAbrirIm
             <button
               onClick={() => onAtribuir(chamado.id)}
               disabled={estaAtribuido}
-              className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all w-full sm:w-auto ${
+              className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all w-full sm:w-auto cursor-pointer ${
                 estaAtribuido
                   ? 'bg-green-100 text-green-700 cursor-not-allowed'
                   : 'bg-red-600 text-white hover:bg-red-700 active:scale-95'
