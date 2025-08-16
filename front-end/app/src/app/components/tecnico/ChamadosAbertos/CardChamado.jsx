@@ -1,48 +1,97 @@
 'use client';
 import { motion } from 'framer-motion';
+import Image from 'next/image'; // Usando next/image para otimização
 
 export default function CardChamado({ chamado, atribuidos, onAtribuir, onAbrirImagem }) {
   const estaAtribuido = atribuidos.includes(chamado.id);
 
+  // Componente reutilizável para a imagem, para não repetir código (Princípio DRY)
+  const ImagemComponente = () => (
+    <motion.div
+      whileHover={{ scale: 1.03 }}
+      className="h-48 rounded-lg overflow-hidden border border-gray-200 cursor-pointer group"
+      onClick={() => onAbrirImagem(chamado.imagem)}
+    >
+      <Image
+        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+        src={`/${chamado.imagem}`} // Assumindo que a imagem está na pasta /public
+        alt={chamado.titulo}
+        width={300}
+        height={200}
+      />
+    </motion.div>
+  );
+
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className="bg-white p-5 rounded-3xl shadow-xl w-240 border border-gray-200"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="bg-white p-5 rounded-xl shadow-md border border-gray-200/80 w-full flex flex-col"
     >
-      <div className="flex flex-col md:flex-row gap-5">
-        <div className="flex-1">
-          <h1 className="text-3xl font-extrabold text-red-600 mb-3">{chamado.titulo}</h1>
-          <div className="flex gap-3 items-center mb-3">
-            <img className="w-7 h-7 rounded-full shadow-md" src={chamado.usuarioImg} alt={`Foto de ${chamado.usuario}`} />
-            <h2 className="font-semibold text-red-600">{chamado.usuario}</h2>
+      <div className="flex flex-col md:flex-row md:gap-x-6 h-full">
+        
+        {/* --- COLUNA DE CONTEÚDO (Esquerda no Desktop) --- */}
+        <div className="flex flex-col flex-1">
+          {/* Título */}
+          <h1 className="text-xl font-bold text-gray-800 line-clamp-2">
+            {chamado.titulo}
+          </h1>
+
+          {/* Usuário e data */}
+          <div className="flex items-center gap-3 mt-3">
+            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-500">
+              {chamado.usuario.charAt(0)}
+            </div>
+            <div>
+              <p className="font-medium text-gray-700 text-sm">{chamado.usuario}</p>
+              <p className="text-xs text-gray-500">
+                {new Date(chamado.criado_em).toLocaleDateString('pt-BR')}
+              </p>
+            </div>
           </div>
-          <p className='font-bold text-gray-800 mb-2'>N. Patrimônio: {chamado.patrimonio}</p>
-          <p className="text-gray-700 mb-4">{chamado.descricao}</p>
-          <button
-            onClick={() => onAtribuir(chamado.id)}
-            className={`px-6 py-2 rounded-lg font-bold shadow-md transition duration-300 ease-in-out 
-              ${estaAtribuido 
-                ? 'bg-gray-300 text-gray-700 cursor-not-allowed' 
-                : 'bg-red-600 text-white hover:bg-red-700'}`}
-          >
-            {estaAtribuido ? 'Pedido Enviado' : 'Atribuir Chamado'}
-          </button>
-        </div>
-        <div className="flex items-center justify-center md:justify-end">
-          <div
-            className="w-70 h-47 rounded-2xl shadow-md overflow-hidden cursor-pointer"
-            onClick={() => onAbrirImagem(chamado.imagem)}
-          >
-            <img
-              className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-              src={chamado.imagem}
-              alt={chamado.titulo}
-            />
+
+          {/* Descrição */}
+          <p className="text-gray-600 text-sm line-clamp-3 mt-3">
+            {chamado.descricao}
+          </p>
+
+          {/* IMAGEM (Aparece aqui no fluxo para mobile) */}
+          {chamado.imagem && (
+            <div className="mt-4 md:hidden"> {/* Esconde em telas médias ou maiores */}
+              <ImagemComponente />
+            </div>
+          )}
+
+          {/* Espaçador: empurra o botão para baixo no desktop */}
+          <div className="flex-grow hidden md:block"></div>
+
+          {/* Rodapé: Patrimônio e Botão */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 mt-4 border-t border-gray-200/80 md:border-t-0 md:pt-2 md:mt-0 gap-3">
+            <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
+              Patrimônio: #{chamado.patrimonio}
+            </span>
+            <button
+              onClick={() => onAtribuir(chamado.id)}
+              disabled={estaAtribuido}
+              className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all w-full sm:w-auto ${
+                estaAtribuido
+                  ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                  : 'bg-red-600 text-white hover:bg-red-700 active:scale-95'
+              }`}
+            >
+              {estaAtribuido ? 'Pendente' : 'Enviar pedido'}
+            </button>
           </div>
         </div>
+
+        {/* --- COLUNA DA IMAGEM (Aparece apenas no Desktop) --- */}
+        {chamado.imagem && (
+          <div className="hidden md:flex md:w-1/3 flex-shrink-0 items-center"> {/* Escondido por padrão, visível em telas médias ou maiores */}
+            <ImagemComponente />
+          </div>
+        )}
       </div>
     </motion.div>
   );

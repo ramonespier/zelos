@@ -14,7 +14,7 @@ import ProfileInfo from './ProfileInfo';
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('inicio');
   const [notifications, setNotifications] = useState([]);
-  const funcionario = { nome: 'Maria Silva', funcao: 'RH', matricula: '1234-5678' };
+  const funcionario = { nome: 'Ana Carollini Rossi', funcao: 'usuário', matricula: '24250000' };
 
   // Mock notificações
   useEffect(() => {

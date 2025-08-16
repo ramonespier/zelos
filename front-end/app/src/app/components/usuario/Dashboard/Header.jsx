@@ -32,16 +32,17 @@ export default function Header({
   const handleSelecao = (opcao) => setActiveTab(opcao);
 
   return (
-    <header className="bg-white shadow-md h-20 flex items-center justify-between px-6 lg:px-10 z-50 sticky top-0">
+    <header className="bg-gradient-to-r from-gray-50 via-white to-gray-50 shadow-md h-20 flex items-center justify-between px-6 lg:px-10 z-50 sticky top-0 backdrop-blur-sm">
       {/* Esquerda: Botão mobile + título */}
       <div className="flex items-center space-x-4">
-        <button
+        <motion.button
+          whileTap={{ scale: 0.9 }}
           onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
-          className="lg:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100 transition"
+          className="lg:hidden p-2 rounded-xl text-gray-600 hover:bg-gray-200 transition"
         >
-          <Bars3Icon className="w-6 h-6" />
-        </button>
-        <h2 className="text-2xl font-semibold text-gray-800 tracking-wide">
+          <Bars3Icon className="w-7 h-7" />
+        </motion.button>
+        <h2 className="text-2xl font-bold text-gray-800 tracking-tight drop-shadow-sm">
           {tabs.find(t => t.id === activeTab)?.label}
         </h2>
       </div>
@@ -56,6 +57,10 @@ export default function Header({
           setNotificationsOpen={setNotificationsOpen}
           notificationsRef={notificationsRef}
         />
+
+        {/* Separador discreto */}
+        <span className="hidden lg:block w-px h-6 bg-gray-300"></span>
+
         <ProfileDropdown
           funcionario={funcionario}
           getInitials={getInitials}
@@ -70,26 +75,30 @@ export default function Header({
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.nav
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
-            className="lg:hidden absolute top-20 left-0 w-full bg-white shadow-md border-t border-gray-200 z-40"
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="lg:hidden absolute top-20 left-0 w-full bg-white shadow-lg border-t border-gray-200 z-40 rounded-b-2xl"
           >
             <ul className="flex flex-col py-4">
               {tabs.map(tab => (
                 <li key={tab.id}>
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => {
                       handleSelecao(tab.id);
                       setMobileMenuOpen(false);
                     }}
-                    className={`w-full text-left px-6 py-3 hover:bg-gray-100 transition ${
-                      activeTab === tab.id ? 'bg-red-600 text-white font-semibold' : 'text-gray-700'
+                    className={`w-full text-left px-6 py-3 transition rounded-md ${
+                      activeTab === tab.id
+                        ? 'bg-red-600 text-white font-semibold shadow-sm'
+                        : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
                     {tab.label}
-                  </button>
+                  </motion.button>
                 </li>
               ))}
             </ul>

@@ -1,41 +1,66 @@
-    'use client';
+'use client';
+
 import { motion } from 'framer-motion';
-import { HiOutlineHome, HiOutlineClipboardList, HiOutlinePlusCircle, HiOutlineBriefcase, HiOutlineUser, HiOutlineMail } from 'react-icons/hi';
+import {
+  HomeIcon,
+  ClipboardDocumentListIcon,
+  UserCircleIcon,
+  UserGroupIcon,
+  PhoneIcon,
+  PlusCircleIcon,
+  FolderOpenIcon
+} from '@heroicons/react/24/outline';
+
 import Footer from '../../footer/page';
 
 const tabs = [
-  { id: 'inicio', label: 'Início', icon: <HiOutlineHome size={22} /> },
-  { id: 'abertos', label: 'Chamados Abertos', icon: <HiOutlineClipboardList size={22} /> },
-  { id: 'atribuidos', label: 'Chamados Atribuídos', icon: <HiOutlineBriefcase size={22} /> },
-  { id: 'meus', label: 'Meus Chamados', icon: <HiOutlineUser size={22} /> },
-  { id: 'abrir', label: 'Solicitar chamado', icon: <HiOutlinePlusCircle size={22} /> },
-  { id: 'contatos', label: 'Contatos', icon: <HiOutlineMail size={22} /> },
-  { id: 'info', label: 'Perfil', icon: <HiOutlineUser size={22} /> },
+  { id: 'inicio', label: 'Início', icon: HomeIcon },
+  { id: 'abertos', label: 'Chamados abertos', icon: FolderOpenIcon },
+  { id: 'atribuidos', label: 'Chamados atribuídos', icon: ClipboardDocumentListIcon },
+  { id: 'meus', label: 'Minhas solicitações', icon: UserGroupIcon },
+  { id: 'chamado', label: 'Solicitar chamado', icon: PlusCircleIcon },
+  { id: 'contato', label: 'Contato', icon: PhoneIcon },
+  { id: 'info', label: 'Perfil', icon: UserCircleIcon },
 ];
 
 export default function Sidebar({ activeTab, setActiveTab }) {
   const handleSelecao = (opcao) => setActiveTab(opcao);
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-gray-200">
+    <aside className="bg-gradient-to-b from-gray-50 via-white to-gray-50 border-r border-gray-200 flex flex-col w-64 hidden lg:flex h-screen shadow-md">
+      {/* Logo */}
       <div className="h-20 flex items-center justify-center border-b border-gray-200">
-        <h1 className="text-xl font-bold text-red-600">SENAI Chamados</h1>
+        <h1 className="text-2xl font-bold text-red-600 tracking-tight drop-shadow-sm">
+          SENAI Chamados
+        </h1>
       </div>
+
+      {/* Navegação */}
       <nav className="flex-1 px-4 py-6 space-y-2">
-        {tabs.map(tab => (
+        {tabs.map(({ id, label, icon: Icon }) => (
           <motion.button
-            key={tab.id}
-            onClick={() => handleSelecao(tab.id)}
-            className={`w-full flex items-center space-x-3 px-1 py-3 rounded-lg transition-all duration-200 ease-in-out ${activeTab === tab.id ? 'bg-red-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800 cursor-pointer'}`}
+            key={id}
+            onClick={() => handleSelecao(id)}
             whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileTap={{ scale: 0.97 }}
+            className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 ease-in-out cursor-pointer ${
+              activeTab === id
+                ? 'bg-red-600 text-white shadow-md font-semibold'
+                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+            }`}
           >
-            {tab.icon}
-            <span className="font-medium">{tab.label}</span>
+            <Icon className="w-6 h-6 flex-shrink-0" />
+            <span>{label}</span>
           </motion.button>
         ))}
       </nav>
-      <Footer />
+
+      {/* Rodapé */}
+      <div className="mt-auto">
+        <div className="border-t border-gray-200">
+          <Footer />
+        </div>
+      </div>
     </aside>
   );
 }

@@ -49,7 +49,7 @@ export default function FormularioContato({ abrirModal }) {
               type="text"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
-              placeholder="Assunto principal da sua mensagem"
+              placeholder="Assunto principal"
               className={`mt-1 p-4 border rounded-lg focus:outline-none focus:ring-4 focus:ring-red-400 transition shadow-sm ${
                 erros.titulo ? 'border-red-500 ring-red-400' : 'border-gray-300'
               }`}
