@@ -49,15 +49,15 @@ export default function ChamadosAtribuidos() {
     return (
         <div className="p-4 sm:p-6 h-full">
             <div className="mb-8">
-                 <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
                     {selectedChamado && (
-                        <motion.button 
+                        <motion.button
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            onClick={() => setSelectedChamado(null)} 
+                            onClick={() => setSelectedChamado(null)}
                             className="p-2 rounded-full hover:bg-gray-200 transition-colors"
                         >
-                            <ArrowLeftIcon className="w-6 h-6 text-red-600"/>
+                            <ArrowLeftIcon className="w-6 h-6 text-red-600" />
                         </motion.button>
                     )}
                     {selectedChamado ? 'Detalhes do Chamado' : 'Meus Chamados Atribuídos'}
@@ -69,12 +69,12 @@ export default function ChamadosAtribuidos() {
 
             <AnimatePresence mode="wait">
                 {!selectedChamado ? (
-                     <motion.div
+                    <motion.div
                         key="grid"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
+                        className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
                     >
                         {chamados.map(chamado => (
                             <ChamadoCard
@@ -85,6 +85,7 @@ export default function ChamadosAtribuidos() {
                             />
                         ))}
                     </motion.div>
+
                 ) : (
                     <motion.div key="detail">
                         <ChamadoDetailView
@@ -97,8 +98,8 @@ export default function ChamadosAtribuidos() {
                 )}
             </AnimatePresence>
 
-            <ApontamentoModal 
-                chamado={apontamentoModal} 
+            <ApontamentoModal
+                chamado={apontamentoModal}
                 tecnicoId={tecnicoId}
                 onClose={() => setApontamentoModal(null)}
                 onSuccess={criarApontamento}
