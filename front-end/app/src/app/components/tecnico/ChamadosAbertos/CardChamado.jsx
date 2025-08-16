@@ -71,7 +71,7 @@ export default function CardChamado({ chamado, atribuidos, onAtribuir, onAbrirIm
             {chamado.imagem && (
               <button
                 onClick={() => onAbrirImagem(chamado.imagem)}
-                className="hidden sm:inline text-xs font-semibold text-blue-600 hover:underline"
+                className="hidden sm:inline text-xs font-semibold cursor-pointer text-blue-600 hover:underline"
               >
                 Ver imagem
               </button>
@@ -84,7 +84,7 @@ export default function CardChamado({ chamado, atribuidos, onAtribuir, onAbrirIm
             className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all w-full sm:w-auto ${
               estaAtribuido
                 ? 'bg-green-100 text-green-700 cursor-not-allowed'
-                : 'bg-red-600 text-white hover:bg-red-700 active:scale-95'
+                : 'bg-red-600 text-white hover:bg-red-700 active:scale-95 cursor-pointer'
             }`}
           >
             {estaAtribuido ? 'Pendente' : 'Enviar pedido'}

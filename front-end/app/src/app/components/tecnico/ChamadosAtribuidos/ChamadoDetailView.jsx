@@ -76,7 +76,7 @@ export default function ChamadoDetailView({ chamado, tecnicoId, onGoBack, onAbri
             <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-4 sm:mt-6 pt-3 sm:pt-5 border-t">
                 <button 
                     onClick={() => onAbrirApontamento(chamado)} 
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-600 cursor-pointer text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base"
                 >
                     <PlusCircleIcon className="w-4 h-4 sm:w-5 sm:h-5"/> 
                     <span>Criar Apontamento</span>

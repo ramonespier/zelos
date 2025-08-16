@@ -49,14 +49,14 @@ export default function ChamadoCard({ chamado, onVerDetalhes, onAbrirApontamento
                 <div className="flex flex-col lg:flex-row gap-3 mt-auto pt-4 border-t border-gray-100">
                     <button 
                         onClick={onVerDetalhes} 
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold rounded-lg transition-colors text-sm"
+                        className="cursor-pointer flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold rounded-lg transition-colors text-sm"
                     >
                         <EyeIcon className="w-5 h-5" />
                         <span>Detalhes</span>
                     </button>
                     <button 
                         onClick={() => onAbrirApontamento(chamado)} 
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold rounded-lg shadow shadow-red-500/20 hover:from-red-600 hover:to-red-700 transition-all text-sm"
+                        className="cursor-pointer flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold rounded-lg shadow shadow-red-500/20 hover:from-red-600 hover:to-red-700 transition-all text-sm"
                     >
                         <PlusCircleIcon className="w-5 h-5" />
                         <span>Apontamento</span>

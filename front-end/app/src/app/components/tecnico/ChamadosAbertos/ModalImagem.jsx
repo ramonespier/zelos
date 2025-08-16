@@ -11,7 +11,7 @@
         <div className="relative rounded-lg shadow-2xl" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={onClose}
-            className="absolute -top-4 -right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold shadow-lg"
+            className="absolute cursor-pointer -top-4 -right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold shadow-lg"
           >
             &times;
           </button>
