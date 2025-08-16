@@ -107,7 +107,7 @@ export default function FormularioContato({ abrirModal }) {
 
           <button
             type="submit"
-            className="mt-6 bg-red-600 text-white py-4 rounded-xl font-semibold shadow-xl hover:bg-red-700 transition flex items-center justify-center gap-3 text-lg"
+            className="mt-6 bg-red-600 text-white py-4 rounded-xl font-semibold shadow-xl cursor-pointer hover:bg-red-700 transition flex items-center justify-center gap-3 text-lg"
           >
             Enviar Mensagem <FaPaperPlane size={20} />
           </button>

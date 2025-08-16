@@ -6,7 +6,7 @@ import Sidebar from './Slidebar';
 import Header from './Header';
 import Inicio from '../Inicio/Inicio';
 import Chamado from '../AbrirChamado/Chamado';
-import MeusChamados from '../MeusChamados/MeusChamados';
+import MeusChamados from '../MeusChamados/MinhasPools';
 import InstrucoesRapidas from '../Instrucoes/page';
 import Contato from '../Contato/Contato';
 import ProfileInfo from './ProfileInfo';

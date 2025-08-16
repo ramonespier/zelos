@@ -6,7 +6,7 @@ import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 export default function ProfileDropdown({ funcionario, getInitials, isProfileOpen, setProfileOpen, handleSelecao, dropdownRef }) {
   return (
     <div className="relative" ref={dropdownRef}>
-      <motion.button onClick={() => setProfileOpen(!isProfileOpen)} className="flex items-center space-x-2 p-1 rounded-full transition-colors hover:bg-gray-100" whileTap={{ scale: 0.95 }}>
+      <motion.button onClick={() => setProfileOpen(!isProfileOpen)} className="flex items-center space-x-2 p-1 rounded-full transition-colors cursor-pointer hover:bg-gray-100" whileTap={{ scale: 0.95 }}>
         <div className="w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-inner">{getInitials(funcionario.nome)}</div>
         <div className="hidden md:flex flex-col items-start">
           <span className="font-semibold text-sm text-gray-700">{funcionario.nome}</span>
@@ -27,7 +27,7 @@ export default function ProfileDropdown({ funcionario, getInitials, isProfileOpe
               <p className="font-semibold text-gray-800">{funcionario.nome}</p>
               <p className="text-sm text-gray-500">Matrícula: {funcionario.matricula}</p>
             </div>
-            <button onClick={() => handleSelecao('sair')} className="w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 flex items-center space-x-3 transition-colors">
+            <button onClick={() => handleSelecao('sair')} className="w-full px-4 py-3 text-left cursor-pointer text-red-600 hover:bg-red-50 flex items-center space-x-3 transition-colors">
               <ArrowRightOnRectangleIcon className="w-5 h-5" /> <span>Sair da Conta</span>
             </button>
           </motion.div>
