@@ -59,7 +59,7 @@ export default function FormChamado({ onSubmit }) {
         {erros.descricao && <p id="error-descricao" className="text-red-600 mt-1 text-sm font-medium absolute bottom-[-1.5rem] left-0">{erros.descricao}</p>}
       </label>
 
-      <button type="submit" className="mt-6 bg-red-600 text-white py-4 rounded-xl font-semibold shadow-xl hover:bg-red-700 transition flex items-center justify-center gap-3 text-lg">
+      <button type="submit" className="mt-6 bg-red-600 cursor-pointer text-white py-4 rounded-xl font-semibold shadow-xl hover:bg-red-700 transition flex items-center justify-center gap-3 text-lg">
         Enviar Solicitação <FaPaperPlane size={20} />
       </button>
     </form>

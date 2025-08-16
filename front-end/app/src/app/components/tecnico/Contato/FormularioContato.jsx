@@ -49,7 +49,7 @@ export default function FormularioContato() {
                         <InputField label="Título" value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Assunto principal" error={erros.titulo} id="titulo" />
                         <InputField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu.email@exemplo.com" error={erros.email} id="email" />
                         <TextareaField label="Mensagem" value={mensagem} onChange={(e) => setMensagem(e.target.value)} placeholder="Digite sua mensagem detalhada aqui" error={erros.mensagem} id="mensagem" />
-                        <button type="submit" className="mt-6 bg-red-600 text-white py-4 rounded-xl font-semibold shadow-xl hover:bg-red-700 transition flex items-center justify-center gap-3 text-lg">
+                        <button type="submit" className="mt-6 bg-red-600 cursor-pointer text-white py-4 rounded-xl font-semibold shadow-xl hover:bg-red-700 transition flex items-center justify-center gap-3 text-lg">
                             Enviar Mensagem <FaPaperPlane size={20} />
                         </button>
                     </form>
