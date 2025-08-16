@@ -5,8 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Sidebar from './Slidebar';
 import Header from './Header';
 import Inicio from '../Inicio/InicioTecnico';
-import Chamado from '../SolicitarChamado/Chamado';
-import MeusChamados from '../MeusChamados/MinhasPools';
 import InstrucoesRapidas from '../Instrucoes/page';
 import Contato from '../Contato/FormularioContato';
 import ProfileInfo from './ProfileInfo';
@@ -32,8 +30,6 @@ export default function Dashboard() {
   const renderContent = () => {
     switch(activeTab) {
       case 'inicio': return <><Inicio onAbrirChamado={() => setActiveTab('chamado')} /><InstrucoesRapidas /></>;
-      case 'chamado': return <Chamado />;
-      case 'meus': return <MeusChamados />;
       case 'contato': return <Contato />;
       case 'atribuidos': return <ChamadosAtribuidos />;
       case 'abertos': return <ChamadosAbertos />;
