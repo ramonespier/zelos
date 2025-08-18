@@ -1,13 +1,20 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaPaperPlane } from 'react-icons/fa';
+import api from '../../../lib/api'; 
 
-export default function FormularioContato({ abrirModal }) {
+export default function FormularioContato({ abrirModal, funcionario }) {
   const [titulo, setTitulo] = useState('');
   const [email, setEmail] = useState('');
   const [mensagem, setMensagem] = useState('');
   const [erros, setErros] = useState({});
+
+  useEffect(() => {
+    if (funcionario && funcionario.email) {
+      setEmail(funcionario.email);
+    }
+  }, [funcionario]);
 
   const validarFormulario = () => {
     const newErros = {};
@@ -19,16 +26,39 @@ export default function FormularioContato({ abrirModal }) {
     return Object.keys(newErros).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validarFormulario()) return;
 
-    console.log('Formulário válido:', { titulo, email, mensagem });
-    abrirModal();
-    setTitulo('');
-    setEmail('');
-    setMensagem('');
-    setErros({});
+    // --- CORREÇÃO ADICIONADA AQUI ---
+    // Verifica se o objeto 'funcionario' e seu 'id' existem antes de prosseguir.
+    if (!funcionario || !funcionario.id) {
+      console.error("Erro: Informações do usuário não carregadas. O submit foi bloqueado.");
+      alert("Não foi possível identificar o usuário. Por favor, recarregue a página e tente novamente.");
+      return; // Interrompe a execução da função.
+    }
+    // --- FIM DA CORREÇÃO ---
+
+    const payload = {
+      titulo,
+      email,
+      mensagem,
+      remetente_id: funcionario.id // Esta linha agora é segura.
+    };
+    
+    try {
+      await api.post('/mensagens', payload);
+
+      abrirModal();
+      setTitulo('');
+      setEmail(funcionario.email);
+      setMensagem('');
+      setErros({});
+    } catch (err) {
+      console.error("Erro ao enviar mensagem:", err);
+      const errorMessage = err.response?.data?.error || 'Não foi possível enviar a mensagem.';
+      alert(errorMessage);
+    }
   };
 
   return (
@@ -40,9 +70,7 @@ export default function FormularioContato({ abrirModal }) {
         <h2 className="text-4xl font-extrabold mb-10 text-red-600 text-center tracking-wide drop-shadow-sm">
           Formulário de Contato
         </h2>
-
         <form onSubmit={handleSubmit} className="flex flex-col gap-8" noValidate>
-          {/* Título */}
           <label className="flex flex-col text-gray-800 font-semibold relative">
             <span className="mb-2">Título</span>
             <input
@@ -63,7 +91,6 @@ export default function FormularioContato({ abrirModal }) {
             )}
           </label>
 
-          {/* Email */}
           <label className="flex flex-col text-gray-800 font-semibold relative">
             <span className="mb-2">Email</span>
             <input
@@ -84,7 +111,6 @@ export default function FormularioContato({ abrirModal }) {
             )}
           </label>
 
-          {/* Mensagem */}
           <label className="flex flex-col text-gray-800 font-semibold relative">
             <span className="mb-2">Mensagem</span>
             <textarea
@@ -104,7 +130,6 @@ export default function FormularioContato({ abrirModal }) {
               </p>
             )}
           </label>
-
           <button
             type="submit"
             className="mt-6 bg-red-600 text-white py-4 rounded-xl font-semibold shadow-xl cursor-pointer hover:bg-red-700 transition flex items-center justify-center gap-3 text-lg"

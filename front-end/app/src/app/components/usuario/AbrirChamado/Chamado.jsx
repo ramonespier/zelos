@@ -4,16 +4,16 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import ChamadoForm from './ChamadoForm';
 import ModalSucesso from './ModalSucesso';
+import api from '../../../lib/api'; // Importe a instância centralizada do axios
 
-export default function Chamado({ usuario_id }) {
+// Recebe o objeto 'funcionario' do componente pai (Dashboard)
+export default function Chamado({ funcionario }) {
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [erros, setErros] = useState({});
   const [modalAberto, setModalAberto] = useState(false);
 
-  const created_by = usuario_id;
-  const updated_by = usuario_id;
-
+  // Lógica de validação do formulário (sem alterações)
   const validarFormulario = () => {
     const newErros = {};
     if (titulo.trim().length < 5) newErros.titulo = 'Título precisa ter ao menos 5 caracteres.';
@@ -26,21 +26,30 @@ export default function Chamado({ usuario_id }) {
     e.preventDefault();
     if (!validarFormulario()) return;
 
-    try {
-      const res = await fetch('/api/pool', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ titulo, descricao, usuario_id, created_by, updated_by })
-      });
-      if (!res.ok) throw new Error('Erro ao criar chamado');
+    // Prepara o payload com os dados do chamado e do usuário logado
+    const payload = {
+      titulo,
+      descricao,
+      usuario_id: funcionario.id,
+      created_by: funcionario.id,
+      updated_by: funcionario.id
+    };
 
+    try {
+      // Faz a requisição POST para a API usando axios
+      // Assumindo que a rota para criar chamados é '/chamados'
+      await api.post('/chamados', payload);
+
+      // Limpa o formulário e abre o modal de sucesso
       setModalAberto(true);
       setTitulo('');
       setDescricao('');
       setErros({});
     } catch (err) {
-      console.error(err);
-      alert('Erro ao enviar chamado, tente novamente.');
+      console.error("Erro ao criar chamado:", err);
+      // Extrai uma mensagem de erro mais amigável da resposta da API
+      const errorMessage = err.response?.data?.error || 'Erro ao enviar chamado, tente novamente.';
+      alert(errorMessage);
     }
   };
 
