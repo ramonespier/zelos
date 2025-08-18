@@ -6,6 +6,41 @@ import Usuario from '../entities/Usuario.js';
 const router = express.Router();
 
 router.post('/login', (req, res, next) => {
+
+  const { username, password } = req.body;
+
+  // Defina aqui as credenciais do seu usuário fixo
+  const DEV_USER = 'devuser';
+  const DEV_PASSWORD = 'password';
+
+  // Verificamos se as credenciais correspondem ao nosso usuário de desenvolvimento
+  if (username === DEV_USER && password === DEV_PASSWORD) {
+    console.log('>>> ATIVANDO MODO DE LOGIN DE DESENVOLVEDOR <<<');
+
+    // 1. Crie um objeto de usuário falso (mock).
+    // Ele deve ter a mesma estrutura que um usuário real do seu banco de dados.
+    const mockUsuario = {
+      id: '00000000-0000-0000-0000-000000000001', // Um UUID de exemplo
+      username: DEV_USER,
+      nome: 'Usuário Desenvolvedor',
+      email: 'dev@local.com',
+      funcao: 'usuario', // Dê a ele o perfil de admin para facilitar os testes
+    };
+
+    // 2. Gere o token para este usuário falso.
+    const token = AuthController.gerarToken(mockUsuario);
+
+    // 3. Envie a resposta de sucesso, exatamente como no fluxo normal.
+    return res.json({
+      message: 'Autenticado com sucesso (MODO DEV)',
+      user: {
+        ...mockUsuario, // Inclui todos os campos do mock
+        token
+      }
+    });
+  }
+
+
   passport.authenticate('ldapauth', { session: true }, async (err, user, info) => {
     try {
       if (err) {

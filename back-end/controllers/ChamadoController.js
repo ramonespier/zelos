@@ -1,5 +1,6 @@
 import Chamado from '../entities/Chamado.js';
 import Usuario from '../entities/Usuario.js';
+import Equipamento from '../entities/Equipamento.js';
 
 class ChamadoController {
 
@@ -43,38 +44,43 @@ class ChamadoController {
 
     static async criar(req, res) {
         try {
-            const { titulo, numero_patrimonio, descricao, pool_id, status } = req.body;
+            const { titulo, numero_patrimonio, descricao, pool_id } = req.body;
 
             if (!numero_patrimonio || !pool_id || !titulo || !descricao) {
                 return res.status(400).json({ message: 'Campos obrigatórios faltando.' });
             }
 
-            // verifica se já existe chamado aberto com mesmo patrimônio e pool
+            const equipamento = await Equipamento.findByPk(numero_patrimonio);
+            
+            if (!equipamento) {
+                return res.status(404).json({ message: `Equipamento com o patrimônio "${numero_patrimonio}" não foi encontrado.` });
+            }
+
+
             const chamadoExistente = await Chamado.findOne({
                 where: {
                     numero_patrimonio,
-                    pool_id,
                     status: 'aberto'
                 }
             });
 
             if (chamadoExistente) {
-                return res.status(400).json({ message: 'Já existe um chamado aberto para este número de patrimônio e tipo' });
+                return res.status(400).json({ message: 'Já existe um chamado aberto para este número de patrimônio' });
             }
 
             const chamado = await Chamado.create({
                 titulo,
                 numero_patrimonio,
                 descricao,
-                usuario_id: req.user.id, // pega do token
-                pool_id,
-                status: status || 'aberto'
+                usuario_id: req.user.id,
+                pool_id
             });
 
             res.status(201).json(chamado);
         } catch (err) {
+            
             console.error(err);
-            res.status(500).json({ message: 'Erro ao criar chamado' });
+            res.status(500).json({ message: 'Ocorreu um erro interno ao criar o chamado' });
         }
     }
     

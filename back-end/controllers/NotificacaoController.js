@@ -4,10 +4,10 @@ class NotificacaoController {
 
     static async listar(req, res) {
         try {
-            const usuario_id = req.user.id;
+            const usuario_id = req.user.id; 
             const notificacoes = await Notificacao.findAll({
                 where: { usuario_id },
-                order: [['created_at', 'DESC']]
+                order: [['criado_em', 'DESC']] 
             });
             res.json(notificacoes);
         } catch (err) {

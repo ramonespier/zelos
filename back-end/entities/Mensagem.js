@@ -12,7 +12,7 @@ Mensagem.init({
     },
     usuario_id: {
         type: DataTypes.CHAR(36),
-        allowNull: false,
+        allowNull: true, 
         references: { model: Usuario, key: "id" },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
@@ -28,20 +28,20 @@ Mensagem.init({
         type: DataTypes.TEXT,
         allowNull: false,
     },
-    respondida: {
+    lida: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
     },
 }, {
     sequelize,
     modelName: "Mensagem",
-    tableName: "mensagens",
+    tableName: "chat_mensagens", 
     timestamps: true,
     createdAt: "criado_em",
     updatedAt: false, 
 });
 
-Mensagem.belongsTo(Usuario, { foreignKey: "usuario_id", as: "usuario" });
+Mensagem.belongsTo(Usuario, { foreignKey: "usuario_id", as: "usuario" }); 
 Mensagem.belongsTo(Usuario, { foreignKey: "admin_id", as: "admin" });
 
 export default Mensagem;
