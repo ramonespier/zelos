@@ -5,5 +5,6 @@ export default function AdminPage() {
         <>
             <Dashboard/>
         </>
+        
     )
 }
