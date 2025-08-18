@@ -1,7 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import Cookies from 'js-cookie'; // Importa a biblioteca para ler cookies. [1]
+import { jwtDecode } from 'jwt-decode'; // Importa a biblioteca para decodificar o token. [3]
 import Sidebar from './Slidebar';
 import Header from './Header';
 import Inicio from '../Inicio/Inicio';
@@ -14,9 +17,38 @@ import ProfileInfo from './ProfileInfo';
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('inicio');
   const [notifications, setNotifications] = useState([]);
-  const funcionario = { nome: 'Ana Carollini Rossi', funcao: 'usuário', matricula: '24250000' };
+  // O estado 'funcionario' agora começa como null e será preenchido com os dados do token.
+  const [funcionario, setFuncionario] = useState(null); 
+  const router = useRouter();
 
-  // Mock notificações
+  // Efeito para ler o token do cookie e definir as informações do usuário
+  useEffect(() => {
+    const token = Cookies.get('token'); // Busca o token no cookie. [2, 4]
+
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token); // Decodifica o token. [3]
+        
+        // Mapeia os dados do token para o formato esperado pelo estado 'funcionario'
+        setFuncionario({
+          nome: decodedToken.nome,
+          funcao: decodedToken.funcao,
+          matricula: decodedToken.username, // Assumindo que o 'username' do token é a matrícula
+        });
+        
+      } catch (error) {
+        console.error("Token inválido ou expirado:", error);
+        // Se o token for inválido, redireciona para a página de login
+        router.push('/login');
+      }
+    } else {
+      // Se não houver token, redireciona para o login
+      console.log("Nenhum token encontrado, redirecionando para login.");
+      router.push('/login');
+    }
+  }, [router]); // Adiciona 'router' como dependência
+
+  // Mock de notificações (mantido como estava)
   useEffect(() => {
     const mockNotifications = [
       { id: 1, title: 'Novo chamado criado', message: 'Você abriu o chamado #1024.', time: '10 min atrás', read: false },
@@ -25,7 +57,15 @@ export default function Dashboard() {
     setNotifications(mockNotifications);
   }, []);
 
-  const getInitials = (name) => name.split(' ').map(n => n[0]).join('').toUpperCase();
+  const getInitials = (name) => {
+    if (!name) return '';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  // Enquanto os dados do funcionário não são carregados, exibe uma mensagem ou tela de loading.
+  if (!funcionario) {
+    return <div>Carregando informações do usuário...</div>;
+  }
 
   const renderContent = () => {
     switch(activeTab) {
@@ -54,7 +94,8 @@ export default function Dashboard() {
           notifications={notifications}
           marcarComoLida={marcarComoLida}
           unreadNotificationsCount={unreadNotificationsCount}
-          funcionario={funcionario}
+          // Os dados do funcionário agora vêm do estado
+          funcionario={funcionario} 
           getInitials={getInitials}
         />
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">

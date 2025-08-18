@@ -1,33 +1,64 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PoolCard from './PoolCard';
 import PoolFiltros from './PoolFitros';
+import api from '../../../lib/api'; // Importe a instância do axios
 
-// --- DADOS DE EXEMPLO ---
-const poolsExemplo = [
-  { id: 1, titulo: 'manutencao', descricao: 'Problema no sistema de ar-condicionado da sala 203', status: 'aguardando aprovacao', criado_em: '2025-08-15T09:30:00', usuario_id: 'user1' },
-  { id: 2, titulo: 'limpeza', descricao: 'Necessária limpeza especial no laboratório de química', status: 'ativo', criado_em: '2025-08-10T14:15:00', usuario_id: 'user2' },
-  { id: 3, titulo: 'apoio_tecnico', descricao: 'Configuração de novos equipamentos na recepção', status: 'rejeitado', criado_em: '2025-08-01T08:00:00', usuario_id: 'user3' },
-  { id: 4, titulo: 'manutencao', descricao: 'Lâmpada queimada no corredor principal, próximo à biblioteca.', status: 'ativo', criado_em: '2025-08-16T11:00:00', usuario_id: 'user4' },
-  { id: 5, titulo: 'outro', descricao: 'Solicitação de compra de novas cadeiras para a sala de estudos.', status: 'aguardando aprovacao', criado_em: '2025-08-14T16:45:00', usuario_id: 'user5' }
-];
-
+// Configuração de status (sem alterações)
 const statusConfig = {
   'aguardando aprovacao': { label: 'Aguardando', classes: 'bg-yellow-100 text-yellow-800' },
   'ativo': { label: 'Ativo', classes: 'bg-green-100 text-green-800' },
   'rejeitado': { label: 'Rejeitado', classes: 'bg-red-100 text-red-800' }
 };
 
-export default function MinhasPools() {
+// Recebe o objeto 'funcionario' como prop
+export default function MinhasPools({ funcionario }) {
+  const [chamados, setChamados] = useState([]);
   const [filtroStatus, setFiltroStatus] = useState('Todos');
   const [termoBusca, setTermoBusca] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const poolsFiltradas = poolsExemplo.filter(pool => {
+  // useEffect para buscar os dados da API quando o componente carregar
+  useEffect(() => {
+    if (funcionario && funcionario.id) {
+      const fetchChamados = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+          // Busca os chamados do usuário logado na API.
+          // Sua API precisa ter uma rota como '/chamados/usuario/ID_DO_USUARIO'
+          const response = await api.get(`/chamados/usuario/${funcionario.id}`);
+          setChamados(response.data);
+        } catch (err) {
+          console.error("Erro ao buscar chamados:", err);
+          setError("Não foi possível carregar seus chamados. Tente novamente mais tarde.");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchChamados();
+    }
+  }, [funcionario]); // Roda novamente se o objeto funcionario mudar
+
+  // A lógica de filtragem agora usa os dados reais do estado 'chamados'
+  const poolsFiltradas = chamados.filter(pool => {
     const correspondeStatus = filtroStatus === 'Todos' || pool.status === filtroStatus;
-    const correspondeBusca = termoBusca === '' || pool.descricao.toLowerCase().includes(termoBusca.toLowerCase());
+    const correspondeBusca = termoBusca === '' || 
+      pool.descricao.toLowerCase().includes(termoBusca.toLowerCase()) ||
+      pool.titulo.toLowerCase().includes(termoBusca.toLowerCase());
     return correspondeStatus && correspondeBusca;
   });
+  
+  // Tratamento de UI para estados de carregamento e erro
+  if (isLoading) {
+    return <div className="text-center py-20 font-semibold text-gray-600">Carregando seus chamados...</div>
+  }
+
+  if (error) {
+     return <div className="text-center py-20 font-semibold text-red-600">{error}</div>
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-10">
@@ -55,7 +86,7 @@ export default function MinhasPools() {
           ) : (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
               <h3 className="mt-2 text-lg font-semibold text-gray-800">Nenhuma pool encontrada</h3>
-              <p className="mt-1 text-sm text-gray-500">Tente ajustar seus filtros ou limpar a busca.</p>
+              <p className="mt-1 text-sm text-gray-500">Tente ajustar seus filtros ou você ainda não abriu um chamado.</p>
             </motion.div>
           )}
         </AnimatePresence>

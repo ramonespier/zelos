@@ -2,6 +2,8 @@
 
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation'; // Importe o useRouter
+import Cookies from 'js-cookie'; // Importe o js-cookie
 import { Bars3Icon } from '@heroicons/react/24/outline';
 import Notifications from './Notifications';
 import ProfileDropdown from './ProfileDropdown';
@@ -20,6 +22,13 @@ export default function Header({
   const [isNotificationsOpen, setNotificationsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const notificationsRef = useRef(null);
+  const router = useRouter(); // Inicialize o router
+
+  // Função que remove o cookie e redireciona para a página de login
+  const handleLogout = () => {
+    Cookies.remove('token'); // Remove o cookie de autenticação. [1, 2]
+    router.push('/login'); // Redireciona o usuário para a tela de login
+  };
 
   const tabs = [
     { id: 'inicio', label: 'Início' },
@@ -68,6 +77,7 @@ export default function Header({
           setProfileOpen={setProfileOpen}
           handleSelecao={handleSelecao}
           dropdownRef={dropdownRef}
+          handleLogout={handleLogout} // Passe a função de logout para o componente do dropdown
         />
       </div>
 

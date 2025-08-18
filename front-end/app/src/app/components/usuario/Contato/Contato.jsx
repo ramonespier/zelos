@@ -3,11 +3,13 @@ import { useState } from 'react';
 import FormularioContato from './FormularioContato';
 import ModalSucesso from './ModalSucess';
 
-export default function Contato() {
+// Recebe a prop 'funcionario' do Dashboard
+export default function Contato({ funcionario }) {
   const [modalAberto, setModalAberto] = useState(false);
 
   return (
     <>
+      {/* Passa o objeto 'funcionario' para o componente do formulário */}
       <FormularioContato abrirModal={() => setModalAberto(true)} />
       <ModalSucesso aberto={modalAberto} fecharModal={() => setModalAberto(false)} />
     </>
