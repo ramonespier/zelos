@@ -1,54 +1,85 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic'; // Importa a função 'dynamic' do Next.js
 import ChamadoForm from './ChamadoForm';
-import ModalSucesso from './ModalSucesso';
-import api from '../../../lib/api'; // Importe a instância centralizada do axios
+import api from '../../../lib/api'; // Ajuste o caminho para a sua API se necessário
 
-// Recebe o objeto 'funcionario' do componente pai (Dashboard)
+// Importa dinamicamente o ModalSucesso para evitar o erro de hidratação do Next.js
+// A opção { ssr: false } garante que ele só será renderizado no navegador
+const ModalSucesso = dynamic(() => import('./ModalSucesso'), { ssr: false });
+
 export default function Chamado({ funcionario }) {
+  // Estados para os campos do formulário
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
+  const [patrimonio, setPatrimonio] = useState('');
+  const [poolId, setPoolId] = useState('');
+  
+  // Estados para as opções do dropdown e seu carregamento
+  const [poolOptions, setPoolOptions] = useState([]);
+  const [isLoadingPools, setIsLoadingPools] = useState(true);
+
+  // Estados de controle da UI
   const [erros, setErros] = useState({});
   const [modalAberto, setModalAberto] = useState(false);
 
-  // Lógica de validação do formulário (sem alterações)
+  // Busca as opções de 'Pool' da API assim que o componente é montado
+  useEffect(() => {
+    const fetchPools = async () => {
+      try {
+        const response = await api.get('/pools');
+        const ativas = response.data.filter(pool => pool.status === 'ativo');
+        setPoolOptions(ativas);
+      } catch (error) {
+        console.error("Falha ao buscar as pools:", error);
+      } finally {
+        setIsLoadingPools(false); // Finaliza o carregamento, com ou sem erro
+      }
+    };
+    fetchPools();
+  }, []); // O array vazio [] faz com que este useEffect execute apenas uma vez
+
+  // Função para validar o formulário antes do envio
   const validarFormulario = () => {
     const newErros = {};
     if (titulo.trim().length < 5) newErros.titulo = 'Título precisa ter ao menos 5 caracteres.';
     if (descricao.trim().length < 10) newErros.descricao = 'Descrição precisa ter ao menos 10 caracteres.';
+    if (!patrimonio.trim()) newErros.patrimonio = 'O número de patrimônio é obrigatório.';
+    if (!poolId) newErros.poolId = 'Selecione um tipo de solicitação.';
     setErros(newErros);
     return Object.keys(newErros).length === 0;
   };
 
+  // Função para enviar os dados para a API
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validarFormulario()) return;
+    if (!funcionario || !funcionario.id) {
+      alert("Sua sessão é inválida. Por favor, faça o login novamente.");
+      return;
+    }
 
-    // Prepara o payload com os dados do chamado e do usuário logado
     const payload = {
       titulo,
       descricao,
-      usuario_id: funcionario.id,
-      created_by: funcionario.id,
-      updated_by: funcionario.id
+      numero_patrimonio: patrimonio,
+      pool_id: parseInt(poolId, 10),
     };
 
     try {
-      // Faz a requisição POST para a API usando axios
-      // Assumindo que a rota para criar chamados é '/chamados'
       await api.post('/chamados', payload);
-
-      // Limpa o formulário e abre o modal de sucesso
       setModalAberto(true);
+      // Limpa os campos do formulário após o sucesso
       setTitulo('');
       setDescricao('');
+      setPatrimonio('');
+      setPoolId('');
       setErros({});
     } catch (err) {
       console.error("Erro ao criar chamado:", err);
-      // Extrai uma mensagem de erro mais amigável da resposta da API
-      const errorMessage = err.response?.data?.error || 'Erro ao enviar chamado, tente novamente.';
+      const errorMessage = err.response?.data?.message || 'Ocorreu um erro ao enviar o chamado.';
       alert(errorMessage);
     }
   };
@@ -64,17 +95,21 @@ export default function Chamado({ funcionario }) {
         <h2 className="text-4xl font-extrabold mb-10 text-red-600 text-center tracking-wide drop-shadow-sm">
           Solicitar Novo Chamado
         </h2>
-
+        
+        {/* Passa todas as props necessárias para o componente do formulário */}
         <ChamadoForm
-          titulo={titulo}
-          setTitulo={setTitulo}
-          descricao={descricao}
-          setDescricao={setDescricao}
+          titulo={titulo} setTitulo={setTitulo}
+          descricao={descricao} setDescricao={setDescricao}
+          patrimonio={patrimonio} setPatrimonio={setPatrimonio}
+          poolId={poolId} setPoolId={setPoolId}
+          poolOptions={poolOptions}
+          isLoadingPools={isLoadingPools}
           erros={erros}
           handleSubmit={handleSubmit}
         />
       </motion.div>
 
+      {/* Renderiza o modal (somente no navegador) */}
       <ModalSucesso aberto={modalAberto} onFechar={() => setModalAberto(false)} />
     </>
   );

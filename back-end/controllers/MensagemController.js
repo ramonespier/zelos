@@ -14,7 +14,7 @@ class MensagemController {
             }
 
             const mensagem = await Mensagem.create({
-                remetente_id: usuario_id,
+                usuario_id: usuario_id,
                 conteudo,
                 status: 'não lida'
             });
@@ -30,7 +30,7 @@ class MensagemController {
     static async listar(req, res) {
         try {
             const mensagens = await Mensagem.findAll({
-                include: ['remetente'],
+                include: ['usuario'],
                 order: [['created_at', 'DESC']]
             });
             res.json(mensagens);
@@ -44,7 +44,7 @@ class MensagemController {
     static async buscarPorId(req, res) {
         try {
             const { id } = req.params;
-            const mensagem = await Mensagem.findByPk(id, { include: ['remetente'] });
+            const mensagem = await Mensagem.findByPk(id, { include: ['usuario'] });
 
             if (!mensagem) {
                 return res.status(404).json({ message: 'Mensagem não encontrada' });

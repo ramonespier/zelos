@@ -2,32 +2,44 @@
 
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter } from 'next/navigation'; // Importe o useRouter
-import Cookies from 'js-cookie'; // Importe o js-cookie
 import { Bars3Icon } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
+
+// Importa os componentes filhos que este Header utiliza
 import Notifications from './Notifications';
 import ProfileDropdown from './ProfileDropdown';
 
 export default function Header({
+  // Props para navegação
   activeTab,
   setActiveTab,
+
+  // Props com os dados do usuário logado
+  funcionario,
+  getInitials,
+  
+  // Props para a funcionalidade de notificações
   notifications,
   marcarComoLida,
+  limparTodasNotificacoes,
   unreadNotificationsCount,
-  funcionario,
-  getInitials
 }) {
+  // Estados para controlar a visibilidade dos menus
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [isNotificationsOpen, setNotificationsOpen] = useState(false);
+  
+  // Refs para fechar os menus ao clicar fora
   const dropdownRef = useRef(null);
   const notificationsRef = useRef(null);
-  const router = useRouter(); // Inicialize o router
 
-  // Função que remove o cookie e redireciona para a página de login
+  const router = useRouter();
+
+  // Função para fazer o logout do usuário
   const handleLogout = () => {
-    Cookies.remove('token'); // Remove o cookie de autenticação. [1, 2]
-    router.push('/login'); // Redireciona o usuário para a tela de login
+    Cookies.remove('token');
+    router.push('/login');
   };
 
   const tabs = [
@@ -37,16 +49,16 @@ export default function Header({
     { id: 'contato', label: 'Contato' },
     { id: 'info', label: 'Perfil' },
   ];
-
+  
   const handleSelecao = (opcao) => setActiveTab(opcao);
 
   return (
     <header className="bg-gradient-to-r from-gray-50 via-white to-gray-50 shadow-md h-20 flex items-center justify-between px-6 lg:px-10 z-50 sticky top-0 backdrop-blur-sm">
-      {/* Esquerda: Botão mobile + título */}
+      {/* Lado Esquerdo: Botão mobile e Título da Página Ativa */}
       <div className="flex items-center space-x-4">
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
+        <motion.button 
+          whileTap={{ scale: 0.9 }} 
+          onClick={() => setMobileMenuOpen(!isMobileMenuOpen)} 
           className="lg:hidden p-2 rounded-xl text-gray-600 hover:bg-gray-200 transition"
         >
           <Bars3Icon className="w-7 h-7" />
@@ -56,20 +68,24 @@ export default function Header({
         </h2>
       </div>
 
-      {/* Direita: Notificações + perfil */}
+      {/* Lado Direito: Notificações e Menu do Perfil */}
       <div className="flex items-center space-x-6">
+        
+        {/* Componente de Notificações */}
         <Notifications
           notifications={notifications}
           marcarComoLida={marcarComoLida}
+          limparTodasNotificacoes={limparTodasNotificacoes}
           unreadNotificationsCount={unreadNotificationsCount}
           isNotificationsOpen={isNotificationsOpen}
           setNotificationsOpen={setNotificationsOpen}
           notificationsRef={notificationsRef}
         />
 
-        {/* Separador discreto */}
+        {/* Separador vertical */}
         <span className="hidden lg:block w-px h-6 bg-gray-300"></span>
 
+        {/* Componente do Perfil do Usuário */}
         <ProfileDropdown
           funcionario={funcionario}
           getInitials={getInitials}
@@ -77,11 +93,11 @@ export default function Header({
           setProfileOpen={setProfileOpen}
           handleSelecao={handleSelecao}
           dropdownRef={dropdownRef}
-          handleLogout={handleLogout} // Passe a função de logout para o componente do dropdown
+          handleLogout={handleLogout}
         />
       </div>
 
-      {/* Menu mobile animado */}
+      {/* Menu Mobile Dropdown (renderizado condicionalmente) */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.nav

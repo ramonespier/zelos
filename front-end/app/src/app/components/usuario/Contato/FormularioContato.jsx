@@ -1,26 +1,19 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaPaperPlane } from 'react-icons/fa';
-import api from '../../../lib/api'; 
+import api from '../../../lib/api'; // Verifique o caminho para sua API
 
 export default function FormularioContato({ abrirModal, funcionario }) {
   const [titulo, setTitulo] = useState('');
-  const [email, setEmail] = useState('');
+  // O e-mail não será enviado ao backend, mas mantemos para a UI se necessário
+  const [email, setEmail] = useState(''); 
   const [mensagem, setMensagem] = useState('');
   const [erros, setErros] = useState({});
-
-  useEffect(() => {
-    if (funcionario && funcionario.email) {
-      setEmail(funcionario.email);
-    }
-  }, [funcionario]);
 
   const validarFormulario = () => {
     const newErros = {};
     if (titulo.trim().length < 5) newErros.titulo = 'O título precisa ter ao menos 5 caracteres.';
-    if (!email.trim()) newErros.email = 'O email é obrigatório.';
-    else if (!/\S+@\S+\.\S+/.test(email)) newErros.email = 'Formato de email inválido.';
     if (mensagem.trim().length < 10) newErros.mensagem = 'A mensagem precisa ter ao menos 10 caracteres.';
     setErros(newErros);
     return Object.keys(newErros).length === 0;
@@ -30,33 +23,29 @@ export default function FormularioContato({ abrirModal, funcionario }) {
     e.preventDefault();
     if (!validarFormulario()) return;
 
-    // --- CORREÇÃO ADICIONADA AQUI ---
-    // Verifica se o objeto 'funcionario' e seu 'id' existem antes de prosseguir.
     if (!funcionario || !funcionario.id) {
-      console.error("Erro: Informações do usuário não carregadas. O submit foi bloqueado.");
-      alert("Não foi possível identificar o usuário. Por favor, recarregue a página e tente novamente.");
-      return; // Interrompe a execução da função.
+        alert("Sua sessão parece inválida. Por favor, faça o login novamente.");
+        return;
     }
-    // --- FIM DA CORREÇÃO ---
 
+    // Payload formatado para o que o MensagemController.criar espera
     const payload = {
-      titulo,
-      email,
-      mensagem,
-      remetente_id: funcionario.id // Esta linha agora é segura.
+      conteudo: `Assunto: ${titulo}\n\nEmail para contato: ${email}\n\nMensagem:\n${mensagem}`
     };
-    
+
     try {
+      // Endpoint correto: POST /mensagens
       await api.post('/mensagens', payload);
 
       abrirModal();
       setTitulo('');
-      setEmail(funcionario.email);
+      setEmail('');
       setMensagem('');
       setErros({});
     } catch (err) {
       console.error("Erro ao enviar mensagem:", err);
-      const errorMessage = err.response?.data?.error || 'Não foi possível enviar a mensagem.';
+      // O seu backend retorna um objeto { message: '...' }
+      const errorMessage = err.response?.data?.message || 'Não foi possível enviar a mensagem.';
       alert(errorMessage);
     }
   };
@@ -71,6 +60,7 @@ export default function FormularioContato({ abrirModal, funcionario }) {
           Formulário de Contato
         </h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-8" noValidate>
+          {/* Título */}
           <label className="flex flex-col text-gray-800 font-semibold relative">
             <span className="mb-2">Título</span>
             <input
@@ -78,39 +68,23 @@ export default function FormularioContato({ abrirModal, funcionario }) {
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               placeholder="Assunto principal"
-              className={`mt-1 p-4 border rounded-lg focus:outline-none focus:ring-4 focus:ring-red-400 transition shadow-sm ${
-                erros.titulo ? 'border-red-500 ring-red-400' : 'border-gray-300'
-              }`}
-              aria-invalid={!!erros.titulo}
-              aria-describedby="error-titulo"
+              className={`mt-1 p-4 border rounded-lg focus:outline-none focus:ring-4 focus:ring-red-400 transition shadow-sm ${erros.titulo ? 'border-red-500 ring-red-400' : 'border-gray-300'}`}
             />
-            {erros.titulo && (
-              <p id="error-titulo" className="text-red-600 mt-1 text-sm font-medium absolute bottom-[-1.5rem] left-0">
-                {erros.titulo}
-              </p>
-            )}
+            {erros.titulo && <p className="text-red-600 mt-1 text-sm font-medium absolute bottom-[-1.5rem] left-0">{erros.titulo}</p>}
           </label>
-
+          {/* Email */}
           <label className="flex flex-col text-gray-800 font-semibold relative">
-            <span className="mb-2">Email</span>
+            <span className="mb-2">Seu Email para Contato</span>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="seu.email@exemplo.com"
-              className={`mt-1 p-4 border rounded-lg focus:outline-none focus:ring-4 focus:ring-red-400 transition shadow-sm ${
-                erros.email ? 'border-red-500 ring-red-400' : 'border-gray-300'
-              }`}
-              aria-invalid={!!erros.email}
-              aria-describedby="error-email"
+              required
+              className={`mt-1 p-4 border rounded-lg focus:outline-none focus:ring-4 focus:ring-red-400 transition shadow-sm`}
             />
-            {erros.email && (
-              <p id="error-email" className="text-red-600 mt-1 text-sm font-medium absolute bottom-[-1.5rem] left-0">
-                {erros.email}
-              </p>
-            )}
           </label>
-
+          {/* Mensagem */}
           <label className="flex flex-col text-gray-800 font-semibold relative">
             <span className="mb-2">Mensagem</span>
             <textarea
@@ -118,17 +92,9 @@ export default function FormularioContato({ abrirModal, funcionario }) {
               onChange={(e) => setMensagem(e.target.value)}
               placeholder="Digite sua mensagem detalhada aqui"
               rows={6}
-              className={`mt-1 p-4 border rounded-lg resize-y focus:outline-none focus:ring-4 focus:ring-red-400 transition shadow-sm ${
-                erros.mensagem ? 'border-red-500 ring-red-400' : 'border-gray-300'
-              }`}
-              aria-invalid={!!erros.mensagem}
-              aria-describedby="error-mensagem"
+              className={`mt-1 p-4 border rounded-lg resize-y focus:outline-none focus:ring-4 focus:ring-red-400 transition shadow-sm ${erros.mensagem ? 'border-red-500 ring-red-400' : 'border-gray-300'}`}
             />
-            {erros.mensagem && (
-              <p id="error-mensagem" className="text-red-600 mt-1 text-sm font-medium absolute bottom-[-1.5rem] left-0">
-                {erros.mensagem}
-              </p>
-            )}
+            {erros.mensagem && <p className="text-red-600 mt-1 text-sm font-medium absolute bottom-[-1.5rem] left-0">{erros.mensagem}</p>}
           </label>
           <button
             type="submit"

@@ -3,8 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import Cookies from 'js-cookie'; // Importa a biblioteca para ler cookies. [1]
-import { jwtDecode } from 'jwt-decode'; // Importa a biblioteca para decodificar o token. [3]
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+// API para fazer requisições
+import api from '../../../lib/api'; // Ajuste o caminho se necessário
+
+// Todos os seus componentes de layout e páginas
 import Sidebar from './Slidebar';
 import Header from './Header';
 import Inicio from '../Inicio/Inicio';
@@ -15,89 +20,132 @@ import Contato from '../Contato/Contato';
 import ProfileInfo from './ProfileInfo';
 
 export default function Dashboard() {
+  // === ESTADOS DO COMPONENTE ===
+  
+  // Navegação
   const [activeTab, setActiveTab] = useState('inicio');
+
+  // Autenticação e Dados do Usuário
+  const [funcionario, setFuncionario] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // Controla o "Carregando..." inicial
+
+  // Notificações
   const [notifications, setNotifications] = useState([]);
-  // O estado 'funcionario' agora começa como null e será preenchido com os dados do token.
-  const [funcionario, setFuncionario] = useState(null); 
+
   const router = useRouter();
 
-  // Efeito para ler o token do cookie e definir as informações do usuário
+  // === LÓGICA DE AUTENTICAÇÃO === (Seu código original, restaurado)
   useEffect(() => {
-    const token = Cookies.get('token'); // Busca o token no cookie. [2, 4]
-
+    const token = Cookies.get('token');
     if (token) {
       try {
-        const decodedToken = jwtDecode(token); // Decodifica o token. [3]
-        
-        // Mapeia os dados do token para o formato esperado pelo estado 'funcionario'
+        const decodedToken = jwtDecode(token);
         setFuncionario({
+          id: decodedToken.id,
           nome: decodedToken.nome,
           funcao: decodedToken.funcao,
-          matricula: decodedToken.username, // Assumindo que o 'username' do token é a matrícula
+          email: decodedToken.email,
+          matricula: decodedToken.username,
         });
-        
       } catch (error) {
-        console.error("Token inválido ou expirado:", error);
-        // Se o token for inválido, redireciona para a página de login
+        console.error("Token inválido ou expirado, redirecionando:", error);
+        Cookies.remove('token');
         router.push('/login');
       }
     } else {
-      // Se não houver token, redireciona para o login
-      console.log("Nenhum token encontrado, redirecionando para login.");
       router.push('/login');
     }
-  }, [router]); // Adiciona 'router' como dependência
+    setIsLoading(false); // Finaliza o carregamento após verificar o token
+  }, [router]);
 
-  // Mock de notificações (mantido como estava)
+  // === LÓGICA DE NOTIFICAÇÕES (Polling) ===
   useEffect(() => {
-    const mockNotifications = [
-      { id: 1, title: 'Novo chamado criado', message: 'Você abriu o chamado #1024.', time: '10 min atrás', read: false },
-      { id: 2, title: 'Chamado atualizado', message: 'O chamado #1001 está "Em Andamento".', time: '2 horas atrás', read: true },
-    ];
-    setNotifications(mockNotifications);
-  }, []);
+    if (!funcionario) return; // Só busca notificações se o login foi bem-sucedido
 
-  const getInitials = (name) => {
-    if (!name) return '';
+    const fetchNotifications = async () => {
+      try {
+        const response = await api.get('/notificacao');
+        setNotifications(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar notificações:", error);
+      }
+    };
+
+    fetchNotifications(); // Busca na primeira vez que o componente carrega
+    const intervalId = setInterval(fetchNotifications, 10000); // E busca a cada 10 segundos
+
+    return () => clearInterval(intervalId); // Limpa o intervalo ao sair da página
+  }, [funcionario]); // Roda essa lógica sempre que 'funcionario' for definido
+
+  // === FUNÇÕES AUXILIARES ===
+
+  // Função para pegar as iniciais do nome
+  const getInitials = (name = '') => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
-  // Enquanto os dados do funcionário não são carregados, exibe uma mensagem ou tela de loading.
+  // Funções para manipular as notificações (passadas para o Header)
+  const marcarComoLida = async (notificationId) => {
+    const notification = notifications.find(n => n.id === notificationId);
+    if (!notification || notification.lida) return;
+    setNotifications(prev => prev.map(n => (n.id === notificationId ? { ...n, lida: true } : n)));
+    // (A chamada à API ficaria aqui)
+  };
+
+  const limparTodasNotificacoes = async () => {
+    const originalNotifications = [...notifications];
+    setNotifications([]);
+    try {
+      await api.delete('/notificacao');
+    } catch (error) {
+      console.error("Erro ao limpar notificações:", error);
+      setNotifications(originalNotifications);
+    }
+  };
+
+  // === RENDERIZAÇÃO ===
+
+  // Tela de "Carregando..." enquanto o token está sendo verificado
+  if (isLoading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Verificando autenticação...</div>;
+  }
+  
+  // Se, após o carregamento, não houver um usuário válido, não renderiza nada (pois o redirect já foi acionado)
   if (!funcionario) {
-    return <div>Carregando informações do usuário...</div>;
+    return null;
   }
 
+  // Função para renderizar a aba de conteúdo ativa (Seu código original, restaurado)
   const renderContent = () => {
     switch(activeTab) {
       case 'inicio': return <><Inicio onAbrirChamado={() => setActiveTab('chamado')} /><InstrucoesRapidas /></>;
-      case 'chamado': return <Chamado />;
-      case 'meus': return <MeusChamados />;
-      case 'contato': return <Contato />;
+      case 'chamado': return <Chamado funcionario={funcionario} />;
+      case 'meus': return <MeusChamados funcionario={funcionario} />;
+      case 'contato': return <Contato funcionario={funcionario} />;
       case 'info': return <ProfileInfo funcionario={funcionario} getInitials={getInitials} />;
       default: return null;
     }
   };
 
-  const marcarComoLida = (id) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-  };
-
-  const unreadNotificationsCount = notifications.filter(n => !n.read).length;
-
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
+      {/* Componente da barra lateral */}
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Componente do Cabeçalho, agora alimentado com todos os dados */}
         <Header
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           notifications={notifications}
           marcarComoLida={marcarComoLida}
-          unreadNotificationsCount={unreadNotificationsCount}
-          // Os dados do funcionário agora vêm do estado
-          funcionario={funcionario} 
+          limparTodasNotificacoes={limparTodasNotificacoes}
+          unreadNotificationsCount={notifications.filter(n => !n.lida).length}
+          funcionario={funcionario}
           getInitials={getInitials}
         />
+        
+        {/* Conteúdo principal da página */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
           <AnimatePresence mode="wait">
             <motion.div

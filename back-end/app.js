@@ -34,7 +34,7 @@ try {
       secret: 'sJYMmuCB2Z187XneUuaOVYTVUlxEOb2K94tFZy370HjOY7T7aiCKvwhNQpQBYL9e',
       resave: false,
       saveUninitialized: false,
-      cookie: { secure: false }
+      cookie: { secure: process.env.NODE_ENV === 'production' }
     }));
   
     // 4. Inicialização segura do Passport
