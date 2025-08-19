@@ -2,11 +2,10 @@
 import { motion } from 'framer-motion';
 import { Calendar, Tag, User, Wrench, SprayCan, CircleHelp } from 'lucide-react';
 
-
 const statusConfig = {
-  'aguardando aprovacao': { label: 'Aguardando', classes: 'bg-yellow-100 text-yellow-800' },
-  'ativo': { label: 'Ativo', classes: 'bg-green-100 text-green-800' },
-  'rejeitado': { label: 'Rejeitado', classes: 'bg-red-100 text-red-800' }
+  'aberto': { label: 'Aberto', classes: 'bg-blue-100 text-blue-800' },
+  'em andamento': { label: 'Em Andamento', classes: 'bg-yellow-100 text-yellow-800' },
+  'concluido': { label: 'Concluído', classes: 'bg-green-100 text-green-800' }
 };
 
 const tituloConfig = {
@@ -17,9 +16,16 @@ const tituloConfig = {
   'outro': { label: 'Outro', icon: <CircleHelp size={18} /> }
 };
 
-export default function PoolCard({ pool }) {
-  const { label, classes } = statusConfig[pool.status];
-  const { label: tituloLabel, icon: tituloIcon } = tituloConfig[pool.titulo];
+// <<< CORREÇÃO PRINCIPAL AQUI >>>
+// Agora o componente recebe a prop 'chamado' de forma clara
+export default function PoolCard({ chamado }) {
+  // Verificação de segurança: se por algum motivo o chamado não chegar, não quebra a página
+  if (!chamado) {
+    return null; // ou um card de erro/carregamento
+  }
+
+  const { label, classes } = statusConfig[chamado.status] || { label: 'Desconhecido', classes: 'bg-gray-100 text-gray-800'};
+  const { label: tituloLabel, icon: tituloIcon } = tituloConfig[chamado.pool?.titulo] || tituloConfig.outro;
 
   return (
     <motion.div
@@ -40,16 +46,17 @@ export default function PoolCard({ pool }) {
             {label}
           </div>
         </header>
-        <p className="text-sm text-gray-600 leading-relaxed">{pool.descricao}</p>
+        <p className="font-semibold text-gray-800 mb-2">{chamado.titulo}</p>
+        <p className="text-sm text-gray-600 leading-relaxed">{chamado.descricao}</p>
       </div>
       <footer className="bg-gray-50/70 border-t border-gray-200/80 px-5 py-3 text-xs text-gray-500 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Calendar size={14} />
-          <span>{new Date(pool.criado_em).toLocaleDateString('pt-BR')}</span>
+          <span>{new Date(chamado.criado_em).toLocaleDateString('pt-BR')}</span>
         </div>
         <div className="flex items-center gap-2">
           <Tag size={14} />
-          <span>ID: {pool.id}</span>
+          <span>Chamado ID: {chamado.id}</span>
         </div>
       </footer>
     </motion.div>

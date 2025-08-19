@@ -7,6 +7,10 @@ const router = express.Router();
 const autorizar = new Autorizar();
 
 const permitir = (perfisPermitidos) => (req, res, next) => {
+
+    if (!req.user) {
+        return res.status(401).json({ message: 'Acesso negado. O token não foi verificado ou é inválido.' });
+    }
     return autorizar.autorizacao(req.user, perfisPermitidos)(req, res, next);
 }
 
