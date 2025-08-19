@@ -3,12 +3,17 @@ import { motion } from 'framer-motion';
 import { UserCircleIcon, CalendarIcon, EyeIcon, PlusCircleIcon } from '@heroicons/react/24/outline';
 
 const formatarData = (dataString) => {
+    if (!dataString) return 'Data indisponível';
     const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
     const formatted = new Date(dataString).toLocaleDateString('pt-BR', options);
     return formatted.replace(',', ' às');
 };
 
 export default function ChamadoCard({ chamado, onVerDetalhes, onAbrirApontamento }) {
+    // Mapeamento de dados da API para o JSX, com valores padrão para evitar erros
+    const usuarioNome = chamado.usuario?.nome || "Solicitante anônimo";
+    const imagemUrl = chamado.img_url || "/placeholder-image.png"; // Usar um placeholder se a imagem não existir
+
     return (
         <motion.div
             layout
@@ -21,16 +26,17 @@ export default function ChamadoCard({ chamado, onVerDetalhes, onAbrirApontamento
         >
             <div className="h-48 overflow-hidden cursor-pointer" onClick={onVerDetalhes}>
                 <img
-                    src={chamado.imagem}
+                    src={imagemUrl}
                     alt={chamado.titulo}
                     className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                     loading="lazy"
+                    onError={(e) => { e.currentTarget.src = "/placeholder-image.png"; }} // Fallback se a imagem falhar
                 />
             </div>
 
             <div className="p-5 flex flex-col flex-1">
                 <span className="inline-block bg-red-100 text-red-700 text-xs font-semibold px-2.5 py-1 rounded-full mb-3 self-start">
-                    Patrimônio: {chamado.patrimonio}
+                    Patrimônio: {chamado.numero_patrimonio}
                 </span>
 
                 <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">{chamado.titulo}</h2>
@@ -38,11 +44,11 @@ export default function ChamadoCard({ chamado, onVerDetalhes, onAbrirApontamento
                 <div className="space-y-2 text-sm text-gray-500 mb-4 flex-grow">
                     <div className="flex items-center gap-3">
                         <UserCircleIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                        <span className="truncate">{chamado.usuario}</span>
+                        <span className="truncate">{usuarioNome}</span>
                     </div>
                     <div className="flex items-center gap-3">
                         <CalendarIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                        <span className="truncate">{formatarData(chamado.data_abertura)}</span>
+                        <span className="truncate">{formatarData(chamado.criado_em)}</span>
                     </div>
                 </div>
 
