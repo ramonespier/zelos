@@ -8,13 +8,14 @@ import Inicio from '../Inicio/Inicio';
 import GerenciarChamados from '../GerenciarChamados/GerenciarChamados';
 import ChamadosAtribuidos from '../ChamadosAtribuidos/ChamadosAtribuidos'
 import Relatorio from '../Relatorios/Relatorios'
-import AbrirChamado from '../AbrirChamado/AbrirChamado'
+import AbrirChamado from '../AbrirChamado/Chamado'
+import Mensagens from '../Contato/Mensagens'
 import ProfileInfo from './ProfileInfo';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('inicio');
   const [notifications, setNotifications] = useState([]);
-  const funcionario = { nome: 'Ramon Coelho Melo', funcao: 'Técnico', matricula: '24250000' };
+  const funcionario = { nome: 'Vitoria Pereira Lucena', funcao: 'admin', matricula: '24250000' };
 
   // Mock notificações
   useEffect(() => {
@@ -28,17 +29,16 @@ export default function Dashboard() {
   const getInitials = (name) => name.split(' ').map(n => n[0]).join('').toUpperCase();
 
   const renderContent = () => {
-    switch(activeTab) {
-      case 'inicio': return <><Inicio onAbrirChamado={() => setActiveTab('chamado')} /></>;
-      case 'atribuidos': return <><ChamadosAtribuidos/></>;
-      case 'gerenciar': return <GerenciarChamados/>;
-      case 'contato': return <Contato />;
-      case 'relatorio': return <Relatorio />;
-      case 'chamado': return <AbrirChamado/>;
+    switch (activeTab) {
+      case 'inicio': return <Inicio onAbrirChamado={() => setActiveTab('abrir')} />;
+      case 'abrir': return <AbrirChamado />;
+      case 'gerenciar': return <GerenciarChamados />;
       case 'atribuidos': return <ChamadosAtribuidos />;
-      case 'abertos': return <ChamadosAbertos />;
-      case 'info': return <ProfileInfo funcionario={funcionario} getInitials={getInitials} />;
+      case 'mensagens': return <Mensagens />;
+      case 'relatorio': return <Relatorio />;
+      case 'perfil': return <ProfileInfo funcionario={funcionario} getInitials={getInitials} />;
       default: return null;
+
     }
   };
 

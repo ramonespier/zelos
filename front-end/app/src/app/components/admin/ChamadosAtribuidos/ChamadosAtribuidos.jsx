@@ -1,17 +1,18 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { FiFilter, FiEdit, FiTrash2, FiPlus, FiX, FiSearch, FiAlertTriangle, FiCheckCircle, FiChevronDown, FiInbox } from 'react-icons/fi';
+import { FiFilter, FiEdit, FiX, FiPlus, FiSearch, FiAlertTriangle, FiCheckCircle, FiChevronDown, FiInbox, FiSlash } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
-// --- DADOS DE EXEMPLO ---
+// --- DADOS DE EXEMPLO (com o novo status 'Cancelado') ---
 const initialTickets = [
     { id: 'CHM-101', titulo: 'PC não liga na sala de reuniões', tecnico: 'Ana Silva', status: 'Aberto' },
     { id: 'CHM-102', titulo: 'Impressora fiscal sem comunicação', tecnico: 'Carlos Dias', status: 'Em Andamento' },
     { id: 'CHM-103', titulo: 'Erro de licença no software de design', tecnico: 'Ana Silva', status: 'Concluído' },
     { id: 'CHM-104', titulo: 'Instabilidade na rede Wi-Fi do 2º andar', tecnico: 'Bia Costa', status: 'Aberto' },
     { id: 'CHM-105', titulo: 'Sistema ERP apresentando lentidão', tecnico: 'Carlos Dias', status: 'Em Andamento' },
+    { id: 'CHM-106', titulo: 'Solicitação de mouse novo', tecnico: 'Ana Silva', status: 'Cancelado' },
 ];
 
 // --- COMPONENTES AUXILIARES ESTILIZADOS ---
@@ -21,6 +22,7 @@ const StatusBadge = ({ status }) => {
         'Aberto': { icon: <FiAlertTriangle />, color: 'red' },
         'Em Andamento': { icon: <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }} className="w-2 h-2 border-2 border-yellow-600 rounded-full border-t-transparent" />, color: 'yellow' },
         'Concluído': { icon: <FiCheckCircle />, color: 'green' },
+        'Cancelado': { icon: <FiSlash />, color: 'gray' }, // Badge para o status 'Cancelado'
     };
     const { icon, color } = config[status] || { icon: '?', color: 'gray' };
     return (
@@ -36,7 +38,7 @@ const Spinner = () => <motion.div animate={{ rotate: 360 }} transition={{ durati
 export default function TabelaChamados() {
     const [chamados, setChamados] = useState(initialTickets);
     const [editingTicket, setEditingTicket] = useState(null);
-    const [ticketToDelete, setTicketToDelete] = useState(null);
+    const [ticketToCancel, setTicketToCancel] = useState(null); // Renomeado de ticketToDelete
     const [filtroStatus, setFiltroStatus] = useState('');
     const [pesquisa, setPesquisa] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -57,13 +59,17 @@ export default function TabelaChamados() {
         }, 700);
     };
 
-    const handleDelete = () => {
+    // Função renomeada e com lógica ajustada para cancelar
+    const handleCancel = () => {
         setIsLoading(true);
         setTimeout(() => {
-            setChamados(chamados.filter(c => c.id !== ticketToDelete.id));
-            setTicketToDelete(null);
+            // Altera o status em vez de filtrar (excluir)
+            setChamados(chamados.map(c => 
+                c.id === ticketToCancel.id ? { ...c, status: 'Cancelado' } : c
+            ));
+            setTicketToCancel(null);
             setIsLoading(false);
-            showToast('Chamado excluído com sucesso!');
+            showToast('Chamado cancelado com sucesso!'); // Mensagem atualizada
         }, 700);
     };
 
@@ -104,6 +110,7 @@ export default function TabelaChamados() {
                             <option value="Aberto">Aberto</option>
                             <option value="Em Andamento">Em Andamento</option>
                             <option value="Concluído">Concluído</option>
+                            <option value="Cancelado">Cancelado</option> {/* Opção adicionada */}
                         </select>
                     </div>
                 </div>
@@ -112,7 +119,7 @@ export default function TabelaChamados() {
                     <motion.table variants={containerVariants} initial="hidden" animate="show" className="w-full text-left table-auto hidden md:table">
                         <thead>
                             <tr className="border-b border-gray-200/80">
-                                <th className="px-4 py-3 font-semibold text-gray-600">ID</th>
+                                <th className="px-4 py-3 font-semibold text-gray-600">Patrimonio</th>
                                 <th className="px-4 py-3 font-semibold text-gray-600">Título</th>
                                 <th className="px-4 py-3 font-semibold text-gray-600">Técnico Atribuído</th>
                                 <th className="px-4 py-3 font-semibold text-gray-600">Status</th>
@@ -129,7 +136,8 @@ export default function TabelaChamados() {
                                     <td className="px-4 py-4">
                                         <div className="flex gap-4 justify-end">
                                             <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setEditingTicket(chamado)} aria-label="Editar" className="text-gray-400 hover:text-blue-600"><FiEdit size={18} /></motion.button>
-                                            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setTicketToDelete(chamado)} aria-label="Excluir" className="text-gray-400 hover:text-red-600"><FiTrash2 size={18} /></motion.button>
+                                            {/* Botão de Cancelar */}
+                                            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setTicketToCancel(chamado)} aria-label="Cancelar" className="text-gray-400 hover:text-red-600"><FiX size={18} /></motion.button>
                                         </div>
                                     </td>
                                 </motion.tr>
@@ -150,7 +158,8 @@ export default function TabelaChamados() {
                                 </div>
                                 <div className="flex gap-4 pt-2 border-t border-gray-200/80">
                                     <button onClick={() => setEditingTicket(chamado)} className="flex items-center gap-2 text-blue-600 font-medium"><FiEdit size={16} /> Editar</button>
-                                    <button onClick={() => setTicketToDelete(chamado)} className="flex items-center gap-2 text-red-600 font-medium"><FiTrash2 size={16} /> Excluir</button>
+                                    {/* Botão de Cancelar para mobile */}
+                                    <button onClick={() => setTicketToCancel(chamado)} className="flex items-center gap-2 text-red-600 font-medium"><FiX size={16} /> Cancelar</button>
                                 </div>
                             </motion.div>
                         ))}
@@ -168,7 +177,7 @@ export default function TabelaChamados() {
 
             {/* Modais e Toast */}
             <AnimatePresence>
-                {(editingTicket || ticketToDelete) && (
+                {(editingTicket || ticketToCancel) && ( // Condição atualizada
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 p-4">
                         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} className="bg-white rounded-xl w-full max-w-md shadow-2xl overflow-hidden">
                             {editingTicket && (
@@ -178,7 +187,7 @@ export default function TabelaChamados() {
                                         <div className="space-y-4">
                                             <input type="text" value={editingTicket.titulo} onChange={e => setEditingTicket({ ...editingTicket, titulo: e.target.value })} className="w-full bg-zinc-100 border-2 border-transparent p-3 rounded-lg focus:bg-white focus:border-blue-500 transition-all outline-none" />
                                             <input type="text" value={editingTicket.tecnico} onChange={e => setEditingTicket({ ...editingTicket, tecnico: e.target.value })} className="w-full bg-zinc-100 border-2 border-transparent p-3 rounded-lg focus:bg-white focus:border-blue-500 transition-all outline-none" />
-                                            <select value={editingTicket.status} onChange={e => setEditingTicket({ ...editingTicket, status: e.target.value })} className="w-full bg-zinc-100 border-2 border-transparent p-3 rounded-lg appearance-none"><option>Aberto</option><option>Em Andamento</option><option>Concluído</option></select>
+                                            <select value={editingTicket.status} onChange={e => setEditingTicket({ ...editingTicket, status: e.target.value })} className="w-full bg-zinc-100 border-2 border-transparent p-3 rounded-lg appearance-none"><option>Aberto</option><option>Em Andamento</option><option>Concluído</option><option>Cancelado</option></select>
                                         </div>
                                     </div>
                                     <div className="bg-gray-50 px-6 py-4">
@@ -186,14 +195,15 @@ export default function TabelaChamados() {
                                     </div>
                                 </>
                             )}
-                            {ticketToDelete && (
+                            {/* Modal de confirmação de cancelamento */}
+                            {ticketToCancel && (
                                 <div className="p-6 text-center">
                                     <FiAlertTriangle className="mx-auto text-red-500 text-5xl mb-4" />
-                                    <h3 className="font-bold text-xl mb-2 text-gray-800">Confirmar Exclusão</h3>
-                                    <p className="text-gray-600 mb-6">Tem certeza que deseja excluir o chamado "{ticketToDelete.titulo}"?</p>
+                                    <h3 className="font-bold text-xl mb-2 text-gray-800">Confirmar Cancelamento</h3>
+                                    <p className="text-gray-600 mb-6">Tem certeza que deseja cancelar o chamado "{ticketToCancel.titulo}"?</p>
                                     <div className="flex gap-4 justify-center">
-                                        <motion.button onClick={() => setTicketToDelete(null)} disabled={isLoading} className="py-2 px-6 rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-700" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Cancelar</motion.button>
-                                        <motion.button onClick={handleDelete} disabled={isLoading} className="py-2 px-6 rounded-lg text-white bg-red-600 hover:bg-red-700 font-semibold flex items-center justify-center gap-2 min-w-[100px]" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>{isLoading ? <Spinner /> : 'Excluir'}</motion.button>
+                                        <motion.button onClick={() => setTicketToCancel(null)} disabled={isLoading} className="py-2 px-6 rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-700" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Voltar</motion.button>
+                                        <motion.button onClick={handleCancel} disabled={isLoading} className="py-2 px-6 rounded-lg text-white bg-red-600 hover:bg-red-700 font-semibold flex items-center justify-center gap-2 min-w-[120px]" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>{isLoading ? <Spinner /> : 'Sim, Cancelar'}</motion.button>
                                     </div>
                                 </div>
                             )}

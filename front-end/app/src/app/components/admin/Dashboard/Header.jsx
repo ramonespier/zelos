@@ -23,13 +23,14 @@ export default function Header({
 
   const tabs = [
     { id: 'inicio', label: 'Início' },
-    { id: 'chamado', label: 'Gerenciar Chamados' },
-    { id: 'chamado', label: 'Meus chamados' },
     { id: 'abrir', label: 'Abrir chamados' },
-    { id: 'chamado', label: 'Relatorio' },
-    { id: 'chamado', label: 'Mensagens' },
-    { id: 'info', label: 'Perfil' },
+    { id: 'gerenciar', label: 'Gerenciar Chamados' },
+    { id: 'atribuidos', label: 'Meus chamados' },
+    { id: 'mensagens', label: 'Mensagem' },
+    { id: 'relatorio', label: 'Relatórios' },
+    { id: 'perfil', label: 'Perfil' },
   ];
+
 
   const handleSelecao = (opcao) => setActiveTab(opcao);
 
@@ -93,11 +94,10 @@ export default function Header({
                       handleSelecao(tab.id);
                       setMobileMenuOpen(false);
                     }}
-                    className={`w-full text-left px-6 py-3 transition rounded-md ${
-                      activeTab === tab.id
+                    className={`w-full text-left px-6 py-3 transition rounded-md ${activeTab === tab.id
                         ? 'bg-red-600 text-white font-semibold shadow-sm'
                         : 'text-gray-700 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     {tab.label}
                   </motion.button>

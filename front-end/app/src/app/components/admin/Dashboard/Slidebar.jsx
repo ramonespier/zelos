@@ -17,7 +17,7 @@ const tabs = [
   { id: 'atribuidos', label: 'Chamados Atribuidos', icon: PlusCircleIcon },
   { id: 'abrir', label: 'Abrir chamados', icon: PlusCircleIcon },
   { id: 'relatorio', label: 'Relatorio', icon: PlusCircleIcon },
-  { id: 'mensgagens', label: 'Mensagens', icon: PlusCircleIcon },
+  { id: 'mensagens', label: 'Mensagens', icon: PlusCircleIcon },
   { id: 'perfil', label: 'Perfil', icon: PlusCircleIcon },
 ];
 
