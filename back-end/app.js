@@ -18,6 +18,7 @@ import notificacaoRoutes from './routes/notificacaoRoutes.js';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+
 // .env
 dotenv.config();
 // middleware
@@ -54,6 +55,7 @@ app.get('/', (req, res) => {
     res.status(200).json({ message: 'Página inicial' })
 })
 
+app.use('/uploads', express.static('uploads'));
 app.use('/usuarios', usuarioRoutes);
 app.use('/pools', poolRoutes);
 app.use('/chamados', chamadoRoutes);
