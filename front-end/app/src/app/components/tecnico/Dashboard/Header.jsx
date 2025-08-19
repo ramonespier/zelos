@@ -3,6 +3,10 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bars3Icon } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation'; // Importa o hook para redirecionamento
+import Cookies from 'js-cookie'; // Importa a biblioteca para remover o cookie
+
+// Componentes filhos do Header
 import Notifications from './Notifications';
 import ProfileDropdown from './ProfileDropdown';
 
@@ -11,6 +15,7 @@ export default function Header({
   setActiveTab,
   notifications,
   marcarComoLida,
+  limparTodasNotificacoes, // Adicionei a prop aqui caso você precise dela no futuro
   unreadNotificationsCount,
   funcionario,
   getInitials
@@ -18,19 +23,28 @@ export default function Header({
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [isNotificationsOpen, setNotificationsOpen] = useState(false);
+  
   const dropdownRef = useRef(null);
   const notificationsRef = useRef(null);
+  
+  const router = useRouter();
+
+  // Função de Logout com a lógica correta para remover o cookie e redirecionar
+  const handleLogout = () => {
+    Cookies.remove('token');
+    router.push('/login');
+  };
 
   const tabs = [
     { id: 'inicio', label: 'Início' },
     { id: 'abertos', label: 'Chamados abertos' },
     { id: 'atribuidos', label: 'Chamados atribuídos' },
+    // Adicionei estas abas de usuário de volta para evitar erros caso você mude o tipo de usuário
     { id: 'meus', label: 'Minhas solicitações' },
     { id: 'chamado', label: 'Solicitar chamado' },
     { id: 'contato', label: 'Contato' },
     { id: 'info', label: 'Perfil' },
   ];
-
 
   const handleSelecao = (opcao) => setActiveTab(opcao);
 
@@ -46,7 +60,7 @@ export default function Header({
           <Bars3Icon className="w-7 h-7" />
         </motion.button>
         <h2 className="text-2xl font-bold text-gray-800 tracking-tight drop-shadow-sm">
-          {tabs.find(t => t.id === activeTab)?.label}
+          {tabs.find(t => t.id === activeTab)?.label || 'Dashboard'}
         </h2>
       </div>
 
@@ -55,15 +69,16 @@ export default function Header({
         <Notifications
           notifications={notifications}
           marcarComoLida={marcarComoLida}
+          limparTodasNotificacoes={limparTodasNotificacoes}
           unreadNotificationsCount={unreadNotificationsCount}
           isNotificationsOpen={isNotificationsOpen}
           setNotificationsOpen={setNotificationsOpen}
           notificationsRef={notificationsRef}
         />
 
-        {/* Separador discreto */}
         <span className="hidden lg:block w-px h-6 bg-gray-300"></span>
 
+        {/* ProfileDropdown agora recebe a função handleLogout como prop */}
         <ProfileDropdown
           funcionario={funcionario}
           getInitials={getInitials}
@@ -71,6 +86,7 @@ export default function Header({
           setProfileOpen={setProfileOpen}
           handleSelecao={handleSelecao}
           dropdownRef={dropdownRef}
+          handleLogout={handleLogout}
         />
       </div>
 
@@ -94,10 +110,11 @@ export default function Header({
                       handleSelecao(tab.id);
                       setMobileMenuOpen(false);
                     }}
-                    className={`w-full text-left px-6 py-3 transition rounded-md ${activeTab === tab.id
+                    className={`w-full text-left px-6 py-3 transition rounded-md ${
+                      activeTab === tab.id
                         ? 'bg-red-600 text-white font-semibold shadow-sm'
                         : 'text-gray-700 hover:bg-gray-100'
-                      }`}
+                    }`}
                   >
                     {tab.label}
                   </motion.button>

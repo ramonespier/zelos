@@ -1,50 +1,58 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import api from '../../../lib/api'; // Certifique-se que o caminho está correto
 import ChamadoCard from './ChamadoCard';
 import ChamadoDetailView from './ChamadoDetailView';
 import ApontamentoModal from './ApontamentoModal';
 
-// dados de exemplo
-const chamados = [
-    {
-        id: 1,
-        titulo: "Monitor quebrado na sala D2-6",
-        usuario: "Maria Silva",
-        usuarioImg: "https://i.pravatar.cc/150?img=5",
-        patrimonio: "PAT-2023-123456",
-        descricao: "Na sala D2-6, quatro monitores da bancada central não estão ligando...",
-        status: "em andamento",
-        tecnico_id: 1,
-        data_abertura: "2025-08-15T10:30:00Z",
-        imagem: "https://s2-techtudo.glbimg.com/ydQHZwG3XpDgagaQ9s7WlSC4HEQ=/0x0:695x391/984x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_08fbf48bc0524877943fe86e43087e7a/internal_photos/bs/2021/s/l/8Efj0lQAyWZ7mPEkTi0w/2014-03-24-mon-031.jpg",
-        localizacao: "Bloco D, Sala 206",
-    },
-    {
-        id: 2,
-        titulo: "Projetor com imagem amarelada",
-        usuario: "João Pereira",
-        usuarioImg: "https://i.pravatar.cc/150?img=12",
-        patrimonio: "PAT-2024-789012",
-        descricao: "O projetor da sala A1-2 está com a projeção totalmente amarelada...",
-        status: "em andamento",
-        tecnico_id: 1,
-        data_abertura: "2025-08-14T14:00:00Z",
-        imagem: "https://www.showmetech.com.br/wp-content/uploads//2019/07/2-projetor-com-mancha-amarela-1024x576.jpg",
-        localizacao: "Bloco A, Sala 102",
-    },
-];
+export default function ChamadosAtribuidos({ funcionario }) {
+    // Estado para os dados que vêm da API
+    const [meusChamados, setMeusChamados] = useState([]);
 
-export default function ChamadosAtribuidos() {
-    const [apontamentoModal, setApontamentoModal] = useState(null);
+    // Estados para controlar a UI
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [selectedChamado, setSelectedChamado] = useState(null);
-    const tecnicoId = 1;
+    const [apontamentoModal, setApontamentoModal] = useState(null); // Guarda o chamado para o modal
 
-    const criarApontamento = (dados) => {
-        console.log("Apontamento criado:", dados);
-        setApontamentoModal(null);
+    // Busca os chamados atribuídos ao técnico logado
+    useEffect(() => {
+        if (!funcionario || !funcionario.id) return;
+
+        const fetchMeusChamados = async () => {
+            setIsLoading(true);
+            setError(null);
+            try {
+                const response = await api.get('/chamados');
+                // Filtramos a lista completa para pegar apenas os chamados do técnico logado
+                // e que não estão concluídos
+                const atribuidos = response.data.filter(chamado => 
+                    chamado.tecnico_id === funcionario.id && chamado.status !== 'concluido'
+                );
+                setMeusChamados(atribuidos);
+            } catch (err) {
+                console.error("Erro ao buscar chamados atribuídos:", err);
+                setError("Não foi possível carregar seus chamados.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchMeusChamados();
+    }, [funcionario]);
+
+    // Função que será chamada quando um apontamento for criado com sucesso
+    const handleApontamentoSuccess = (novoApontamento) => {
+        console.log("Apontamento criado com sucesso!", novoApontamento);
+        // Futuramente, você pode adicionar o apontamento a uma lista no estado
+        // para exibi-los na tela de detalhes, por exemplo.
     };
+    
+    // Renderização de loading e erro
+    if (isLoading) return <div className="text-center p-10 font-semibold text-gray-600">Carregando seus chamados...</div>;
+    if (error) return <div className="text-center p-10 font-semibold text-red-600">{error}</div>;
 
     return (
         <div className="p-4 sm:p-6 h-full">
@@ -74,35 +82,40 @@ export default function ChamadosAtribuidos() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
                     >
-                        {chamados.map(chamado => (
-                            <ChamadoCard
-                                key={chamado.id}
-                                chamado={chamado}
-                                onVerDetalhes={() => setSelectedChamado(chamado)}
-                                onAbrirApontamento={setApontamentoModal}
-                            />
-                        ))}
+                        {meusChamados.length > 0 ? (
+                            <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                                {meusChamados.map(chamado => (
+                                    <ChamadoCard
+                                        key={chamado.id}
+                                        chamado={chamado}
+                                        onVerDetalhes={() => setSelectedChamado(chamado)}
+                                        onAbrirApontamento={() => setApontamentoModal(chamado)}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-center text-gray-500 mt-10">Você não tem nenhum chamado atribuído no momento.</p>
+                        )}
                     </motion.div>
-
                 ) : (
                     <motion.div key="detail">
                         <ChamadoDetailView
                             chamado={selectedChamado}
-                            tecnicoId={tecnicoId}
+                            tecnicoId={funcionario.id}
                             onGoBack={() => setSelectedChamado(null)}
-                            onAbrirApontamento={setApontamentoModal}
+                            onAbrirApontamento={() => setApontamentoModal(selectedChamado)}
                         />
                     </motion.div>
                 )}
             </AnimatePresence>
 
+            {/* O modal de apontamento é renderizado aqui */}
             <ApontamentoModal
                 chamado={apontamentoModal}
-                tecnicoId={tecnicoId}
+                tecnicoId={funcionario.id}
                 onClose={() => setApontamentoModal(null)}
-                onSuccess={criarApontamento}
+                onSuccess={handleApontamentoSuccess}
             />
         </div>
     )
