@@ -4,9 +4,9 @@ import sequelize from "../configs/database.js";
 class RelatorioPool extends Model { }
 
 RelatorioPool.init({
-
-    tipo_chamado:{
-      type: DataTypes.ENUM('externo', 'manutencao', 'apoio_tecnico', 'limpeza'),
+    tipo_chamado: {
+      type: DataTypes.STRING,
+      primaryKey: true
     },
     total: {
         type: DataTypes.INTEGER
@@ -14,14 +14,9 @@ RelatorioPool.init({
 }, {
     sequelize,
     modelName: 'RelatorioPool', 
-    tableName: 'vw_relatorio_por_pool',
+    tableName: 'vw_chamados_por_tipo',
     timestamps: false,
-    indexes: [],
-    defaultScope: {
-        attributes: {
-            exclude: ['id']
-        }
-    }
+    id: false
 });
-
-export default RelatorioPool;
+ 
+export default RelatorioPool;   

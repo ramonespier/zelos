@@ -5,23 +5,19 @@ class RelatorioChamados extends Model {}
 
 RelatorioChamados.init({
     status: {
-        type: DataTypes.ENUM('pendente', 'em andamento', 'concluido'),
+        type: DataTypes.STRING,
         allowNull: false,
+        primaryKey: true
     },
     total: {
         type: DataTypes.INTEGER,
-        allowNull: false,
     },
 }, {
     sequelize,
     modelName: 'RelatorioChamados',
-    tableName: 'vw_relatorio_chamados',
+    tableName: 'vw_chamados_por_status',
     timestamps: false,
-    freezeTableName: true,
-    underscored: true,
-    defaultScope: {
-        attributes: ['status', 'total']
-    }
+    id: false
 });
 
 export default RelatorioChamados;
