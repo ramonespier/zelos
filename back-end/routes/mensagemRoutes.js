@@ -1,40 +1,29 @@
-import MensagemController from "../controllers/MensagemController.js";
-import Autorizar from "../middlewares/Autorizar.js";
-import AuthMiddleware from "../middlewares/AuthMiddleware.js";
-import express from "express";
+// src/routes/mensagemRoutes.js
+import express from 'express';
+import { getMinhasMensagens, sendMensagem, getConversasAdmin, getMensagensPorUsuarioAdmin } from '../controllers/mensagemController.js';
+import AuthMiddleware from '../middlewares/AuthMiddleware.js'; // Use o seu middleware
 
 const router = express.Router();
-const autorizar = new Autorizar();
 
-const permitir = (perfisPermitidos) => (req, res, next) => {
-    return autorizar.autorizacao(req.user, perfisPermitidos)(req, res, next);
-}
+// ---- Rotas para Usuários Comuns ----
 
+// Rota para um usuário buscar SUAS PRÓPRIAS mensagens.
+// GET /mensagens/minhas
+router.get('/minhas', AuthMiddleware.verifyToken, getMinhasMensagens);
 
-router.get('/',
-    AuthMiddleware.verifyToken,
-    permitir(['admin']),
-    MensagemController.listar
-);
+// Rota para um usuário enviar uma mensagem.
+// POST /mensagens
+router.post('/', AuthMiddleware.verifyToken, sendMensagem);
 
 
-router.get('/:id',
-    AuthMiddleware.verifyToken,
-    permitir(['admin', 'usuario', 'tecnico']),
-    MensagemController.buscarPorId
-);
+// ---- Rotas para Administradores ----
 
+// Rota para um admin ver a lista de todas as conversas ativas.
+// GET /mensagens/conversas
+router.get('/conversas', AuthMiddleware.verifyToken, getConversasAdmin);
 
-router.post('/',
-    AuthMiddleware.verifyToken,
-    permitir(['usuario', 'tecnico']),
-    MensagemController.criar
-);
-
-router.delete('/:id',
-    AuthMiddleware.verifyToken,
-    permitir(['admin']),
-    MensagemController.deletar
-);
+// Rota para um admin buscar as mensagens de um USUÁRIO ESPECÍFICO.
+// GET /mensagens/usuario/:usuarioId
+router.get('/usuario/:usuarioId', AuthMiddleware.verifyToken, getMensagensPorUsuarioAdmin);
 
 export default router;
