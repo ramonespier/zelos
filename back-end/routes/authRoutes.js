@@ -24,7 +24,7 @@ router.post('/login', (req, res, next) => {
       username: DEV_USER,
       nome: 'Usuário Desenvolvedor',
       email: 'dev@local.com',
-      funcao: 'admin', // Dê a ele o perfil de admin para facilitar os testes
+      funcao: 'usuario', // Dê a ele o perfil de admin para facilitar os testes
     };
 
     // 2. Gere o token para este usuário falso.

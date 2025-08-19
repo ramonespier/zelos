@@ -12,7 +12,7 @@ const permitir = (perfisPermitidos) => (req, res, next) => {
 
 router.get('/',
     AuthMiddleware.verifyToken,
-    permitir(['admin']),
+    permitir(['admin', 'tecnico', 'usuario']),
     ChamadoController.listar
 );
 
