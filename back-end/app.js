@@ -14,6 +14,7 @@ import authRoutes from './routes/authRoutes.js';
 import equipamentoRoutes from './routes/equipamentoRoutes.js';
 import mensagemRoutes from './routes/mensagemRoutes.js';
 import notificacaoRoutes from './routes/notificacaoRoutes.js';
+import pedidoChamadoRoutes from './routes/pedidoChamadoRoutes.js'
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -63,6 +64,7 @@ app.use('/auth', authRoutes);
 app.use('/equipamentos', equipamentoRoutes);
 app.use('/mensagens', mensagemRoutes);
 app.use('/notificacao', notificacaoRoutes);
+app.use('/pedidos-chamado', pedidoChamadoRoutes)
 
 async function StartServer() {
     try {

@@ -3,37 +3,33 @@
 import { motion } from 'framer-motion';
 import {
   HomeIcon,
-  ClipboardDocumentListIcon,
-  UserCircleIcon,
-  UserGroupIcon,
+  ClipboardDocumentCheckIcon, // Ícone atualizado
+  FolderOpenIcon,
   PhoneIcon,
-  PlusCircleIcon,
-  FolderOpenIcon
+  UserCircleIcon,
 } from '@heroicons/react/24/outline';
 
 import Footer from '../../footer/page';
 
+// <<< LISTA DE ABAS APENAS PARA TÉCNICOS >>>
 const tabs = [
   { id: 'inicio', label: 'Início', icon: HomeIcon },
-  { id: 'abertos', label: 'Chamados abertos', icon: FolderOpenIcon },
-  { id: 'atribuidos', label: 'Chamados atribuídos', icon: ClipboardDocumentListIcon },
+  { id: 'abertos', label: 'Chamados Abertos', icon: FolderOpenIcon },
+  { id: 'atribuidos', label: 'Meus Chamados', icon: ClipboardDocumentCheckIcon },
   { id: 'contato', label: 'Contato', icon: PhoneIcon },
   { id: 'info', label: 'Perfil', icon: UserCircleIcon },
 ];
 
-export default function Sidebar({ activeTab, setActiveTab }) {
+export default function Slidebar({ activeTab, setActiveTab }) {
   const handleSelecao = (opcao) => setActiveTab(opcao);
 
   return (
-    <aside className="bg-gradient-to-b from-gray-50 via-white to-gray-50 border-r border-gray-200 flex flex-col w-64 hidden lg:flex h-screen shadow-md">
-      {/* Logo */}
+    <aside className="bg-gradient-to-b from-gray-50 via-white to-gray-50 border-r border-gray-200 flex flex-col w-64 lg:flex h-screen shadow-md">
       <div className="h-20 flex items-center justify-center border-b border-gray-200">
         <h1 className="text-2xl font-bold text-red-600 tracking-tight drop-shadow-sm">
-          SENAI Chamados
+          SENAI | Técnico
         </h1>
       </div>
-
-      {/* Navegação */}
       <nav className="flex-1 px-4 py-6 space-y-2">
         {tabs.map(({ id, label, icon: Icon }) => (
           <motion.button
@@ -52,8 +48,6 @@ export default function Sidebar({ activeTab, setActiveTab }) {
           </motion.button>
         ))}
       </nav>
-
-      {/* Rodapé */}
       <div className="mt-auto">
         <div className="border-t border-gray-200">
           <Footer />

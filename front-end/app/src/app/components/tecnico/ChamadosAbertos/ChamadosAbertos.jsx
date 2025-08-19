@@ -1,101 +1,99 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import api from '../../../lib/api'; 
 import CardChamado from './CardChamado';
 import ModalAtribuicao from './ModalAtribuicao';
 import ModalImagem from './ModalImagem';
 
-const chamados = [
-  {
-    id: 1,
-    titulo: 'Problema no ar-condicionado',
-    descricao: 'O ar-condicionado da sala 203 está com vazamento e não resfria corretamente.',
-    status: 'Aberto',
-    criado_em: '2025-08-15T09:30:00',
-    usuario: 'José Silva',
-    patrimonio: '1234',
-    imagem: 'monitor.webp'
-  },
-  {
-    id: 2,
-    titulo: 'Limpeza especial',
-    descricao: 'Necessária limpeza profunda no laboratório de química antes da aula prática.',
-    status: 'Aberto',
-    criado_em: '2025-08-14T14:00:00',
-    usuario: 'Maria Oliveira',
-    patrimonio: '5678',
-    imagem: 'monitor.webp'
-  },
-  {
-    id: 3,
-    titulo: 'Configuração de equipamentos',
-    descricao: 'Novos computadores da recepção precisam ser configurados com softwares básicos.',
-    status: 'Aberto',
-    criado_em: '2025-08-13T08:00:00',
-    usuario: 'Carlos Pereira',
-    patrimonio: '91011',
-    imagem: 'monitor.webp'
-  },
-  {
-    id: 4,
-    titulo: 'Lâmpada queimada',
-    descricao: 'Lâmpada queimada no corredor principal próximo à biblioteca.',
-    status: 'Aberto',
-    criado_em: '2025-08-16T11:00:00',
-    usuario: 'Ana Souza',
-    patrimonio: '1213',
-    imagem: 'monitor.webp'
-  },
-  {
-    id: 5,
-    titulo: 'Solicitação de cadeiras',
-    descricao: 'Solicitação de compra de novas cadeiras para a sala de estudos.',
-    status: 'Aberto',
-    criado_em: '2025-08-14T16:45:00',
-    usuario: 'Roberto Lima',
-    patrimonio: '1415',
-    imagem: 'monitor.webp'
-  }
-];
-export default function ChamadosAbertos() {
-  const [atribuidos, setAtribuidos] = useState([]);
+export default function ChamadosAbertos({ funcionario }) {
+  // Estados para controlar os dados e a UI
+  const [chamadosAbertos, setChamadosAbertos] = useState([]);
+  const [pedidosEnviados, setPedidosEnviados] = useState([]); // Este agora será populado pela API
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [modalAberto, setModalAberto] = useState(false);
   const [imagemModal, setImagemModal] = useState(null);
 
-  const handleAtribuir = (id) => {
-    if (!atribuidos.includes(id)) {
-      setAtribuidos(prev => [...prev, id]);
+  // useEffect para buscar TODOS os dados iniciais
+  useEffect(() => {
+    const fetchData = async () => {
+      // Garantimos que só buscamos os dados quando temos o objeto 'funcionario'
+      if (!funcionario || !funcionario.id) return;
+      
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        // Usamos Promise.all para fazer as duas requisições em paralelo,
+        // o que é mais rápido e eficiente.
+        const [chamadosResponse, pedidosResponse] = await Promise.all([
+          api.get('/chamados'),          // 1. Busca todos os chamados
+          api.get('/pedidos-chamado/meus-pedidos') // 2. Busca os pedidos do técnico logado
+        ]);
+        
+        // Processa a resposta dos chamados
+        const abertos = chamadosResponse.data.filter(chamado => chamado.status === 'aberto');
+        setChamadosAbertos(abertos);
+        
+        // Processa a resposta dos pedidos
+        // O backend agora nos envia um array de IDs [1, 5, 12]
+        setPedidosEnviados(pedidosResponse.data);
+        
+      } catch (err) {
+        console.error("Erro ao buscar dados iniciais:", err);
+        setError("Não foi possível carregar os dados. Tente atualizar a página.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [funcionario]); // Este hook roda sempre que o 'funcionario' for carregado
+
+  const handleAtribuir = async (chamadoId) => {
+    if (pedidosEnviados.includes(chamadoId)) return;
+    
+    try {
+      await api.post('/pedidos-chamado', { chamado_id: chamadoId });
+      setPedidosEnviados(prev => [...prev, chamadoId]);
       setModalAberto(true);
+    } catch (err) {
+      console.error("Erro ao enviar pedido:", err);
+      const errorMessage = err.response?.data?.message || "Não foi possível enviar o pedido.";
+      alert(errorMessage);
     }
   };
 
   const abrirModalImagem = (url) => setImagemModal(url);
   const fecharModalImagem = () => setImagemModal(null);
 
+  // O resto do seu componente JSX continua exatamente o mesmo
+  if (isLoading) return <div className="text-center p-10">Carregando chamados...</div>;
+  if (error) return <div className="text-center p-10 text-red-600">{error}</div>;
+
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="flex flex-col w-full px-4 sm:px-6 lg:px-8 py-6"
-      >
+      <motion.div /* ... */ >
         <h1 className='text-xl sm:text-2xl font-semibold text-gray-700 mb-4 sm:mb-6 text-center'>
-          Aqui estão seus chamados abertos
+          Aqui estão os chamados disponíveis
         </h1>
 
-        {/* GRID RESPONSIVO */}
-        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
-          {chamados.map(chamado => (
-            <CardChamado
-              key={chamado.id}
-              chamado={chamado}
-              atribuidos={atribuidos}
-              onAtribuir={handleAtribuir}
-              onAbrirImagem={abrirModalImagem}
-            />
-          ))}
-        </div>
+        {chamadosAbertos.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+            {chamadosAbertos.map(chamado => (
+              <CardChamado
+                key={chamado.id}
+                chamado={chamado}
+                pedidosEnviados={pedidosEnviados}
+                onAtribuir={handleAtribuir}
+                onAbrirImagem={abrirModalImagem}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-gray-500 mt-10">Nenhum chamado aberto no momento.</p>
+        )}
       </motion.div>
 
       <ModalAtribuicao aberto={modalAberto} onClose={() => setModalAberto(false)} />
