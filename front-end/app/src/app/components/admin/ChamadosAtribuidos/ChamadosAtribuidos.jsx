@@ -49,7 +49,7 @@ export default function TabelaChamados() {
         try {
             const [chamadosRes, tecnicosRes] = await Promise.all([
                 api.get('/chamados'),
-                api.get('/usuarios?funcao=tecnico') // Busca a lista de técnicos
+                api.get('/usuarios/tecnicos') // Busca a lista de técnicos
             ]);
             
             // Mapeamos os dados para a estrutura que o front-end espera
