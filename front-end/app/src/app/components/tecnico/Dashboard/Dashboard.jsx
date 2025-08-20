@@ -14,7 +14,7 @@ import ProfileInfo from './ProfileInfo';
 
 // <<< PÁGINAS ESPECÍFICAS DO TÉCNICO >>>
 import InicioTecnico from '../Inicio/InicioTecnico';
-import Contato from '../Contato/FormularioContato';
+import Contato from '../Contato/ChatUsuario';
 import ChamadosAbertos from '../ChamadosAbertos/ChamadosAbertos';
 import ChamadosAtribuidos from '../ChamadosAtribuidos/ChamadosAtribuidos';
 
