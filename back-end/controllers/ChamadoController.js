@@ -6,7 +6,6 @@ import Pool from '../entities/Pool.js';
 
 class ChamadoController {
 
-    // Lista de chamados para os painéis de gerenciamento
     static async listar(req, res) {
         try {
             const whereClause = {
@@ -19,7 +18,7 @@ class ChamadoController {
                     { model: Pool, as: 'pool' }
                 ],
                 where: whereClause,
-                order: [['criado_em', 'DESC']] // Ordena pelos mais recentes
+                order: [['criado_em', 'DESC']] // ordena pelos mais recentes
             });
             res.json(chamados);
         } catch (err) {
@@ -28,7 +27,6 @@ class ChamadoController {
         }
     }
 
-    // Buscar um único chamado por ID
     static async buscarPorId(req, res) {
         try {
             const { id } = req.params;
@@ -36,7 +34,7 @@ class ChamadoController {
                 include: [
                     { association: 'tecnico', required: false },
                     { association: 'pool' },
-                    { association: 'usuario' } // Inclui o criador do chamado
+                    { association: 'usuario' } 
                 ]
             });
             if (!chamado) {
@@ -49,7 +47,6 @@ class ChamadoController {
         }
     }
 
-    // ===== MÉTODO 'CRIAR' CORRIGIDO E COMPLETO =====
     static async criar(req, res) {
         try {
             const { titulo, numero_patrimonio, descricao, pool_id } = req.body;
@@ -57,22 +54,22 @@ class ChamadoController {
             // req.file vem do middleware 'multer'
             const img_url = req.file ? `/uploads/${req.file.filename}` : null;
 
-            // 1. Validação de campos obrigatórios
+            // validação de campos obrigatórios
             if (!titulo || !numero_patrimonio || !descricao || !pool_id) {
                 return res.status(400).json({ message: 'Todos os campos são obrigatórios: Título, Patrimônio, Tipo e Descrição.' });
             }
 
-            // 2. Validação se o equipamento existe
+            // validação se o equipamento existe
             const equipamento = await Equipamento.findByPk(numero_patrimonio);
             if (!equipamento) {
                 return res.status(404).json({ message: `Equipamento com o patrimônio "${numero_patrimonio}" não foi encontrado. Verifique o número digitado.` });
             }
             
-            // 3. Validação de chamado duplicado (a sua lógica de proteção)
+            // validação de chamado duplicado 
             const chamadoExistente = await Chamado.findOne({
                 where: {
                     numero_patrimonio,
-                    status: ['aberto', 'em andamento'] // Evita chamado duplicado que não seja 'concluido' ou 'cancelado'
+                    status: ['aberto', 'em andamento'] // evita chamado duplicado que não seja 'concluido' ou 'cancelado'
                 }
             });
             if (chamadoExistente) {
@@ -86,10 +83,9 @@ class ChamadoController {
                 descricao,
                 pool_id,
                 img_url,
-                usuario_id: req.user.id, // req.user é adicionado pelo middleware de autenticação
+                usuario_id: req.user.id, 
             });
 
-            // Retorna sucesso
             res.status(201).json(chamado);
         } catch (err) {
             console.error("Erro no controller ao criar chamado:", err);
@@ -97,7 +93,6 @@ class ChamadoController {
         }
     }
     
-    // Atribuir / Desatribuir um chamado
     static async atribuir(req, res) {
         try {
             const { id } = req.params;
@@ -119,7 +114,6 @@ class ChamadoController {
         }
     }
 
-    // Atualizar chamado
     static async atualizar(req, res) {
         try {
             const { id } = req.params;
@@ -144,7 +138,6 @@ class ChamadoController {
         }
     }
 
-    // Atualizar o status do chamado 
     static async status(req, res) {
         try {
             const { id } = req.params;
@@ -160,7 +153,6 @@ class ChamadoController {
         }
     }
 
-    // Fechar chamado
     static async fechar(req, res) {
         try {
             const { id } = req.params;
