@@ -94,8 +94,6 @@ class ApontamentoController {
             res.status(500).json({ message: "Erro ao fechar apontamento" });
         }
     }
-
-
 }
 
 export default ApontamentoController;   

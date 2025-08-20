@@ -1,23 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiInbox, FiUsers, FiTrendingUp, FiCheckCircle, FiChevronDown, FiCornerUpRight } from 'react-icons/fi';
-
-// --- DADOS INICIAIS SEM FOTO DE PERFIL E SEM PRIORIDADE ---
-const INICIAL_TECNICOS = [
-    { id: 1, nome: 'Ana Silva' },
-    { id: 2, nome: 'Bruno Costa' },
-    { id: 3, nome: 'Carlos Dias' },
-];
-
-const INICIAL_CHAMADOS = [
-    { id: 1, titulo: 'PC da contabilidade não liga', tecnico: null },
-    { id: 2, titulo: 'Impressora fiscal sem comunicação', tecnico: null },
-    { id: 3, titulo: 'Erro de licença no software de design', tecnico: 'Ana Silva' },
-    { id: 4, titulo: 'Instalar novo antivírus no servidor', tecnico: null },
-    { id: 5, titulo: 'Rede Wi-Fi instável no 2º andar', tecnico: 'Carlos Dias' },
-];
+import { FiInbox, FiUsers, FiTrendingUp, FiCheckCircle, FiChevronDown, FiCornerUpRight, FiLoader } from 'react-icons/fi';
+import api from '../../../lib/api'; // Certifique-se de que o caminho está correto
 
 // --- COMPONENTES DE UI REUTILIZÁVEIS E REFINADOS ---
 
@@ -31,7 +17,6 @@ const StatCard = ({ icon, label, value }) => (
     </div>
 );
 
-// Componente ChamadoPendenteCard ATUALIZADO para remover a prioridade
 const ChamadoPendenteCard = ({ chamado, tecnicos, onAtribuir }) => (
     <motion.div
         layout
@@ -46,10 +31,12 @@ const ChamadoPendenteCard = ({ chamado, tecnicos, onAtribuir }) => (
                 <select
                     onChange={(e) => onAtribuir(chamado.id, e.target.value)}
                     className="appearance-none w-full bg-slate-50 border border-slate-300/70 p-2.5 rounded-md text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
-                    value=""
+                    defaultValue=""
                 >
                     <option value="" disabled>Atribuir a um técnico...</option>
-                    {tecnicos.map(t => <option key={t.id} value={t.nome}>{t.nome}</option>)}
+                    {/* ===== A CORREÇÃO CRUCIAL ESTÁ AQUI ===== */}
+                    {tecnicos.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)}
+                    {/* ======================================= */}
                 </select>
                 <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>
@@ -118,11 +105,13 @@ const Toast = ({ message }) => (
     </motion.div>
 );
 
-// --- COMPONENTE PRINCIPAL ---
+
+// --- COMPONENTE PRINCIPAL INTEGRADO ---
 export default function PainelAtribuicaoAdmin() {
-    const [tecnicos] = useState(INICIAL_TECNICOS);
-    const [chamados, setChamados] = useState(INICIAL_CHAMADOS);
+    const [tecnicos, setTecnicos] = useState([]);
+    const [chamados, setChamados] = useState([]);
     const [toast, setToast] = useState(null);
+    const [pageLoading, setPageLoading] = useState(true);
 
     const showToast = (message) => {
         setToast(null);
@@ -130,15 +119,59 @@ export default function PainelAtribuicaoAdmin() {
         setTimeout(() => setToast(null), 3000);
     };
 
-    const handleAtribuir = (ticketId, nomeTecnico) => {
-        setChamados(chamados.map(c => c.id === ticketId ? { ...c, tecnico: nomeTecnico } : c));
-        showToast(`Atribuído a ${nomeTecnico}!`);
+    const fetchData = async () => {
+        setPageLoading(true);
+        try {
+            const [chamadosRes, tecnicosRes] = await Promise.all([
+                api.get('/chamados'),
+                api.get('/usuarios/tecnicos') // Usando a rota específica para técnicos
+            ]);
+            
+            const mappedChamados = chamadosRes.data.map(c => ({
+                id: c.id,
+                titulo: c.titulo,
+                tecnico: c.tecnico ? c.tecnico.nome : null,
+            }));
+
+            setChamados(mappedChamados);
+            setTecnicos(tecnicosRes.data);
+        } catch (error) {
+            console.error("Erro ao buscar dados:", error);
+            showToast("Erro ao carregar dados. Tente novamente.");
+        } finally {
+            setPageLoading(false);
+        }
     };
 
-    const handleDesatribuir = (ticketId) => {
-        setChamados(chamados.map(c => c.id === ticketId ? { ...c, tecnico: null } : c));
-        showToast('Chamado retornado para a fila.');
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const handleAtribuir = async (chamadoId, tecnicoId) => {
+        if (!tecnicoId) return;
+
+        try {
+            await api.patch(`/chamados/${chamadoId}/atribuir`, { tecnico_id: tecnicoId });
+            await fetchData();
+            const tecnicoNome = tecnicos.find(t => t.id === tecnicoId)?.nome;
+            showToast(`Atribuído a ${tecnicoNome || 'um técnico'}!`);
+        } catch (error) {
+            console.error("Erro ao atribuir chamado:", error.response?.data || error);
+            showToast("Falha ao atribuir chamado.");
+        }
     };
+
+    const handleDesatribuir = async (chamadoId) => {
+        try {
+            await api.patch(`/chamados/${chamadoId}/atribuir`, { tecnico_id: null });
+            await fetchData();
+            showToast('Chamado retornado para a fila.');
+        } catch (error) {
+            console.error("Erro ao desatribuir chamado:", error);
+            showToast("Falha ao desatribuir chamado.");
+        }
+    };
+
 
     const { pendentes, atribuidos } = useMemo(() => {
         const pendentes = chamados.filter(c => !c.tecnico);
@@ -146,6 +179,16 @@ export default function PainelAtribuicaoAdmin() {
         return { pendentes, atribuidos };
     }, [chamados]);
 
+
+    if (pageLoading) {
+        return (
+            <div className="flex flex-col justify-center items-center h-screen text-slate-500">
+                <FiLoader className="animate-spin text-4xl mb-4" />
+                <p className="text-lg">Carregando painel de atribuição...</p>
+            </div>
+        );
+    }
+    
     return (
         <div className="font-sans p-4 sm:p-6 lg:p-8 min-h-screen">
             <div className="max-w-7xl mx-auto">
@@ -161,7 +204,6 @@ export default function PainelAtribuicaoAdmin() {
                 </header>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                    {/* Coluna Principal */}
                     <main className="lg:col-span-2 space-y-4">
                         <h2 className="text-xl font-bold text-slate-800 px-2">Fila de Espera</h2>
                         <AnimatePresence>
@@ -178,7 +220,6 @@ export default function PainelAtribuicaoAdmin() {
                         </AnimatePresence>
                     </main>
                     
-                    {/* Barra Lateral com a equipe */}
                     <aside className="space-y-6 lg:sticky lg:top-8">
                         <h2 className="text-xl font-bold text-slate-800 px-2">Equipe Técnica</h2>
                         {tecnicos.map(tecnico => (

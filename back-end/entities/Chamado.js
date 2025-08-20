@@ -4,8 +4,6 @@ import Usuario from "./Usuario.js";
 import Pool from "./Pool.js";
 import Equipamento from "./Equipamento.js";
 
-
-
 class Chamado extends Model { }
 
 Chamado.init({

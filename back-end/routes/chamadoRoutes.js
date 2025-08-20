@@ -1,6 +1,7 @@
 import ChamadoController from "../controllers/ChamadoController.js";
 import Autorizar from "../middlewares/Autorizar.js";
 import AuthMiddleware from "../middlewares/AuthMiddleware.js";
+import upload from '../middlewares/upload.js'; 
 import express from "express";
 
 const router = express.Router();
@@ -25,6 +26,7 @@ router.get('/:id',
 router.post('/',
     AuthMiddleware.verifyToken,
     permitir(['usuario', 'admin', 'tecnico']),
+    upload.single('imagem'), 
     ChamadoController.criar
 );
 

@@ -2,46 +2,48 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import dynamic from 'next/dynamic'; // Importa a função 'dynamic' do Next.js
+import dynamic from 'next/dynamic';
 import ChamadoForm from './ChamadoForm';
-import api from '../../../lib/api'; // Ajuste o caminho para a sua API se necessário
+import api from '../../../lib/api';
 
-// Importa dinamicamente o ModalSucesso para evitar o erro de hidratação do Next.js
-// A opção { ssr: false } garante que ele só será renderizado no navegador
 const ModalSucesso = dynamic(() => import('./ModalSucesso'), { ssr: false });
 
 export default function Chamado({ funcionario }) {
-  // Estados para os campos do formulário
+  // Estados para o arquivo de imagem
+  const [imagem, setImagem] = useState(null);
+  const [imagemPreview, setImagemPreview] = useState('');
+
+  // Estados do formulário
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [patrimonio, setPatrimonio] = useState('');
   const [poolId, setPoolId] = useState('');
-  
-  // Estados para as opções do dropdown e seu carregamento
   const [poolOptions, setPoolOptions] = useState([]);
-  const [isLoadingPools, setIsLoadingPools] = useState(true);
-
+  
   // Estados de controle da UI
-  const [erros, setErros] = useState({});
+  const [isLoadingPools, setIsLoadingPools] = useState(true);
+  const [erros, setErros] =    useState({});
   const [modalAberto, setModalAberto] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Busca as opções de 'Pool' da API assim que o componente é montado
   useEffect(() => {
     const fetchPools = async () => {
+      setIsLoadingPools(true);
       try {
         const response = await api.get('/pools');
+        // Filtramos para mostrar apenas as pools ativas no dropdown
         const ativas = response.data.filter(pool => pool.status === 'ativo');
         setPoolOptions(ativas);
       } catch (error) {
         console.error("Falha ao buscar as pools:", error);
+        setErros(prev => ({ ...prev, api: 'Não foi possível carregar os tipos de chamado.' }));
       } finally {
-        setIsLoadingPools(false); // Finaliza o carregamento, com ou sem erro
+        setIsLoadingPools(false); // ESSENCIAL: Desbloqueia o campo em qualquer cenário
       }
     };
     fetchPools();
-  }, []); // O array vazio [] faz com que este useEffect execute apenas uma vez
+  }, []);
 
-  // Função para validar o formulário antes do envio
   const validarFormulario = () => {
     const newErros = {};
     if (titulo.trim().length < 5) newErros.titulo = 'Título precisa ter ao menos 5 caracteres.';
@@ -52,51 +54,47 @@ export default function Chamado({ funcionario }) {
     return Object.keys(newErros).length === 0;
   };
 
-  // Função para enviar os dados para a API
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validarFormulario()) return;
-    if (!funcionario || !funcionario.id) {
-      alert("Sua sessão é inválida. Por favor, faça o login novamente.");
-      return;
+    setIsSubmitting(true);
+    setErros({});
+
+    const formData = new FormData();
+    formData.append('titulo', titulo);
+    formData.append('descricao', descricao);
+    formData.append('numero_patrimonio', patrimonio);
+    formData.append('pool_id', poolId);
+    if (imagem) {
+      formData.append('imagem', imagem);
     }
 
-    const payload = {
-      titulo,
-      descricao,
-      numero_patrimonio: patrimonio,
-      pool_id: parseInt(poolId, 10),
-    };
-
     try {
-      await api.post('/chamados', payload);
-      setModalAberto(true);
-      // Limpa os campos do formulário após o sucesso
-      setTitulo('');
-      setDescricao('');
-      setPatrimonio('');
-      setPoolId('');
-      setErros({});
+      await api.post('/chamados', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setModalAberto(true); 
+      // Limpa o formulário
+      setTitulo(''); setDescricao(''); setPatrimonio('');
+      setPoolId(''); setImagem(null); setImagemPreview(''); setErros({});
     } catch (err) {
       console.error("Erro ao criar chamado:", err);
       const errorMessage = err.response?.data?.message || 'Ocorreu um erro ao enviar o chamado.';
-      alert(errorMessage);
+      setErros({ api: errorMessage });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="max-w-xl mx-auto mt-10 mb-20 bg-white p-8 rounded-3xl shadow-xl border border-gray-200"
-      >
+        initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
+        className="max-w-xl mx-auto mt-10 mb-20 bg-white p-8 rounded-3xl shadow-xl border border-gray-200">
         <h2 className="text-4xl font-extrabold mb-10 text-red-600 text-center tracking-wide drop-shadow-sm">
           Solicitar Novo Chamado
         </h2>
         
-        {/* Passa todas as props necessárias para o componente do formulário */}
         <ChamadoForm
           titulo={titulo} setTitulo={setTitulo}
           descricao={descricao} setDescricao={setDescricao}
@@ -106,11 +104,12 @@ export default function Chamado({ funcionario }) {
           isLoadingPools={isLoadingPools}
           erros={erros}
           handleSubmit={handleSubmit}
+          imagem={imagem} setImagem={setImagem}
+          imagemPreview={imagemPreview} setImagemPreview={setImagemPreview}
+          isSubmitting={isSubmitting}
         />
       </motion.div>
-
-      {/* Renderiza o modal (somente no navegador) */}
       <ModalSucesso aberto={modalAberto} onFechar={() => setModalAberto(false)} />
     </>
-  );
-}
+  ); 
+} 
