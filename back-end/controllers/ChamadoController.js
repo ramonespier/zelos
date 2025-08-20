@@ -1,41 +1,26 @@
-import { Op } from 'sequelize'; // <<<<<<< IMPORTANTE: Adicione esta importação
+import { Op } from 'sequelize';
 import Chamado from '../entities/Chamado.js';
 import Usuario from '../entities/Usuario.js';
 import Equipamento from '../entities/Equipamento.js';
-import Pool from '../entities/Pool.js'; // Adicione a importação do modelo Pool
+import Pool from '../entities/Pool.js';
 
 class ChamadoController {
 
-    // Lista de chamados para o painel de gerenciamento (AGORA FILTRADA)
+    // Lista de chamados para os painéis de gerenciamento
     static async listar(req, res) {
         try {
-            // Este filtro garante que a lista de gerenciamento mostre
-            // apenas chamados abertos por 'usuarios' ou 'admins'.
             const whereClause = {
-                '$usuario.funcao$': {
-                    [Op.ne]: 'tecnico' // Onde a função do criador NÃO É ('ne') técnico
-                }
+                '$usuario.funcao$': { [Op.ne]: 'tecnico' }
             };
-
             const chamados = await Chamado.findAll({
                 include: [
-                    {
-                        model: Usuario,
-                        as: 'usuario', // Associa o modelo do criador para o filtro
-                        attributes: [] // Não precisamos dos dados do criador no resultado final
-                    },
-                    {
-                        model: Usuario,
-                        as: 'tecnico' // Inclui dados do técnico atribuído
-                    },
-                    {
-                        model: Pool, // Inclui dados da pool
-                        as: 'pool'
-                    }
+                    { model: Usuario, as: 'usuario', attributes: [] },
+                    { model: Usuario, as: 'tecnico' },
+                    { model: Pool, as: 'pool' }
                 ],
-                where: whereClause
+                where: whereClause,
+                order: [['criado_em', 'DESC']] // Ordena pelos mais recentes
             });
-
             res.json(chamados);
         } catch (err) {
             console.error(err);
@@ -43,18 +28,15 @@ class ChamadoController {
         }
     }
 
-    //
-    // --- O RESTANTE DOS MÉTODOS PERMANECE EXATAMENTE O MESMO ---
-    //
-
-    // buscar por id
+    // Buscar um único chamado por ID
     static async buscarPorId(req, res) {
         try {
             const { id } = req.params;
             const chamado = await Chamado.findByPk(id, {
                 include: [
                     { association: 'tecnico', required: false },
-                    { association: 'pool' }
+                    { association: 'pool' },
+                    { association: 'usuario' } // Inclui o criador do chamado
                 ]
             });
             if (!chamado) {
@@ -67,20 +49,26 @@ class ChamadoController {
         }
     }
 
-    // Atualização genérica do chamado
-
-
-    // Criar um novo chamado
+    // ===== MÉTODO 'CRIAR' CORRIGIDO E COMPLETO =====
     static async criar(req, res) {
         try {
             const { titulo, numero_patrimonio, descricao, pool_id } = req.body;
-            if (!numero_patrimonio || !pool_id || !titulo || !descricao) {
-                return res.status(400).json({ message: 'Campos obrigatórios faltando.' });
+            
+            // req.file vem do middleware 'multer'
+            const img_url = req.file ? `/uploads/${req.file.filename}` : null;
+
+            // 1. Validação de campos obrigatórios
+            if (!titulo || !numero_patrimonio || !descricao || !pool_id) {
+                return res.status(400).json({ message: 'Todos os campos são obrigatórios: Título, Patrimônio, Tipo e Descrição.' });
             }
+
+            // 2. Validação se o equipamento existe
             const equipamento = await Equipamento.findByPk(numero_patrimonio);
             if (!equipamento) {
-                return res.status(404).json({ message: `Equipamento com o patrimônio "${numero_patrimonio}" não foi encontrado.` });
+                return res.status(404).json({ message: `Equipamento com o patrimônio "${numero_patrimonio}" não foi encontrado. Verifique o número digitado.` });
             }
+            
+            // 3. Validação de chamado duplicado (a sua lógica de proteção)
             const chamadoExistente = await Chamado.findOne({
                 where: {
                     numero_patrimonio,
@@ -88,46 +76,42 @@ class ChamadoController {
                 }
             });
             if (chamadoExistente) {
-                return res.status(400).json({ message: 'Já existe um chamado ativo para este número de patrimônio' });
+                return res.status(400).json({ message: 'Já existe um chamado ativo (aberto ou em andamento) para este equipamento.' });
             }
+            
+            // 4. Criação do chamado no banco de dados
             const chamado = await Chamado.create({
                 titulo,
                 numero_patrimonio,
                 descricao,
-                usuario_id: req.user.id,
-                pool_id
+                pool_id,
+                img_url,
+                usuario_id: req.user.id, // req.user é adicionado pelo middleware de autenticação
             });
+
+            // Retorna sucesso
             res.status(201).json(chamado);
         } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: 'Ocorreu um erro interno ao criar o chamado' });
+            console.error("Erro no controller ao criar chamado:", err);
+            res.status(500).json({ message: 'Ocorreu um erro interno ao processar sua solicitação.' });
         }
     }
-
+    
     // Atribuir / Desatribuir um chamado
-    // ATRIBUIR / DESATRIBUIR um chamado (com validação de função)
     static async atribuir(req, res) {
         try {
             const { id } = req.params;
             const { tecnico_id } = req.body;
-
             const chamado = await Chamado.findByPk(id);
-            if (!chamado) {
-                return res.status(404).json({ message: 'Chamado não encontrado' });
-            }
-
-            // Se um tecnico_id for fornecido (não é null)
+            if (!chamado) { return res.status(404).json({ message: 'Chamado não encontrado' }); }
             if (tecnico_id) {
                 const tecnico = await Usuario.findByPk(tecnico_id);
-                // ===== A VALIDAÇÃO CRUCIAL ESTÁ AQUI =====
                 if (!tecnico || tecnico.funcao !== 'tecnico') {
                     return res.status(400).json({ message: 'Atribuição falhou: o usuário selecionado não é um técnico.' });
                 }
             }
-
             await chamado.update({ tecnico_id: tecnico_id });
             await chamado.reload({ include: ['tecnico'] });
-
             res.status(200).json(chamado);
         } catch (err) {
             console.error("Erro ao atribuir chamado:", err);
@@ -135,34 +119,24 @@ class ChamadoController {
         }
     }
 
-    // ATUALIZAR chamado (com validação de função no técnico)
+    // Atualizar chamado
     static async atualizar(req, res) {
         try {
             const { id } = req.params;
             const { titulo, tecnico_id, status } = req.body;
-
             const chamado = await Chamado.findByPk(id);
-            if (!chamado) {
-                return res.status(404).json({ message: 'Chamado não encontrado' });
-            }
-
-            // A mesma validação precisa estar aqui
+            if (!chamado) { return res.status(404).json({ message: 'Chamado não encontrado' }); }
             if (tecnico_id) {
                 const tecnico = await Usuario.findByPk(tecnico_id);
                 if (!tecnico || tecnico.funcao !== 'tecnico') {
                     return res.status(400).json({ message: 'Atribuição falhou: o usuário selecionado não é um técnico.' });
                 }
             }
-
-            // Só atualiza os campos se eles existirem no body da requisição
-            // O `undefined` no `else` garante que o campo não seja alterado se não for passado
             chamado.titulo = titulo !== undefined ? titulo : chamado.titulo;
             chamado.tecnico_id = tecnico_id !== undefined ? tecnico_id : chamado.tecnico_id;
             chamado.status = status !== undefined ? status : chamado.status;
-
             await chamado.save();
             await chamado.reload({ include: ['tecnico'] });
-
             res.status(200).json(chamado);
         } catch (err) {
             console.error(err);
