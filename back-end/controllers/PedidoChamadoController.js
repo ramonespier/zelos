@@ -6,7 +6,7 @@ import Usuario from '../entities/Usuario.js';
 import sequelize from '../configs/database.js'; // Importa a instância para transações
 
 class PedidoChamadoController {
-    
+
     // ROTA: POST /pedidos-chamado
     // Um técnico cria um novo pedido para se atribuir a um chamado.
     static async criar(req, res) {
@@ -16,7 +16,7 @@ class PedidoChamadoController {
         if (!chamado_id) {
             return res.status(400).json({ message: "O ID do chamado é obrigatório." });
         }
-        
+
         try {
             const pedidoExistente = await PedidoChamado.findOne({
                 where: { chamado_id, tecnico_id, status: 'pendente' }
@@ -39,18 +39,21 @@ class PedidoChamadoController {
 
     // ROTA: GET /pedidos-chamado/meus-pedidos
     // Técnico busca a lista de IDs de chamados para os quais ele já enviou um pedido.
+    // /controllers/PedidoChamadoController.js
+
     static async listarPorTecnico(req, res) {
         const tecnico_id = req.user.id;
-        
+
         try {
             const pedidos = await PedidoChamado.findAll({
                 where: { tecnico_id },
-                attributes: ['chamado_id']
+                // MUDANÇA: Agora selecionamos o chamado_id e o status
+                attributes: ['chamado_id', 'status']
             });
 
-            const idsDosChamados = pedidos.map(p => p.chamado_id);
-            res.json(idsDosChamados);
-            
+            // A resposta agora será um array de objetos, ex: [{ chamado_id: 1, status: 'pendente' }, { chamado_id: 2, status: 'recusado' }]
+            res.json(pedidos);
+
         } catch (error) {
             console.error("Erro ao listar pedidos do técnico:", error);
             res.status(500).json({ message: "Erro interno no servidor." });
@@ -64,8 +67,8 @@ class PedidoChamadoController {
             const pedidos = await PedidoChamado.findAll({
                 where: { status: 'pendente' },
                 include: [
-                    { 
-                        model: Chamado, 
+                    {
+                        model: Chamado,
                         as: 'chamado',
                         attributes: ['id', 'titulo', 'numero_patrimonio']
                     },
@@ -126,8 +129,8 @@ class PedidoChamadoController {
 
                 await PedidoChamado.update(
                     { status: 'recusado' },
-                    { 
-                        where: { 
+                    {
+                        where: {
                             chamado_id: pedido.chamado_id,
                             status: 'pendente'
                         },
