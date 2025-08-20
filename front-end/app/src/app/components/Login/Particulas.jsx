@@ -13,8 +13,9 @@ export default function ParticlesFundo() {
     <Particles
       id="tsparticles"
       init={particlesInit}
+      className="h-full w-full"
       options={{
-        fullScreen: { enable: true, zIndex: -1 },
+        fullScreen: { enable: false }, 
         background: {
           color: "#a90000",
         },
@@ -43,12 +44,12 @@ export default function ParticlesFundo() {
             enable: true,
             distance: 130,
             color: "#ffffff",
-            opacity: 0.6,        
-            width: 1.2,       
+            opacity: 0.6,
+            width: 1.2,
             triangles: {
               enable: true,
               color: "#ffffff",
-              opacity: 0.07,     
+              opacity: 0.07,
             },
           },
           move: {
@@ -62,7 +63,6 @@ export default function ParticlesFundo() {
           events: {
             onHover: {
               enable: false,
-            //   mode: "repulse",
             },
             resize: true,
           },
