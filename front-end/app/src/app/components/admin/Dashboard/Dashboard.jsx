@@ -9,7 +9,7 @@ import GerenciarChamados from '../GerenciarChamados/GerenciarChamados';
 import ChamadosAtribuidos from '../ChamadosAtribuidos/ChamadosAtribuidos'
 import Relatorio from '../Relatorios/Relatorios'
 import AbrirChamado from '../AbrirChamado/Chamado'
-import Mensagens from '../Contato/Mensagens'
+import Mensagens from '../Contato/PainelChatAdmin'
 import ProfileInfo from './ProfileInfo';
 
 export default function Dashboard() {

@@ -16,7 +16,7 @@ import Inicio from '../Inicio/Inicio';
 import Chamado from '../AbrirChamado/Chamado';
 import MeusChamados from '../MeusChamados/MinhasPools';
 import InstrucoesRapidas from '../Instrucoes/page';
-import Contato from '../Contato/Contato';
+import Contato from '../Contato/ChatUsuario';
 import ProfileInfo from './ProfileInfo';
 
 export default function Dashboard() {
