@@ -48,7 +48,6 @@ export default function Chamado({ funcionario }) {
     const newErros = {};
     if (titulo.trim().length < 5) newErros.titulo = 'Título precisa ter ao menos 5 caracteres.';
     if (descricao.trim().length < 10) newErros.descricao = 'Descrição precisa ter ao menos 10 caracteres.';
-    if (!patrimonio.trim()) newErros.patrimonio = 'O número de patrimônio é obrigatório.';
     if (!poolId) newErros.poolId = 'Selecione um tipo de solicitação.';
     setErros(newErros);
     return Object.keys(newErros).length === 0;

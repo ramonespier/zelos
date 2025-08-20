@@ -1,8 +1,10 @@
-
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, CheckCircle, AlertTriangle, Info, X } from 'lucide-react';
+import { Bell, CheckCircle, Info, X } from 'lucide-react';
+// Importação necessária para formatação de data amigável
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 export default function Notifications({
   notifications,
@@ -13,10 +15,8 @@ export default function Notifications({
   setNotificationsOpen,
   notificationsRef
 }) {
+  // Ícones padrões para as notificações
   const notificationAssets = {
-    success: { icon: <CheckCircle className="w-5 h-5 text-green-500" /> },
-    warning: { icon: <AlertTriangle className="w-5 h-5 text-yellow-500" /> },
-    info: { icon: <Info className="w-5 h-5 text-blue-500" /> },
     default: { icon: <Bell className="w-5 h-5 text-gray-500" /> }
   };
 
@@ -29,7 +29,7 @@ export default function Notifications({
         whileTap={{ scale: 0.9 }}
         aria-label="Notificações"
       >
-        <Bell className="w-6 h-6 cursor-pointer " />
+        <Bell className="w-6 h-6 cursor-pointer" />
         {unreadNotificationsCount > 0 && (
           <motion.span
             initial={{ scale: 0 }}
@@ -45,7 +45,7 @@ export default function Notifications({
       <AnimatePresence>
         {isNotificationsOpen && (
           <>
-            {/* Overlay para mobile */}
+            {/* Overlay para fechar em telas menores */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.5 }}
@@ -62,7 +62,7 @@ export default function Notifications({
               transition={{ duration: 0.2, ease: "easeInOut" }}
               className="fixed inset-x-0 top-16 mx-auto w-[95vw] max-w-sm sm:max-w-md md:max-w-lg lg:fixed lg:right-4 lg:top-16 lg:inset-x-auto lg:mx-0 lg:w-96 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden"
             >
-              {/* Cabeçalho */}
+              {/* Cabeçalho do Dropdown */}
               <div className="flex justify-between items-center p-4 border-b border-gray-200">
                 <div className="flex items-center">
                   <h3 className="font-bold text-lg text-gray-800">Notificações</h3>
@@ -76,7 +76,7 @@ export default function Notifications({
                   {notifications.length > 0 && (
                     <button
                       onClick={limparTodasNotificacoes}
-                      className="text-sm text-red-600 hover:text-red-800 font-medium transition hidden sm:block cursor-pointer  "
+                      className="text-sm text-red-600 hover:text-red-800 font-medium transition hidden sm:block cursor-pointer"
                     >
                       Limpar tudo
                     </button>
@@ -92,26 +92,32 @@ export default function Notifications({
 
               {/* Lista de notificações com scroll */}
               <div className="max-h-[calc(100vh-10rem)] lg:max-h-[70vh] overflow-y-auto">
-                {notifications.length > 0 ? (
+                {notifications && notifications.length > 0 ? (
                   notifications.map(n => {
-                    const assets = notificationAssets[n.type] || notificationAssets.default;
+                    const assets = notificationAssets.default;
                     return (
                       <motion.div
                         key={n.id}
                         onClick={() => marcarComoLida(n.id)}
-                        whileHover={{ scale: 1.005 }}
-                        className="flex items-start p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors duration-150"
+                        whileHover={{ backgroundColor: '#f9fafb' }}
+                        className={`flex items-start p-4 border-b border-gray-100 cursor-pointer transition-colors duration-150 ${!n.lida ? 'bg-red-50' : 'bg-white'}`}
                       >
                         <div className="flex-shrink-0 mr-3 mt-0.5">
                           {assets.icon}
                         </div>
                         <div className="flex-grow min-w-0">
-                          <p className="font-semibold text-gray-800 truncate">{n.title}</p>
-                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">{n.message}</p>
-                          <p className="text-xs text-gray-400 mt-2">{n.time}</p>
+                          {/* CORREÇÃO: Usa 'n.mensagem' para o texto principal */}
+                          <p className={`text-sm leading-relaxed ${!n.lida ? 'font-semibold text-gray-800' : 'text-gray-600'}`}>
+                            {n.mensagem}
+                          </p>
+                          {/* CORREÇÃO: Formata a data de 'n.criado_em' */}
+                          <p className="text-xs text-gray-400 mt-2">
+                            {formatDistanceToNow(new Date(n.criado_em), { addSuffix: true, locale: ptBR })}
+                          </p>
                         </div>
-                        {!n.read && (
-                          <div className="ml-3 flex-shrink-0">
+                        {/* Indicador de "não lida" */}
+                        {!n.lida && (
+                          <div className="ml-3 mt-1 flex-shrink-0">
                             <div className="w-2.5 h-2.5 bg-red-500 rounded-full" title="Não lida" />
                           </div>
                         )}

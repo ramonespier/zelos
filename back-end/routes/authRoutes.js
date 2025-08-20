@@ -24,8 +24,9 @@ router.post('/login', (req, res, next) => {
       username: DEV_USER,
       nome: 'Usuário Desenvolvedor',
       email: 'dev@local.com',
-      funcao: 'admin', // Dê a ele o admin de admin para facilitar os testes
+      funcao: 'admin', // Dê a ele admin de admin para facilitar os testes
     };
+    
 
     // 2. Gere o token para este usuário falso.
     const token = AuthController.gerarToken(mockUsuario);
@@ -57,9 +58,10 @@ router.post('/login', (req, res, next) => {
 
       // aqui estou fazendo com que 3 users tenha o padrao de acesso do sistema
       let funcao = 'usuario';
-      if (user.sAMAccountName === '24250492') funcao = 'admin';
+      if (user.sAMAccountName === '24250492') funcao = 'usuario';
       // if (user.sAMAccountName === '24250469') funcao = 'tecnico';
-      if (user.sAMAccountName === '24250246') funcao = 'usuario';
+      if (user.sAMAccountName === '24250246') funcao = 'admin';
+      // xqMeBX
       if (user.sAMAccountName === '00000000') funcao = 'tecnico';
 
       // aqui estou bucando e se não estiver cadastrado no meu banco eu crio

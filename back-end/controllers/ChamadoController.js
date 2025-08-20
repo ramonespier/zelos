@@ -34,7 +34,7 @@ class ChamadoController {
                 include: [
                     { association: 'tecnico', required: false },
                     { association: 'pool' },
-                    { association: 'usuario' } 
+                    { association: 'usuario' }
                 ]
             });
             if (!chamado) {
@@ -47,52 +47,59 @@ class ChamadoController {
         }
     }
 
+    // /controllers/ChamadoController.js
+
     static async criar(req, res) {
         try {
             const { titulo, numero_patrimonio, descricao, pool_id } = req.body;
-            
-            // req.file vem do middleware 'multer'
+
             const img_url = req.file ? `/uploads/${req.file.filename}` : null;
 
-            // validação de campos obrigatórios
-            if (!titulo || !numero_patrimonio || !descricao || !pool_id) {
-                return res.status(400).json({ message: 'Todos os campos são obrigatórios: Título, Patrimônio, Tipo e Descrição.' });
+            // Validação dos campos que são sempre obrigatórios
+            if (!titulo || !descricao || !pool_id) {
+                return res.status(400).json({ message: 'Campos obrigatórios faltando: Título, Descrição e Tipo de Solicitação.' });
             }
 
-            // validação se o equipamento existe
-            const equipamento = await Equipamento.findByPk(numero_patrimonio);
-            if (!equipamento) {
-                return res.status(404).json({ message: `Equipamento com o patrimônio "${numero_patrimonio}" não foi encontrado. Verifique o número digitado.` });
-            }
-            
-            // validação de chamado duplicado 
-            const chamadoExistente = await Chamado.findOne({
-                where: {
-                    numero_patrimonio,
-                    status: ['aberto', 'em andamento'] // evita chamado duplicado que não seja 'concluido' ou 'cancelado'
+
+            // Só executa as validações de patrimônio se ele for fornecido
+            if (numero_patrimonio && numero_patrimonio.trim() !== '') {
+
+                // 1. Verifica se o equipamento existe
+                const equipamento = await Equipamento.findByPk(numero_patrimonio);
+                if (!equipamento) {
+                    return res.status(404).json({ message: `Equipamento com o patrimônio "${numero_patrimonio}" não foi encontrado. Verifique o número ou deixe o campo em branco.` });
                 }
-            });
-            if (chamadoExistente) {
-                return res.status(400).json({ message: 'Já existe um chamado ativo (aberto ou em andamento) para este equipamento.' });
+
+                // 2. Verifica se já existe um chamado ativo para este equipamento
+                const chamadoExistente = await Chamado.findOne({
+                    where: {
+                        numero_patrimonio: numero_patrimonio,
+                        status: ['aberto', 'em andamento']
+                    }
+                });
+                if (chamadoExistente) {
+                    return res.status(400).json({ message: 'Já existe um chamado ativo para este equipamento.' });
+                }
             }
-            
-            // 4. Criação do chamado no banco de dados
+
+            // Cria o chamado. Se numero_patrimonio for uma string vazia, salva como null.
             const chamado = await Chamado.create({
                 titulo,
-                numero_patrimonio,
+                numero_patrimonio: numero_patrimonio || null,
                 descricao,
                 pool_id,
                 img_url,
-                usuario_id: req.user.id, 
+                usuario_id: req.user.id,
             });
 
             res.status(201).json(chamado);
+
         } catch (err) {
             console.error("Erro no controller ao criar chamado:", err);
             res.status(500).json({ message: 'Ocorreu um erro interno ao processar sua solicitação.' });
         }
     }
-    
+
     static async atribuir(req, res) {
         try {
             const { id } = req.params;

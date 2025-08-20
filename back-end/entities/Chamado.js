@@ -18,7 +18,7 @@ Chamado.init({
     },
     numero_patrimonio: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
         references: { model: Equipamento, key: 'patrimonio' },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',

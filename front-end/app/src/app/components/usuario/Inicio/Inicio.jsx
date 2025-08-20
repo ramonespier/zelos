@@ -20,6 +20,7 @@ export default function Inicio({ onAbrirChamado }) {
     { question: 'Posso anexar documentos?', answer: 'Sim, é possível anexar imagens e documentos para ajudar na análise do problema.' },
     { question: 'Qual o tempo médio de resposta?', answer: 'Nosso tempo médio de resposta é de até 24 horas úteis.' },
     { question: 'Como acompanhar meu chamado?', answer: 'Você pode ver seus chamados na seção "Meus chamados" após fazer login.' },
+    { question: 'Como eu envio uma mensagem para o suporte?', answer: 'Você pode enviar uma mensagem para nossa equipe na aba "Contato", assim que retornarmos, irá aparecer uma nova notificação. ' },
   ];
 
   return (
