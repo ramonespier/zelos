@@ -40,6 +40,13 @@ router.patch('/:id/status',
     ChamadoController.status 
 );
 
+router.patch('/:id',
+    AuthMiddleware.verifyToken,
+    permitir(['admin', 'tecnico']),
+    ChamadoController.atualizar
+);
+
+
 router.patch('/:id/fechar',
     AuthMiddleware.verifyToken,         
     permitir(['admin']),

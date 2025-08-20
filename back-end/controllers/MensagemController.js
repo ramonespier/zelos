@@ -1,78 +1,122 @@
-import Mensagem from '../entities/Mensagem.js';
-import Usuario from '../entities/Usuario.js';
+import Mensagem from "../entities/Mensagem.js";
+import Usuario from "../entities/Usuario.js";
+import { Sequelize } from "sequelize";
 
-class MensagemController {
 
-    // usuário envia mensagem
-    static async criar(req, res) {
-        try {
-            const { conteudo } = req.body;
-            const usuario_id = req.user.id; // usuário logado
+export const getMinhasMensagens = async (req, res) => {
+    try {
+        const usuarioId = req.user.id; 
 
-            if (!conteudo) {
-                return res.status(400).json({ message: 'Conteúdo obrigatório' });
+        const mensagens = await Mensagem.findAll({
+            where: { usuario_id: usuarioId },
+            include: [
+                { model: Usuario, as: "usuario", attributes: ["id", "nome"] },
+                { model: Usuario, as: "admin", attributes: ["id", "nome", "funcao"] }
+            ],
+            order: [["criado_em", "ASC"]]
+        });
+        res.status(200).json(mensagens);
+    } catch (error) {
+        console.error("Erro ao buscar mensagens do usuário:", error);
+        res.status(500).json({ error: "Erro interno ao buscar mensagens." });
+    }
+};
+
+
+export const sendMensagem = async (req, res) => {
+    try {
+        const remetente = req.user;
+        const { conteudo, conversaUsuarioId } = req.body; 
+
+        let data;
+
+        // Se for admin ou técnico respondendo...
+        if (['admin', 'tecnico'].includes(remetente.funcao)) {
+            if (!conversaUsuarioId) {
+                return res.status(400).json({ error: "É necessário especificar o ID do usuário da conversa." });
             }
-
-            const mensagem = await Mensagem.create({
-                usuario_id: usuario_id,
+            data = {
                 conteudo,
-                status: 'não lida'
-            });
-
-            res.status(201).json(mensagem);
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: 'Erro ao enviar mensagem' });
+                usuario_id: conversaUsuarioId, 
+                admin_id: remetente.id,        
+            };
+        } else {
+      
+            data = {
+                conteudo,
+                usuario_id: remetente.id,
+                admin_id: null,
+            };
         }
+
+        const novaMensagem = await Mensagem.create(data);
+        const mensagemCriada = await Mensagem.findByPk(novaMensagem.id, {
+            include: [
+                { model: Usuario, as: "usuario", attributes: ["id", "nome"] },
+                { model: Usuario, as: "admin", attributes: ["id", "nome", "funcao"] }
+            ]
+        });
+
+        res.status(201).json(mensagemCriada);
+
+    } catch (error) {
+        console.error("Erro ao enviar mensagem:", error);
+        res.status(500).json({ error: "Erro interno ao enviar mensagem." });
     }
+};
 
-    // admin lista todas mensagens
-    static async listar(req, res) {
-        try {
-            const mensagens = await Mensagem.findAll({
-                include: ['usuario'],
-                order: [['created_at', 'DESC']]
-            });
-            res.json(mensagens);
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: 'Erro ao listar mensagens' });
-        }
+
+export const getConversasAdmin = async (req, res) => {
+    
+    if (!['admin', 'tecnico'].includes(req.user.funcao)) {
+        return res.status(403).json({ error: "Acesso negado." });
     }
-
-    // admin busca mensagem por ID
-    static async buscarPorId(req, res) {
-        try {
-            const { id } = req.params;
-            const mensagem = await Mensagem.findByPk(id, { include: ['usuario'] });
-
-            if (!mensagem) {
-                return res.status(404).json({ message: 'Mensagem não encontrada' });
-            }
-
-            res.json(mensagem);
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: 'Erro ao buscar mensagem' });
-        }
+    try {
+        const conversas = await Mensagem.findAll({
+            attributes: [
+                'usuario_id',
+                [Sequelize.fn('MAX', Sequelize.col('Mensagem.conteudo')), 'ultima_mensagem'],
+                [Sequelize.fn('MAX', Sequelize.col('Mensagem.criado_em')), 'data_ultima_mensagem']
+            ],
+           
+            group: [
+                'usuario_id',
+                'usuario.id',
+                'usuario.nome'
+            ],
+            order: [[Sequelize.fn('MAX', Sequelize.col('Mensagem.criado_em')), 'DESC']],
+            include: [{
+                model: Usuario,
+                as: 'usuario',
+                attributes: ['id', 'nome'],
+                required: true 
+            }]
+        });
+        res.status(200).json(conversas);
+    } catch (error) {
+      
+        console.error("Erro detalhado ao buscar conversas:", error);
+        res.status(500).json({ error: "Erro interno ao buscar conversas." });
     }
+};
 
-
-    // admin deleta mensagem
-    static async deletar(req, res) {
-        try {
-            const { id } = req.params;
-            const mensagem = await Mensagem.findByPk(id);
-
-            if (!mensagem) return res.status(404).json({ message: 'Mensagem não encontrada' });
-
-            await mensagem.destroy();
-            res.json({ message: 'Mensagem deletada com sucesso' });
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: 'Erro ao deletar mensagem' });
-        }
+export const getMensagensPorUsuarioAdmin = async (req, res) => {
+    if (!['admin', 'tecnico'].includes(req.user.funcao)) {
+        return res.status(403).json({ error: "Acesso negado." });
     }
-}
-
-export default MensagemController;
+    try {
+        const { usuarioId } = req.params;
+        const mensagens = await Mensagem.findAll({
+            where: { usuario_id: usuarioId },
+            include: [
+                { model: Usuario, as: "usuario", attributes: ["id", "nome"] },
+                { model: Usuario, as: "admin", attributes: ["id", "nome", "funcao"] }
+            ],
+            order: [["criado_em", "ASC"]]
+        });
+        res.status(200).json(mensagens);
+    } catch (error) {
+        console.error("Erro ao buscar mensagens do usuário (admin):", error);
+        res.status(500).json({ error: "Erro interno ao buscar mensagens." });
+    }
+}; 

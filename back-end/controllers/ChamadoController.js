@@ -41,6 +41,34 @@ class ChamadoController {
         }
     }
 
+    // dentro da classe ChamadoController
+
+    static async atualizar(req, res) {
+        try {
+            const { id } = req.params;
+            const { titulo, tecnico_id, status } = req.body;
+
+            const chamado = await Chamado.findByPk(id);
+            if (!chamado) {
+                return res.status(404).json({ message: 'Chamado não encontrado' });
+            }
+
+            // Atualiza apenas os campos que foram fornecidos
+            if (titulo) chamado.titulo = titulo;
+            if (tecnico_id) chamado.tecnico_id = tecnico_id;
+            if (status) chamado.status = status;
+
+            await chamado.save();
+            // Recarrega com as associações para retornar o dado completo
+            await chamado.reload({ include: ['tecnico'] });
+
+            res.status(200).json(chamado);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: "Erro ao atualizar chamado" });
+        }
+    }   
+
 
     static async criar(req, res) {
         try {

@@ -13,6 +13,20 @@ class UsuarioController {
         }
     }
 
+    static async listarTecnicos(req, res) {
+        try {
+            const tecnicos = await Usuario.findAll({
+                where: {
+                    funcao: 'tecnico'
+                },
+                    attributes: ['id', 'nome']
+            });
+            res.json(tecnicos);
+        } catch (err) {
+            console.error("Erro ao listar técnicos:", err);
+            res.status(500).json({ message: "Erro ao buscar técnicos" });
+        }
+    }
     // buscar user por id
     static async buscarPorId(req, res) {
         try {
