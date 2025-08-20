@@ -32,8 +32,8 @@ Chamado.init({
     img_url: {
         type: DataTypes.STRING(1000)
     },
-    status: {
-        type: DataTypes.ENUM('aberto', 'em andamento', 'concluido'),
+     status: {
+        type: DataTypes.ENUM('aberto', 'em andamento', 'concluido', 'cancelado'),
         defaultValue: 'aberto',
     },
     usuario_id: {

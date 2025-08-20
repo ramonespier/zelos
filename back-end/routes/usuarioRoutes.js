@@ -16,6 +16,12 @@ router.get('/',
     UsuarioController.listar
 );
 
+router.get('/tecnicos',
+    // AuthMiddleware.verifyToken,
+    // permitir(['admin']),
+    UsuarioController.listarTecnicos
+);
+
 router.get('/:id',
     // AuthMiddleware.verifyToken,
     // permitir(['admin', 'usuario', 'tecnico']),
