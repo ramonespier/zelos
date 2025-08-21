@@ -57,7 +57,7 @@ export default function MinhasPools({ funcionario }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
+    <div className="min-h-screen py-10">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <header className="text-center mb-10">
           <h1 className="text-4xl font-extrabold text-gray-800 tracking-tight">Meus Chamados</h1>

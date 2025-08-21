@@ -15,7 +15,6 @@ const tabs = [
   { id: 'inicio', label: 'Início', icon: HomeIcon },
   { id: 'chamado', label: 'Solicitar chamado', icon: PlusCircleIcon },
   { id: 'meus', label: 'Minhas solicitações', icon: ClipboardDocumentListIcon },
-  { id: 'contato', label: 'Contato', icon: PhoneIcon },
   { id: 'info', label: 'Perfil', icon: UserCircleIcon },
 ];
 

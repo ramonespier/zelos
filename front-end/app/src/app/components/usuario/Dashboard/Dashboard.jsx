@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
+import Chat from '../Contato/Chatfixo';
 
 // API para fazer requisições
 import api from '../../../lib/api'; // Ajuste o caminho se necessário
@@ -159,6 +160,8 @@ export default function Dashboard() {
             </motion.div>
           </AnimatePresence>
         </main>
+
+        <Chat/>
       </div>
     </div>
   );
