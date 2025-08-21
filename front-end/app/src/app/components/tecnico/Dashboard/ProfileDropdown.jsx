@@ -33,7 +33,6 @@ export default function ProfileDropdown({ funcionario, getInitials, isProfileOpe
           >
             <div className="p-4 border-b">
               <p className="font-semibold text-gray-800">{funcionario.nome}</p>
-              <p className="text-sm text-gray-500">Matrícula: {funcionario.matricula}</p>
             </div>
             
             {/* O onClick deste botão agora chama a função correta de logout */}
