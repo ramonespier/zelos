@@ -18,6 +18,7 @@ const tabs = [
   { id: 'abrir', label: 'Abrir chamados', icon: PlusCircleIcon },
   { id: 'relatorio', label: 'Relatorio', icon: PlusCircleIcon },
   { id: 'pedidos', label: 'Gerenciar Pedidos', icon: PlusCircleIcon },
+  { id: 'fechamento', label: 'Gerenciar fechamento', icon: PlusCircleIcon },
   { id: 'mensagens', label: 'Mensagens', icon: PlusCircleIcon },
   { id: 'perfil', label: 'Perfil', icon: PlusCircleIcon },
 ];

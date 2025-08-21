@@ -55,4 +55,10 @@ router.patch('/:id/fechar',
     ChamadoController.fechar
 );
 
+router.get('/:id/apontamentos',
+    AuthMiddleware.verifyToken,
+    permitir(['admin', 'tecnico']), 
+    ChamadoController.listarApontamentos
+);
+
 export default router;

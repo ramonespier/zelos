@@ -174,6 +174,28 @@ class ChamadoController {
             res.status(500).json({ message: "Erro ao fechar chamado" });
         }
     }
+
+     static async listarApontamentos(req, res) {
+        try {
+            const { id } = req.params; // ID do chamado
+            
+            // Validação para garantir que o chamado existe antes de buscar apontamentos
+            const chamado = await Chamado.findByPk(id);
+            if (!chamado) {
+                return res.status(404).json({ message: "Chamado não encontrado." });
+            }
+
+            const apontamentos = await Apontamento.findAll({
+                where: { chamado_id: id },
+                order: [['criado_em', 'DESC']] // Ordena pelos mais recentes primeiro
+            });
+
+            res.json(apontamentos);
+        } catch (err) {
+            console.error("Erro ao buscar apontamentos:", err);
+            res.status(500).json({ message: 'Erro ao buscar apontamentos.' });
+        }
+    }
 }
 
 export default ChamadoController;

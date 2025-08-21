@@ -27,6 +27,7 @@ export default function Header({
     { id: 'gerenciar', label: 'Gerenciar Chamados' },
     { id: 'atribuidos', label: 'Meus chamados' },
     { id: 'pedidos', label: 'Gerenciar pedidos' },
+    { id: 'fechamento', label: 'Gerenciar fechamento' },
     { id: 'mensagens', label: 'Mensagem' },
     { id: 'relatorio', label: 'Relatórios' },
     { id: 'perfil', label: 'Perfil' },

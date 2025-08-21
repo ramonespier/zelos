@@ -15,6 +15,7 @@ import Header from './Header';
 import Inicio from '../Inicio/Inicio';
 import GerenciarChamados from '../GerenciarChamados/GerenciarChamados';
 import ChamadosAtribuidos from '../ChamadosAtribuidos/ChamadosAtribuidos'
+import GerenciarFechamentos from '../GerenciarFechamento/GerenciarFechamento';
 import Relatorio from '../Relatorios/Relatorios'
 import AbrirChamado from '../AbrirChamado/Chamado'
 import Mensagens from '../Contato/PainelChatAdmin'
@@ -138,6 +139,7 @@ export default function Dashboard() {
             case 'gerenciar': return <GerenciarChamados />;
             case 'atribuidos': return <ChamadosAtribuidos />;
             case 'pedidos': return <GerenciarPedidos />;
+            case 'fechamento': return <GerenciarFechamentos />;
             case 'mensagens': return <Mensagens />;
             case 'relatorio': return <Relatorio />;
             case 'perfil': return <ProfileInfo funcionario={funcionario} getInitials={getInitials} />;
