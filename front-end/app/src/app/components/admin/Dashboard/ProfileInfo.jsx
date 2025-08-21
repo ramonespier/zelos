@@ -12,7 +12,6 @@ export default function ProfileInfo({ funcionario, getInitials }) {
       <div className="space-y-6 text-gray-800">
         <p><strong>Nome:</strong> {funcionario.nome}</p>
         <p><strong>Função:</strong> {funcionario.funcao}</p>
-        <p><strong>Matrícula:</strong> {funcionario.matricula}</p>
       </div>
     </section>
   );

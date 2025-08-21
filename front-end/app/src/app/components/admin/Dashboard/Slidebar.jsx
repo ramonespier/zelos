@@ -18,9 +18,9 @@ import Footer from '../../footer/page'; // Ajuste o caminho se necessário
 const tabs = [
   { id: 'inicio', label: 'Início', icon: HomeIcon },
   { id: 'abrir', label: 'Abrir Chamado', icon: PlusCircleIcon },
-  { id: 'gerenciar', label: 'Gerenciar Chamados', icon: WrenchScrewdriverIcon },
+  { id: 'gerenciar', label: 'Painel de Atribuição', icon: WrenchScrewdriverIcon },
   // <<< O ITEM DE MENU "Chamados Atribuídos" FOI RESTAURADO >>>
-  { id: 'atribuidos', label: 'Chamados Atribuídos', icon: ClipboardDocumentCheckIcon },
+  { id: 'atribuidos', label: 'Gerenciar Chamados', icon: ClipboardDocumentCheckIcon },
   { id: 'pedidos', label: 'Gerenciar Pedidos', icon: FolderArrowDownIcon },
   { id: 'fechamento', label: 'Gerenciar Fechamentos', icon: DocumentCheckIcon },
   { id: 'mensagens', label: 'Mensagens', icon: PaperAirplaneIcon },
@@ -45,7 +45,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
             onClick={() => handleSelecao(id)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
-            className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 ease-in-out cursor-pointer ${
+            className={`w-full flex items-center gap-3 px-0 py-3 rounded-xl transition-all duration-200 ease-in-out cursor-pointer ${
               activeTab === id
                 ? 'bg-red-600 text-white shadow-md font-semibold'
                 : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'

@@ -33,10 +33,8 @@ export default function ProfileDropdown({ funcionario, getInitials, isProfileOpe
           >
             <div className="p-4 border-b">
               <p className="font-semibold text-gray-800">{funcionario.nome}</p>
-              <p className="text-sm text-gray-500">Matrícula: {funcionario.matricula}</p>
             </div>
             
-            {/* <<< 2. O onClick do botão foi alterado para chamar 'handleLogout' diretamente >>> */}
             <button 
               onClick={handleLogout} 
               className="w-full px-4 py-3 text-left cursor-pointer text-red-600 hover:bg-red-50 flex items-center space-x-3 transition-colors"
