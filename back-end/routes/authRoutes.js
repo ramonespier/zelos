@@ -24,7 +24,9 @@ router.post('/login', (req, res, next) => {
       username: DEV_USER,
       nome: 'Usuário Desenvolvedor',
       email: 'dev@local.com',
+      integracao
       funcao: 'usuario', // Dê a ele admin de admin para facilitar os testes
+
     };
     
 
@@ -58,7 +60,7 @@ router.post('/login', (req, res, next) => {
 
       // aqui estou fazendo com que 3 users tenha o padrao de acesso do sistema
       let funcao = 'usuario';
-      if (user.sAMAccountName === '24250492') funcao = 'usuario';
+      if (user.sAMAccountName === '24250492') funcao = 'tecnico';
       // if (user.sAMAccountName === '24250469') funcao = 'tecnico';
       if (user.sAMAccountName === '24250246') funcao = 'tecnico';
       // xqMeBX

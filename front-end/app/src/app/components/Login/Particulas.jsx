@@ -15,31 +15,19 @@ export default function ParticlesFundo() {
       init={particlesInit}
       className="h-full w-full"
       options={{
-        fullScreen: { enable: false }, 
+        fullScreen: { enable: false },
         background: {
-          color: "#a90000",
-        },
-        particles: {
-          number: {
-            value: 70,
-            density: {
-              enable: true,
-              area: 1000,
-            },
-          },
           color: {
-            value: "#ffffff",
+            value: "transparent" 
           },
-          shape: {
-            type: "circle",
-          },
-          opacity: {
-            value: 0.5,
-          },
-          size: {
-            value: 3,
-            random: true,
-          },
+        },
+
+        particles: {
+          number: { value: 70, density: { enable: true, area: 1000, }, },
+          color: { value: "#ffffff", },
+          shape: { type: "circle", },
+          opacity: { value: 0.5, },
+          size: { value: 3, random: true, },
           links: {
             enable: true,
             distance: 130,
@@ -61,9 +49,7 @@ export default function ParticlesFundo() {
         },
         interactivity: {
           events: {
-            onHover: {
-              enable: false,
-            },
+            onHover: { enable: false, },
             resize: true,
           },
         },
