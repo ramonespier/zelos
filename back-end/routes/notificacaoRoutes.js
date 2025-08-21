@@ -34,7 +34,6 @@ router.get('/:id',
 // PATCH /notificacao/:id/lida -> Marcar uma notificação específica como lida
 router.patch('/:id/lida',
     AuthMiddleware.verifyToken,
-    permitir(['admin', 'usuario', 'tecnico']),
     NotificacaoController.marcarComoLida
 );
 

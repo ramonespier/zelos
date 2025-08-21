@@ -4,23 +4,28 @@ import { motion } from 'framer-motion';
 import {
   HomeIcon,
   PlusCircleIcon,
-  ClipboardDocumentListIcon,
-  PhoneIcon,
+  WrenchScrewdriverIcon,
+  FolderArrowDownIcon,
+  DocumentCheckIcon,
+  PaperAirplaneIcon,
+  ChartBarIcon,
   UserCircleIcon,
+  ClipboardDocumentCheckIcon, // <<< Ícone para 'Chamados Atribuídos'
 } from '@heroicons/react/24/outline';
+import Footer from '../../footer/page'; // Ajuste o caminho se necessário
 
-import Footer from '../../footer/page';
-
+// <<< A LISTA DE ABAS FOI CORRIGIDA >>>
 const tabs = [
   { id: 'inicio', label: 'Início', icon: HomeIcon },
-  { id: 'gerenciar', label: 'Gerenciar Chamados', icon: PlusCircleIcon },
-  { id: 'atribuidos', label: 'Chamados Atribuidos', icon: PlusCircleIcon },
-  { id: 'abrir', label: 'Abrir chamados', icon: PlusCircleIcon },
-  { id: 'relatorio', label: 'Relatorio', icon: PlusCircleIcon },
-  { id: 'pedidos', label: 'Gerenciar Pedidos', icon: PlusCircleIcon },
-  { id: 'fechamento', label: 'Gerenciar fechamento', icon: PlusCircleIcon },
-  { id: 'mensagens', label: 'Mensagens', icon: PlusCircleIcon },
-  { id: 'perfil', label: 'Perfil', icon: PlusCircleIcon },
+  { id: 'abrir', label: 'Abrir Chamado', icon: PlusCircleIcon },
+  { id: 'gerenciar', label: 'Gerenciar Chamados', icon: WrenchScrewdriverIcon },
+  // <<< O ITEM DE MENU "Chamados Atribuídos" FOI RESTAURADO >>>
+  { id: 'atribuidos', label: 'Chamados Atribuídos', icon: ClipboardDocumentCheckIcon },
+  { id: 'pedidos', label: 'Gerenciar Pedidos', icon: FolderArrowDownIcon },
+  { id: 'fechamento', label: 'Gerenciar Fechamentos', icon: DocumentCheckIcon },
+  { id: 'mensagens', label: 'Mensagens', icon: PaperAirplaneIcon },
+  { id: 'relatorio', label: 'Relatórios', icon: ChartBarIcon },
+  { id: 'info', label: 'Perfil', icon: UserCircleIcon },
 ];
 
 export default function Sidebar({ activeTab, setActiveTab }) {
@@ -28,14 +33,11 @@ export default function Sidebar({ activeTab, setActiveTab }) {
 
   return (
     <aside className="bg-gradient-to-b from-gray-50 via-white to-gray-50 border-r border-gray-200 flex flex-col w-64 hidden lg:flex h-screen shadow-md">
-      {/* Logo */}
       <div className="h-20 flex items-center justify-center border-b border-gray-200">
         <h1 className="text-2xl font-bold text-red-600 tracking-tight drop-shadow-sm">
-          SENAI Chamados
+          SENAI | Admin
         </h1>
       </div>
-
-      {/* Navegação */}
       <nav className="flex-1 px-4 py-6 space-y-2">
         {tabs.map(({ id, label, icon: Icon }) => (
           <motion.button
@@ -54,8 +56,6 @@ export default function Sidebar({ activeTab, setActiveTab }) {
           </motion.button>
         ))}
       </nav>
-
-      {/* Rodapé */}
       <div className="mt-auto">
         <div className="border-t border-gray-200">
           <Footer />
