@@ -143,7 +143,7 @@ export default function TabelaChamados() {
              <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="bg-white p-5 sm:p-8 rounded-2xl shadow-subtle max-w-7xl mx-auto border border-gray-200/80">
                 <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-200/80 pb-6 mb-6">
                     <div>
-                        <h1 className="text-3xl font-extrabold text-red-600 drop-shadow-md">Gerenciamento de Chamados</h1>
+                        <h1 className="text-3xl font-extrabold text-red-600 drop-shadow-md">Chamados Atribuídos</h1>
                         <p className="text-sm text-gray-600 mt-1">Visualize, edite e gerencie todos os chamados.</p>
                     </div>
                     {/* Link para uma página que não foi enviada, mas mantido caso exista */}

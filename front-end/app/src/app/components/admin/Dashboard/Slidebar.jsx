@@ -10,16 +10,14 @@ import {
   PaperAirplaneIcon,
   ChartBarIcon,
   UserCircleIcon,
-  ClipboardDocumentCheckIcon, // <<< Ícone para 'Chamados Atribuídos'
+  ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline';
 import Footer from '../../footer/page'; // Ajuste o caminho se necessário
 
-// <<< A LISTA DE ABAS FOI CORRIGIDA >>>
 const tabs = [
   { id: 'inicio', label: 'Início', icon: HomeIcon },
   { id: 'abrir', label: 'Abrir Chamado', icon: PlusCircleIcon },
   { id: 'gerenciar', label: 'Painel de Atribuição', icon: WrenchScrewdriverIcon },
-  // <<< O ITEM DE MENU "Chamados Atribuídos" FOI RESTAURADO >>>
   { id: 'atribuidos', label: 'Gerenciar Chamados', icon: ClipboardDocumentCheckIcon },
   { id: 'pedidos', label: 'Gerenciar Pedidos', icon: FolderArrowDownIcon },
   { id: 'fechamento', label: 'Gerenciar Fechamentos', icon: DocumentCheckIcon },
@@ -45,14 +43,15 @@ export default function Sidebar({ activeTab, setActiveTab }) {
             onClick={() => handleSelecao(id)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
-            className={`w-full flex items-center gap-3 px-0 py-3 rounded-xl transition-all duration-200 ease-in-out cursor-pointer ${
+            // <<< MUDANÇA PRINCIPAL AQUI: troquei px-0 por px-4 >>>
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ease-in-out cursor-pointer text-left ${
               activeTab === id
                 ? 'bg-red-600 text-white shadow-md font-semibold'
-                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                : 'text-gray-700 hover:text-gray-900'
             }`}
           >
             <Icon className="w-6 h-6 flex-shrink-0" />
-            <span>{label}</span>
+            <span className="whitespace-nowrap">{label}</span>
           </motion.button>
         ))}
       </nav>
