@@ -12,45 +12,46 @@ import Sidebar from './Slidebar';
 import Header from './Header';
 import ProfileInfo from './ProfileInfo';
 
-// <<< PÁGINAS ESPECÍFICAS DO TÉCNICO >>>
+// Páginas específicas do Técnico
 import InicioTecnico from '../Inicio/InicioTecnico';
-import Contato from '../Contato/ChatUsuario';
+import Contato from '../Contato/ChatUsuario'; // Renomeie se necessário
 import ChamadosAbertos from '../ChamadosAbertos/ChamadosAbertos';
 import ChamadosAtribuidos from '../ChamadosAtribuidos/ChamadosAtribuidos';
 
 export default function Dashboard() {
-  // Estados de navegação e autenticação
   const [activeTab, setActiveTab] = useState('inicio');
   const [funcionario, setFuncionario] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Estado e lógica de notificações (reutilizada da versão do usuário)
   const [notifications, setNotifications] = useState([]);
-  
   const router = useRouter();
 
-  // Hooks de autenticação e notificações (sem alterações)
+  // Hooks de autenticação e busca inicial de notificações
   useEffect(() => {
     const token = Cookies.get('token');
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        // Garante que o usuário logado é realmente um técnico
         if (decoded.funcao !== 'tecnico') {
-          // Poderia redirecionar para um dashboard apropriado ou para o login
-          router.push('/login'); 
+          router.push('/login');
+          return;
         }
         setFuncionario(decoded);
-      } catch (e) { router.push('/login'); }
-    } else { router.push('/login'); }
+      } catch (e) {
+        Cookies.remove('token');
+        router.push('/login');
+      }
+    } else {
+      router.push('/login');
+    }
     setIsLoading(false);
   }, [router]);
-  
+
   useEffect(() => {
     if (!funcionario) return;
     const fetchNotifications = async () => {
       try {
-        setNotifications(await api.get('/notificacao').then(res => res.data));
+        const response = await api.get('/notificacao');
+        setNotifications(response.data);
       } catch (e) { console.error("Erro ao buscar notificações", e); }
     };
     fetchNotifications();
@@ -59,32 +60,68 @@ export default function Dashboard() {
   }, [funcionario]);
 
 
-  // Função para salvar a especialidade (a ser usada pelo ProfileInfo)
+  // Função para salvar a especialidade
   const handleSaveEspecialidade = async (especialidade) => {
     if (!funcionario || !funcionario.id) return;
     try {
-      // Rota PATCH para atualizar o usuário (conforme seu usuarioRoutes.js)
       const response = await api.patch(`/usuarios/${funcionario.id}`, { especialidade });
-      // Atualiza o estado local para refletir a mudança instantaneamente
       setFuncionario(prev => ({ ...prev, especialidade: response.data.especialidade }));
     } catch (error) {
       console.error("Falha ao atualizar especialidade:", error);
-      // Re-lança o erro para que o componente filho possa saber que falhou
       throw error;
     }
   };
 
-  // Funções de notificações
-  const marcarComoLida = (id) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, lida: true } : n));
-  const limparTodasNotificacoes = () => setNotifications([]); // Implementar chamada à API se necessário
+  // ==========================================================
+  // <<< INÍCIO DAS CORREÇÕES DAS FUNÇÕES DE NOTIFICAÇÃO >>>
+  // ==========================================================
+
+  const marcarComoLida = async (notificationId) => {
+      const notification = notifications.find(n => n.id === notificationId);
+      if (!notification || notification.lida) return;
+
+      // 1. Atualização Otimista: Muda a UI imediatamente
+      setNotifications(prev => 
+          prev.map(n => (n.id === notificationId ? { ...n, lida: true } : n))
+      );
+
+      try {
+          // 2. Chamada à API para salvar a mudança no banco de dados
+          await api.patch(`/notificacao/${notificationId}/lida`);
+      } catch (error) {
+          console.error("Erro ao marcar notificação como lida:", error);
+          // 3. Rollback: Se a API falhar, desfaz a mudança na UI
+          setNotifications(prev => 
+              prev.map(n => (n.id === notificationId ? { ...n, lida: false } : n))
+          );
+          alert("Não foi possível marcar a notificação como lida. Tente novamente.");
+      }
+  };
+
+  const limparTodasNotificacoes = async () => {
+      const backup = [...notifications];
+      setNotifications([]);
+      try {
+          // A rota DELETE /notificacao já remove todas as do usuário logado
+          await api.delete('/notificacao');
+      } catch (error) {
+          console.error("Erro ao limpar notificações:", error);
+          setNotifications(backup); // Restaura em caso de erro
+          alert("Não foi possível limpar as notificações.");
+      }
+  };
+
+  // ==========================================================
+  // <<< FIM DAS CORREÇÕES >>>
+  // ==========================================================
+  
   const getInitials = (name = "") => name.split(' ').map(n => n[0]).join('').toUpperCase();
 
-  // Tela de carregamento
+  // Renderização
   if (isLoading || !funcionario) {
-    return <div>Carregando Dashboard do Técnico...</div>;
+    return <div className="flex h-screen w-full items-center justify-center">Carregando Dashboard do Técnico...</div>;
   }
   
-  // <<< LÓGICA DE RENDERIZAÇÃO ESPECÍFICA DO TÉCNICO >>>
   const renderContent = () => {
     switch(activeTab) {
       case 'inicio': return <InicioTecnico />;
@@ -95,10 +132,10 @@ export default function Dashboard() {
         <ProfileInfo 
           funcionario={funcionario} 
           getInitials={getInitials}
-          onSaveEspecialidade={handleSaveEspecialidade} // Passa a função para salvar
+          onSaveEspecialidade={handleSaveEspecialidade}
         />
       );
-      default: return null;
+      default: return <InicioTecnico />;
     }
   };
 
@@ -111,6 +148,7 @@ export default function Dashboard() {
           setActiveTab={setActiveTab}
           notifications={notifications}
           marcarComoLida={marcarComoLida}
+          limparTodasNotificacoes={limparTodasNotificacoes}
           unreadNotificationsCount={notifications.filter(n => !n.lida).length}
           funcionario={funcionario}
           getInitials={getInitials}
