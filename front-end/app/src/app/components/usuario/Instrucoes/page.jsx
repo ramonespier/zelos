@@ -7,7 +7,7 @@ export default function InstrucoesRapidas({ isOpen, onClose }) {
 
     return (
         <div
-            className="fixed inset-0 bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50"
             onClick={onClose}
         >
             <motion.div
