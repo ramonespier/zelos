@@ -39,35 +39,35 @@ class NotificacaoController {
         }
     }
 
-    // ===== MÉTODO CORRIGIDO E ATIVADO =====
-    // Marca uma única notificação como lida
     static async marcarComoLida(req, res) {
         try {
             const { id } = req.params;
             const usuario_id = req.user.id;
+
             const notificacao = await Notificacao.findOne({
-                where: {
-                    id: id,
-                    usuario_id: usuario_id
-                }
+                where: { id, usuario_id }
             });
 
             if (!notificacao) {
                 return res.status(404).json({ message: 'Notificação não encontrada ou não pertence a você.' });
             }
-
-            // CORREÇÃO: Altera a propriedade 'lida' para 'true'
+            
+            if (notificacao.lida) {
+                return res.status(200).json(notificacao);
+            }
+            
             notificacao.lida = true;
+
             await notificacao.save();
 
-            res.json(notificacao);
+            res.status(200).json(notificacao);
+
         } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: 'Erro ao marcar notificação como lida' });
+            console.error("Erro ao marcar notificação como lida:", err);
+            res.status(500).json({ message: 'Erro ao atualizar notificação' });
         }
     }
     
-    // Deletar uma notificação específica
     static async deletar(req, res) {
         try {
             const { id } = req.params;

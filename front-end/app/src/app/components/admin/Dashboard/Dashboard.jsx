@@ -7,34 +7,29 @@ import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 
 // API para fazer requisições
-import api from '../../../lib/api'; // Ajuste o caminho se necessário
+import api from '../../../lib/api'; 
 
-// Seus componentes de layout e páginas do dashboard de admin
+// Componentes de layout do Dashboard
 import Sidebar from './Slidebar';
 import Header from './Header';
-import Inicio from '../Inicio/Inicio';
-import GerenciarChamados from '../GerenciarChamados/GerenciarChamados';
-import ChamadosAtribuidos from '../ChamadosAtribuidos/ChamadosAtribuidos'
-import GerenciarFechamentos from '../GerenciarFechamento/GerenciarFechamento';
-import Relatorio from '../Relatorios/Relatorios'
-import AbrirChamado from '../AbrirChamado/Chamado'
-import Mensagens from '../Contato/PainelChatAdmin'
-import GerenciarPedidos from '../GerenciarPedidos/GerenciarPedidos';
 import ProfileInfo from './ProfileInfo';
+
+// Componentes de conteúdo (Páginas do Admin)
+import Inicio from '../Inicio/Inicio'; 
+import GerenciarChamados from '../GerenciarChamados/GerenciarChamados';
+import ChamadosAtribuidos from '../ChamadosAtribuidos/ChamadosAtribuidos';
+import GerenciarFechamentos from '../GerenciarFechamento/GerenciarFechamento';
+import Relatorio from '../Relatorios/Relatorios';
+import AbrirChamado from '../AbrirChamado/Chamado';
+import Mensagens from '../Contato/PainelChatAdmin';
+import GerenciarPedidos from '../GerenciarPedidos/GerenciarPedidos';
 
 export default function Dashboard() {
     // === ESTADOS DO COMPONENTE ===
-
-    // Navegação
     const [activeTab, setActiveTab] = useState('inicio');
-
-    // Autenticação e Dados do Usuário
     const [funcionario, setFuncionario] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-
-    // Notificações
     const [notifications, setNotifications] = useState([]);
-
     const router = useRouter();
 
     // === LÓGICA DE AUTENTICAÇÃO E BUSCA INICIAL ===
@@ -43,57 +38,39 @@ export default function Dashboard() {
         if (token) {
             try {
                 const decodedToken = jwtDecode(token);
-
-                // Verificação de segurança: redireciona se não for admin ou técnico
-                if (!['admin', 'tecnico'].includes(decodedToken.funcao)) {
-                    console.error("Acesso não autorizado, redirecionando para o login.");
-                    Cookies.remove('token');
+                if (decodedToken.funcao !== 'admin') {
                     router.push('/login');
-                    return; // Interrompe a execução
+                    return;
                 }
-                
-                setFuncionario({
-                    id: decodedToken.id,
-                    nome: decodedToken.nome,
-                    funcao: decodedToken.funcao,
-                    email: decodedToken.email,
-                    matricula: decodedToken.username,
-                });
+                setFuncionario(decodedToken);
             } catch (error) {
-                console.error("Token inválido ou expirado, redirecionando:", error);
+                console.error("Token inválido, redirecionando:", error);
                 Cookies.remove('token');
                 router.push('/login');
             }
         } else {
             router.push('/login');
         }
-        setIsLoading(false); // Finaliza o carregamento após verificar o token
+        setIsLoading(false);
     }, [router]);
 
     // === LÓGICA DE NOTIFICAÇÕES (Polling) ===
     useEffect(() => {
-        // Só executa se a verificação de login já foi concluída e foi bem-sucedida
         if (!funcionario) return; 
-
         const fetchNotifications = async () => {
             try {
-                // Supondo que sua rota de notificações já retorna as notificações certas
                 const response = await api.get('/notificacao'); 
                 setNotifications(response.data);
             } catch (error) {
                 console.error("Erro ao buscar notificações:", error.response?.data || error.message);
             }
         };
-
-        fetchNotifications(); // Busca na primeira vez
-        const intervalId = setInterval(fetchNotifications, 15000); // Busca a cada 15 segundos
-
-        // Limpa o intervalo quando o componente é desmontado para evitar memory leaks
+        fetchNotifications();
+        const intervalId = setInterval(fetchNotifications, 15000);
         return () => clearInterval(intervalId); 
-    }, [funcionario]); // Roda essa lógica sempre que 'funcionario' mudar
+    }, [funcionario]);
 
     // === FUNÇÕES AUXILIARES ===
-
     const getInitials = (name = '') => {
         if (!name) return '?';
         return name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -102,48 +79,50 @@ export default function Dashboard() {
     const marcarComoLida = async (notificationId) => {
         const notification = notifications.find(n => n.id === notificationId);
         if (!notification || notification.lida) return;
-        
-        // Atualiza a UI imediatamente para uma melhor experiência do usuário
         setNotifications(prev => prev.map(n => (n.id === notificationId ? { ...n, lida: true } : n)));
-        
         try {
-            // Envia a requisição para o back-end para persistir a mudança
             await api.patch(`/notificacao/${notificationId}/lida`); 
         } catch (error) {
             console.error("Erro ao marcar notificação como lida:", error);
-            // Opcional: Reverte a mudança na UI se a API falhar
             setNotifications(prev => prev.map(n => (n.id === notificationId ? { ...n, lida: false } : n)));
         }
     };
-    
-    // Contagem de notificações não lidas para o Header
-    const unreadNotificationsCount = notifications.filter(n => !n.lida).length;
 
+    const limparTodasNotificacoes = async () => {
+        const backupNotifications = [...notifications];
+        setNotifications([]);
+        try {
+            await api.delete('/notificacao');
+        } catch (error) {
+            console.error("Erro ao limpar notificações no servidor:", error);
+            setNotifications(backupNotifications);
+            alert("Não foi possível limpar as notificações. Tente novamente.");
+        }
+    };
 
     // === RENDERIZAÇÃO ===
-
-    // Tela de carregamento enquanto o token é verificado
     if (isLoading) {
         return <div className="flex h-screen items-center justify-center text-lg text-gray-600">Verificando autenticação...</div>;
     }
     
-    // Se o funcionário não for válido, não renderiza nada (pois já está sendo redirecionado)
     if (!funcionario) {
-        return null;
+        return null; // Não renderiza nada enquanto redireciona
     }
-
+    
     const renderContent = () => {
         switch (activeTab) {
-            case 'inicio': return <Inicio onAbrirChamado={() => setActiveTab('abrir')} />;
-            case 'abrir': return <AbrirChamado />;
-            case 'gerenciar': return <GerenciarChamados />;
-            case 'atribuidos': return <ChamadosAtribuidos />;
-            case 'pedidos': return <GerenciarPedidos />;
-            case 'fechamento': return <GerenciarFechamentos />;
-            case 'mensagens': return <Mensagens />;
+            case 'inicio':
+                // <<< CORREÇÃO AQUI: Passamos a função setActiveTab como uma prop >>>
+                return <Inicio setActiveTab={setActiveTab} />;
+            case 'abrir': return <AbrirChamado funcionario={funcionario}/>;
+            case 'gerenciar': return <GerenciarChamados funcionario={funcionario}/>;
+            case 'atribuidos': return <ChamadosAtribuidos funcionario={funcionario}/>;
+            case 'pedidos': return <GerenciarPedidos funcionario={funcionario}/>;
+            case 'fechamento': return <GerenciarFechamentos funcionario={funcionario}/>;
+            case 'mensagens': return <Mensagens funcionario={funcionario}/>;
             case 'relatorio': return <Relatorio />;
-            case 'perfil': return <ProfileInfo funcionario={funcionario} getInitials={getInitials} />;
-            default: return null;
+            case 'info': return <ProfileInfo funcionario={funcionario} getInitials={getInitials} />;
+            default: return <Inicio setActiveTab={setActiveTab} />;
         }
     };
 
@@ -156,7 +135,8 @@ export default function Dashboard() {
                     setActiveTab={setActiveTab}
                     notifications={notifications}
                     marcarComoLida={marcarComoLida}
-                    unreadNotificationsCount={unreadNotificationsCount}
+                    limparTodasNotificacoes={limparTodasNotificacoes}
+                    unreadNotificationsCount={notifications.filter(n => !n.lida).length}
                     funcionario={funcionario}
                     getInitials={getInitials}
                 />
@@ -176,4 +156,4 @@ export default function Dashboard() {
             </div>
         </div>
     );
-} 
+}
