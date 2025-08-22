@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiInbox, FiUsers, FiTrendingUp, FiCheckCircle, FiChevronDown, FiCornerUpRight, FiLoader } from 'react-icons/fi';
 import api from '../../../lib/api'; // Certifique-se de que o caminho está correto
 
-// --- COMPONENTES DE UI REUTILIZÁVEIS E REFINADOS ---
+// --- SUBCOMPONENTES DE UI REUTILIZÁVEIS ---
 
 const StatCard = ({ icon, label, value }) => (
     <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-5">
@@ -34,9 +34,7 @@ const ChamadoPendenteCard = ({ chamado, tecnicos, onAtribuir }) => (
                     defaultValue=""
                 >
                     <option value="" disabled>Atribuir a um técnico...</option>
-                    {/* ===== A CORREÇÃO CRUCIAL ESTÁ AQUI ===== */}
                     {tecnicos.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)}
-                    {/* ======================================= */}
                 </select>
                 <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>
@@ -76,10 +74,10 @@ const TecnicoCard = ({ tecnico, chamados, onDesatribuir }) => {
                             className="bg-slate-100 p-2.5 rounded-md text-sm group"
                         >
                             <div className="flex justify-between items-center">
-                                <p className="text-slate-700">{chamado.titulo}</p>
+                                <p className="text-slate-700 truncate" title={chamado.titulo}>{chamado.titulo}</p>
                                 <button
                                     onClick={() => onDesatribuir(chamado.id)}
-                                    className="text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                    className="text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
                                     title="Desatribuir"
                                 >
                                     <FiCornerUpRight />
@@ -120,17 +118,19 @@ export default function PainelAtribuicaoAdmin() {
     };
 
     const fetchData = async () => {
-        setPageLoading(true);
+        if (!chamados.length) setPageLoading(true);
         try {
             const [chamadosRes, tecnicosRes] = await Promise.all([
                 api.get('/chamados'),
-                api.get('/usuarios/tecnicos') // Usando a rota específica para técnicos
+                api.get('/usuarios/tecnicos')
             ]);
             
+            // Mapeamento que preserva o status do chamado
             const mappedChamados = chamadosRes.data.map(c => ({
                 id: c.id,
                 titulo: c.titulo,
                 tecnico: c.tecnico ? c.tecnico.nome : null,
+                status: c.status
             }));
 
             setChamados(mappedChamados);
@@ -149,10 +149,9 @@ export default function PainelAtribuicaoAdmin() {
 
     const handleAtribuir = async (chamadoId, tecnicoId) => {
         if (!tecnicoId) return;
-
         try {
             await api.patch(`/chamados/${chamadoId}/atribuir`, { tecnico_id: tecnicoId });
-            await fetchData();
+            await fetchData(); // Rebusca todos os dados para ter o estado mais atual
             const tecnicoNome = tecnicos.find(t => t.id === tecnicoId)?.nome;
             showToast(`Atribuído a ${tecnicoNome || 'um técnico'}!`);
         } catch (error) {
@@ -173,10 +172,11 @@ export default function PainelAtribuicaoAdmin() {
     };
 
 
-    const { pendentes, atribuidos } = useMemo(() => {
-        const pendentes = chamados.filter(c => !c.tecnico);
-        const atribuidos = chamados.filter(c => c.tecnico);
-        return { pendentes, atribuidos };
+    // Lógica de filtragem aprimorada
+    const { pendentes, chamadosAtribuiveis } = useMemo(() => {
+        const pendentes = chamados.filter(c => !c.tecnico && c.status === 'aberto');
+        const atribuidosAtivos = chamados.filter(c => c.tecnico && (c.status === 'aberto' || c.status === 'em andamento'));
+        return { pendentes, chamadosAtribuiveis: atribuidosAtivos };
     }, [chamados]);
 
 
@@ -197,9 +197,9 @@ export default function PainelAtribuicaoAdmin() {
                     <h1 className="text-4xl font-black text-red-600 tracking-tight">Painel de Atribuição</h1>
                     <p className="text-lg text-slate-500 mt-1">Atribua rapidamente os chamados pendentes para a sua equipe.</p>
                     <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                        <StatCard icon={<FiTrendingUp className="text-sky-600"/>} label="Total de Chamados" value={chamados.length} />
+                        <StatCard icon={<FiTrendingUp className="text-sky-600"/>} label="Total de Chamados Ativos" value={pendentes.length + chamadosAtribuiveis.length} />
                         <StatCard icon={<FiInbox className="text-red-600"/>} label="Pendentes na Fila" value={pendentes.length} />
-                        <StatCard icon={<FiUsers className="text-green-600"/>} label="Em Atendimento" value={atribuidos.length} />
+                        <StatCard icon={<FiUsers className="text-green-600"/>} label="Em Atendimento" value={chamadosAtribuiveis.length} />
                     </div>
                 </header>
 
@@ -226,7 +226,7 @@ export default function PainelAtribuicaoAdmin() {
                             <TecnicoCard
                                 key={tecnico.id}
                                 tecnico={tecnico}
-                                chamados={atribuidos.filter(c => c.tecnico === tecnico.nome)}
+                                chamados={chamadosAtribuiveis.filter(c => c.tecnico === tecnico.nome)}
                                 onDesatribuir={handleDesatribuir}
                             />
                         ))}

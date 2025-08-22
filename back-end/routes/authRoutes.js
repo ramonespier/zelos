@@ -24,7 +24,7 @@ router.post('/login', (req, res, next) => {
       username: DEV_USER,
       nome: 'Usuário Desenvolvedor',
       email: 'dev@local.com',
-      funcao: 'tecnico', // Dê a ele admin de admin para facilitar os testes
+      funcao: 'admin', // Dê a ele admin de admin para facilitar os testes
     };
     
 

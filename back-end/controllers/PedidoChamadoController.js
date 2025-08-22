@@ -90,8 +90,8 @@ class PedidoChamadoController {
     // ROTA: PATCH /pedidos-chamado/:id/responder
     // Admin aceita ou recusa um pedido pendente.
     static async responderPedido(req, res) {
-        const { id } = req.params;
-        const { status } = req.body;
+        const { id } = req.params; // ID do pedido
+        const { status } = req.body; // 'aceito' ou 'recusado'
 
         if (!['aceito', 'recusado'].includes(status)) {
             return res.status(400).json({ message: "Status inválido. Use 'aceito' ou 'recusado'." });
@@ -100,33 +100,42 @@ class PedidoChamadoController {
         const t = await sequelize.transaction();
 
         try {
+            // Busca o pedido de atribuição
             const pedido = await PedidoChamado.findByPk(id, { transaction: t });
-            if (!pedido) {
+            if (!pedido || pedido.status !== 'pendente') {
                 await t.rollback();
-                return res.status(404).json({ message: "Pedido não encontrado." });
-            }
-            if (pedido.status !== 'pendente') {
-                await t.rollback();
-                return res.status(409).json({ message: "Este pedido já foi respondido." });
+                return res.status(409).json({ message: "Este pedido não foi encontrado ou já foi respondido." });
             }
 
             if (status === 'aceito') {
                 const chamado = await Chamado.findByPk(pedido.chamado_id, { transaction: t });
                 if (!chamado) {
                     await t.rollback();
-                    return res.status(404).json({ message: "O chamado associado não existe mais." });
+                    return res.status(404).json({ message: "O chamado associado a este pedido não existe mais." });
                 }
                 if (chamado.tecnico_id) {
                     await t.rollback();
-                    return res.status(409).json({ message: "Este chamado já foi atribuído a outro técnico." });
+                    return res.status(409).json({ message: "Este chamado já foi atribuído a outro técnico enquanto o pedido estava pendente." });
                 }
 
+                // ===== A LÓGICA ATUALIZADA ESTÁ AQUI =====
+
+                // 1. Atribui o técnico ao chamado principal
                 chamado.tecnico_id = pedido.tecnico_id;
+
+                // 2. ATUALIZA O STATUS DO CHAMADO para 'em andamento'
+                chamado.status = 'em andamento';
+
+                // 3. Salva as duas alterações no chamado de uma vez
                 await chamado.save({ transaction: t });
 
+                // ===========================================
+
+                // 4. Atualiza o status do pedido atual para 'aceito'
                 pedido.status = 'aceito';
                 await pedido.save({ transaction: t });
 
+                // 5. (Bônus) Recusa automaticamente todos os outros pedidos pendentes para o mesmo chamado
                 await PedidoChamado.update(
                     { status: 'recusado' },
                     {
@@ -137,17 +146,21 @@ class PedidoChamadoController {
                         transaction: t
                     }
                 );
-            } else {
+
+            } else { // Se o status for 'recusado'
                 pedido.status = 'recusado';
                 await pedido.save({ transaction: t });
             }
 
+            // Se todas as operações foram bem-sucedidas, confirma a transação
             await t.commit();
             res.json({ message: `Pedido ${status} com sucesso.` });
+
         } catch (error) {
+            // Se qualquer operação falhar, desfaz tudo
             await t.rollback();
             console.error("Erro ao responder ao pedido:", error);
-            res.status(500).json({ message: "Erro interno no servidor." });
+            res.status(500).json({ message: "Erro interno no servidor ao processar o pedido." });
         }
     }
 }
