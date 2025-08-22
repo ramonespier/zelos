@@ -23,6 +23,12 @@ router.get('/:id',
     ChamadoController.buscarPorId
 );
 
+router.get('/:id/apontamentos', 
+    AuthMiddleware.verifyToken,
+    permitir(['admin', 'tecnico']),
+    ChamadoController.listarApontamentos
+);
+
 router.post('/',
     AuthMiddleware.verifyToken,
     permitir(['usuario', 'admin', 'tecnico']),

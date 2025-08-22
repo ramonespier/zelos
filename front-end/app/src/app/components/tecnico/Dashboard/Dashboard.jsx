@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
-import api from '../../../lib/api'; // Ajuste o caminho se necessário
+import api from '../../../lib/api'; // Certifique-se que o caminho está correto
 
 // Componentes do Dashboard
 import Sidebar from './Slidebar';
@@ -72,20 +72,25 @@ export default function Dashboard() {
     }
   };
 
+
   // ==========================================================
   // <<< INÍCIO DAS CORREÇÕES DAS FUNÇÕES DE NOTIFICAÇÃO >>>
   // ==========================================================
+
 
   const marcarComoLida = async (notificationId) => {
       const notification = notifications.find(n => n.id === notificationId);
       if (!notification || notification.lida) return;
 
-      // 1. Atualização Otimista: Muda a UI imediatamente
+
+      // 1. Atualização Otimista: Muda a UI imediatamente para o usuário.
+
       setNotifications(prev => 
           prev.map(n => (n.id === notificationId ? { ...n, lida: true } : n))
       );
 
       try {
+
           // 2. Chamada à API para salvar a mudança no banco de dados
           await api.patch(`/notificacao/${notificationId}/lida`);
       } catch (error) {
@@ -95,10 +100,12 @@ export default function Dashboard() {
               prev.map(n => (n.id === notificationId ? { ...n, lida: false } : n))
           );
           alert("Não foi possível marcar a notificação como lida. Tente novamente.");
+
       }
   };
 
   const limparTodasNotificacoes = async () => {
+
       const backup = [...notifications];
       setNotifications([]);
       try {
@@ -118,6 +125,7 @@ export default function Dashboard() {
   const getInitials = (name = "") => name.split(' ').map(n => n[0]).join('').toUpperCase();
 
   // Renderização
+
   if (isLoading || !funcionario) {
     return <div className="flex h-screen w-full items-center justify-center">Carregando Dashboard do Técnico...</div>;
   }

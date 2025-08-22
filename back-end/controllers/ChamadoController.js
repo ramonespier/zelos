@@ -2,6 +2,7 @@ import { Op } from 'sequelize';
 import Chamado from '../entities/Chamado.js';
 import Usuario from '../entities/Usuario.js';
 import Equipamento from '../entities/Equipamento.js';
+import Apontamento from '../entities/Apontamento.js';
 import Pool from '../entities/Pool.js';
 
 class ChamadoController {

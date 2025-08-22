@@ -2,22 +2,25 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import api from '../../../lib/api'; // Certifique-se que o caminho está correto
+import api from '../../../lib/api'; // Certifique-se de que o caminho para sua API está correto
 import ChamadoCard from './ChamadoCard';
 import ChamadoDetailView from './ChamadoDetailView';
 import ApontamentoModal from './ApontamentoModal';
 
 export default function ChamadosAtribuidos({ funcionario }) {
-    // Estado para os dados que vêm da API
+    // Estado para os dados principais
     const [meusChamados, setMeusChamados] = useState([]);
+    
+    // O estado do histórico de apontamentos agora vive aqui, no componente pai.
+    const [apontamentos, setApontamentos] = useState([]);
 
-    // Estados para controlar a UI
+    // Estados para controlar a UI (carregamento, erros, telas ativas)
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedChamado, setSelectedChamado] = useState(null);
-    const [apontamentoModal, setApontamentoModal] = useState(null); // Guarda o chamado para o modal
+    const [apontamentoModal, setApontamentoModal] = useState(null); // Guarda o objeto do chamado para o modal
 
-    // Busca os chamados atribuídos ao técnico logado
+    // Busca a lista de chamados atribuídos ao técnico logado
     useEffect(() => {
         if (!funcionario || !funcionario.id) return;
 
@@ -26,8 +29,8 @@ export default function ChamadosAtribuidos({ funcionario }) {
             setError(null);
             try {
                 const response = await api.get('/chamados');
-                // Filtramos a lista completa para pegar apenas os chamados do técnico logado
-                // e que não estão concluídos
+                // Filtramos a lista para pegar apenas os chamados que pertencem ao técnico
+                // e que ainda não foram concluídos.
                 const atribuidos = response.data.filter(chamado => 
                     chamado.tecnico_id === funcionario.id && chamado.status !== 'concluido'
                 );
@@ -43,14 +46,35 @@ export default function ChamadosAtribuidos({ funcionario }) {
         fetchMeusChamados();
     }, [funcionario]);
 
-    // Função que será chamada quando um apontamento for criado com sucesso
+    // Busca o histórico de apontamentos sempre que um novo chamado é selecionado
+    useEffect(() => {
+        // Se nenhum chamado está selecionado, limpa a lista de apontamentos
+        if (!selectedChamado) {
+            setApontamentos([]);
+            return;
+        }
+
+        const fetchApontamentos = async () => {
+            try {
+                const response = await api.get(`/chamados/${selectedChamado.id}/apontamentos`);
+                setApontamentos(response.data);
+            } catch (error) {
+                console.error("Erro ao buscar o histórico de apontamentos:", error);
+            }
+        };
+
+        fetchApontamentos();
+    }, [selectedChamado]); // Este efeito roda sempre que o 'selectedChamado' muda
+
+    // Função de callback que é executada quando um apontamento é criado com sucesso
     const handleApontamentoSuccess = (novoApontamento) => {
-        console.log("Apontamento criado com sucesso!", novoApontamento);
-        // Futuramente, você pode adicionar o apontamento a uma lista no estado
-        // para exibi-los na tela de detalhes, por exemplo.
+        // Adiciona o novo apontamento no topo da lista que já está na tela
+        // Isso atualiza a UI instantaneamente
+        setApontamentos(prevApontamentos => [novoApontamento, ...prevApontamentos]);
+        console.log("Apontamento adicionado à lista da UI!", novoApontamento);
     };
     
-    // Renderização de loading e erro
+    // Renderização condicional para carregamento e erro
     if (isLoading) return <div className="text-center p-10 font-semibold text-gray-600">Carregando seus chamados...</div>;
     if (error) return <div className="text-center p-10 font-semibold text-red-600">{error}</div>;
 
@@ -102,15 +126,14 @@ export default function ChamadosAtribuidos({ funcionario }) {
                     <motion.div key="detail">
                         <ChamadoDetailView
                             chamado={selectedChamado}
-                            tecnicoId={funcionario.id}
-                            onGoBack={() => setSelectedChamado(null)}
+                            apontamentos={apontamentos} // Passa a lista de apontamentos para o componente de detalhe
                             onAbrirApontamento={() => setApontamentoModal(selectedChamado)}
                         />
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* O modal de apontamento é renderizado aqui */}
+            {/* O modal de apontamento recebe a função de sucesso para atualizar a UI */}
             <ApontamentoModal
                 chamado={apontamentoModal}
                 tecnicoId={funcionario.id}
@@ -118,5 +141,5 @@ export default function ChamadosAtribuidos({ funcionario }) {
                 onSuccess={handleApontamentoSuccess}
             />
         </div>
-    )
+    );
 }
