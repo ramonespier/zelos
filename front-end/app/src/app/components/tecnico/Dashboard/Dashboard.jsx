@@ -5,39 +5,43 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
-import api from '../../../lib/api'; // Certifique-se que o caminho está correto
 
-// Componentes do Dashboard
+// API para fazer requisições
+import api from '../../../lib/api';
+
+// Componentes de layout e páginas do TÉCNICO
 import Sidebar from './Slidebar';
 import Header from './Header';
 import ProfileInfo from './ProfileInfo';
-
-// Páginas específicas do Técnico
 import InicioTecnico from '../Inicio/InicioTecnico';
-import Contato from '../Contato/ChatUsuario'; // Renomeie se necessário
 import ChamadosAbertos from '../ChamadosAbertos/ChamadosAbertos';
 import ChamadosAtribuidos from '../ChamadosAtribuidos/ChamadosAtribuidos';
 import HistoricoChamados from '../HistoricoChamados/HistoricoChamados';
+import ChatFixoIntegrado from '../Contato/Chatfixo';
 
-export default function Dashboard() {
+export default function DashboardTecnico() {
+  // === ESTADOS DO COMPONENTE ===
   const [activeTab, setActiveTab] = useState('inicio');
   const [funcionario, setFuncionario] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
   const router = useRouter();
 
-  // Hooks de autenticação e busca inicial de notificações
+  // === LÓGICA DE AUTENTICAÇÃO ===
   useEffect(() => {
     const token = Cookies.get('token');
     if (token) {
       try {
-        const decoded = jwtDecode(token);
-        if (decoded.funcao !== 'tecnico') {
-          router.push('/login');
+        const decodedToken = jwtDecode(token);
+        // Validação específica para o painel de técnico
+        if (decodedToken.funcao !== 'tecnico') {
+          console.error("Acesso não autorizado para esta função.");
+          router.push('/login'); // Redireciona se não for técnico
           return;
         }
-        setFuncionario(decoded);
-      } catch (e) {
+        setFuncionario(decodedToken);
+      } catch (error) {
+        console.error("Token inválido, redirecionando:", error);
         Cookies.remove('token');
         router.push('/login');
       }
@@ -47,22 +51,49 @@ export default function Dashboard() {
     setIsLoading(false);
   }, [router]);
 
+  // === LÓGICA DE NOTIFICAÇÕES (Polling) ===
   useEffect(() => {
     if (!funcionario) return;
+
     const fetchNotifications = async () => {
       try {
         const response = await api.get('/notificacao');
         setNotifications(response.data);
-      } catch (e) { console.error("Erro ao buscar notificações", e); }
+      } catch (error) { console.error("Erro ao buscar notificações:", error); }
     };
+
     fetchNotifications();
     const intervalId = setInterval(fetchNotifications, 10000);
     return () => clearInterval(intervalId);
   }, [funcionario]);
 
+  // === FUNÇÕES AUXILIARES ===
+  const getInitials = (name = '') => name.split(' ').map(n => n[0]).join('').toUpperCase();
 
-  // Função para salvar a especialidade
-  const handleSaveEspecialidade = async (especialidade) => {
+  const marcarComoLida = async (notificationId) => {
+    const notification = notifications.find(n => n.id === notificationId);
+    if (!notification || notification.lida) return;
+    setNotifications(prev => prev.map(n => (n.id === notificationId ? { ...n, lida: true } : n)));
+    try {
+      await api.patch(`/notificacao/${notificationId}/lida`);
+    } catch (error) {
+      console.error("Erro ao marcar notificação como lida:", error);
+      setNotifications(prev => prev.map(n => (n.id === notificationId ? { ...n, lida: false } : n)));
+    }
+  };
+
+  const limparTodasNotificacoes = async () => {
+    const backup = [...notifications];
+    setNotifications([]);
+    try {
+      await api.delete('/notificacao');
+    } catch (error) {
+      console.error("Erro ao limpar notificações:", error);
+      setNotifications(backup);
+    }
+  };
+  
+   const handleSaveEspecialidade = async (especialidade) => {
     if (!funcionario || !funcionario.id) return;
     try {
       const response = await api.patch(`/usuarios/${funcionario.id}`, { especialidade });
@@ -73,110 +104,44 @@ export default function Dashboard() {
     }
   };
 
-
-  // ==========================================================
-  // <<< INÍCIO DAS CORREÇÕES DAS FUNÇÕES DE NOTIFICAÇÃO >>>
-  // ==========================================================
-
-
-  const marcarComoLida = async (notificationId) => {
-      const notification = notifications.find(n => n.id === notificationId);
-      if (!notification || notification.lida) return;
-
-
-      // 1. Atualização Otimista: Muda a UI imediatamente para o usuário.
-
-      setNotifications(prev => 
-          prev.map(n => (n.id === notificationId ? { ...n, lida: true } : n))
-      );
-
-      try {
-
-          // 2. Chamada à API para salvar a mudança no banco de dados
-          await api.patch(`/notificacao/${notificationId}/lida`);
-      } catch (error) {
-          console.error("Erro ao marcar notificação como lida:", error);
-          // 3. Rollback: Se a API falhar, desfaz a mudança na UI
-          setNotifications(prev => 
-              prev.map(n => (n.id === notificationId ? { ...n, lida: false } : n))
-          );
-          alert("Não foi possível marcar a notificação como lida. Tente novamente.");
-
-      }
-  };
-
-  const limparTodasNotificacoes = async () => {
-
-      const backup = [...notifications];
-      setNotifications([]);
-      try {
-          // A rota DELETE /notificacao já remove todas as do usuário logado
-          await api.delete('/notificacao');
-      } catch (error) {
-          console.error("Erro ao limpar notificações:", error);
-          setNotifications(backup); // Restaura em caso de erro
-          alert("Não foi possível limpar as notificações.");
-      }
-  };
-
-  // ==========================================================
-  // <<< FIM DAS CORREÇÕES >>>
-  // ==========================================================
-  
-  const getInitials = (name = "") => name.split(' ').map(n => n[0]).join('').toUpperCase();
-
-  // Renderização
-
+  // === RENDERIZAÇÃO ===
   if (isLoading || !funcionario) {
-    return <div className="flex h-screen w-full items-center justify-center">Carregando Dashboard do Técnico...</div>;
+    return <div className="flex h-screen items-center justify-center">Verificando autenticação...</div>;
   }
   
   const renderContent = () => {
     switch(activeTab) {
-      case 'inicio': return <InicioTecnico />;
+      case 'inicio': return <InicioTecnico setActiveTab={setActiveTab} />;
       case 'abertos': return <ChamadosAbertos funcionario={funcionario} />;
       case 'atribuidos': return <ChamadosAtribuidos funcionario={funcionario} />;
       case 'historico': return <HistoricoChamados funcionario={funcionario} />;
-      case 'contato': return <Contato funcionario={funcionario} />;
-      case 'info': return (
-        <ProfileInfo 
-          funcionario={funcionario} 
-          getInitials={getInitials}
-          onSaveEspecialidade={handleSaveEspecialidade}
-        />
-      );
-      default: return <InicioTecnico />;
+      case 'info': return <ProfileInfo funcionario={funcionario} getInitials={getInitials} onSaveEspecialidade={handleSaveEspecialidade}/>;
+      default: return <InicioTecnico setActiveTab={setActiveTab} />;
     }
   };
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          notifications={notifications}
-          marcarComoLida={marcarComoLida}
+          activeTab={activeTab} setActiveTab={setActiveTab}
+          notifications={notifications} marcarComoLida={marcarComoLida}
           limparTodasNotificacoes={limparTodasNotificacoes}
           unreadNotificationsCount={notifications.filter(n => !n.lida).length}
-          funcionario={funcionario}
-          getInitials={getInitials}
+          funcionario={funcionario} getInitials={getInitials}
         />
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.25, ease: 'easeInOut' }}
-            >
+            <motion.div key={activeTab} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.25, ease: 'easeInOut' }}>
               {renderContent()}
             </motion.div>
           </AnimatePresence>
         </main>
       </div>
+
+      <ChatFixoIntegrado funcionario={funcionario} />
     </div>
   );
 }
