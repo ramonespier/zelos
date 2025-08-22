@@ -44,7 +44,7 @@ export default function Header({
 
   const tabs = [
     { id: 'inicio', label: 'Início' },
-    { id: 'chamado', label: 'Solicitar chamado' },
+    { id: 'chamado', label: 'Abrir chamado' },
     { id: 'meus', label: 'Minhas solicitações' },
     { id: 'contato', label: 'Contato' },
     { id: 'info', label: 'Perfil' },
