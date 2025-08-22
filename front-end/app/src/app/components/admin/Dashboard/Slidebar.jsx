@@ -30,7 +30,9 @@ export default function Sidebar({ activeTab, setActiveTab }) {
   const handleSelecao = (opcao) => setActiveTab(opcao);
 
   return (
-    <aside className="bg-gradient-to-b from-gray-50 via-white to-gray-50 border-r border-gray-200 flex flex-col w-64 hidden lg:flex h-screen shadow-md">
+    // --- CORREÇÃO APLICADA AQUI ---
+    // A largura da sidebar foi aumentada para w-72 (288px)
+    <aside className="bg-gradient-to-b from-gray-50 via-white to-gray-50 border-r border-gray-200 flex flex-col w-72 hidden lg:flex h-screen shadow-md">
       <div className="h-20 flex items-center justify-center border-b border-gray-200">
         <h1 className="text-2xl font-bold text-red-600 tracking-tight drop-shadow-sm">
           SENAI | Admin
@@ -43,7 +45,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
             onClick={() => handleSelecao(id)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
-            // <<< MUDANÇA PRINCIPAL AQUI: troquei px-0 por px-4 >>>
+            // O padding original e mais harmonioso (px-4) pode ser mantido
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ease-in-out cursor-pointer text-left ${
               activeTab === id
                 ? 'bg-red-600 text-white shadow-md font-semibold'
