@@ -2,90 +2,74 @@ import Equipamento from '../entities/Equipamento.js';
 
 class EquipamentoController {
 
+    // Listar todos os equipamentos (Read)
     static async listar(req, res) {
         try {
-            const equipamentos = await Equipamento.findAll();
+            const equipamentos = await Equipamento.findAll({ order: [['patrimonio', 'ASC']] });
             res.json(equipamentos);
         } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: 'Erro ao buscar equipamentos' });
+            console.error("Erro ao listar equipamentos:", err);
+            res.status(500).json({ message: 'Erro ao buscar equipamentos.' });
         }
     }
 
-    // buscar equipamento por patrimônio
-    static async buscarPorPatrimonio(req, res) {
-        try {
-            const { patrimonio } = req.params;
-            const equipamento = await Equipamento.findByPk(patrimonio);
-            if (!equipamento) {
-                return res.status(404).json({ message: 'Equipamento não encontrado' });
-            }
-            res.json(equipamento);
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: 'Erro ao buscar equipamento' });
-        }
-    }
-
+    // Criar um novo equipamento (Create)
     static async criar(req, res) {
         try {
             const { patrimonio, sala, equipamento } = req.body;
-
-            // validação básica
-            if (!patrimonio || !equipamento) {
-                return res.status(400).json({ message: 'Campos obrigatórios faltando: patrimonio e equipamento' });
-            }
-
-            // verifica se já existe
-            const existente = await Equipamento.findByPk(patrimonio);
-            if (existente) {
-                return res.status(400).json({ message: 'Equipamento com esse patrimônio já existe' });
+            if (!patrimonio) {
+                return res.status(400).json({ message: "O número do patrimônio é obrigatório." });
             }
 
             const novoEquipamento = await Equipamento.create({ patrimonio, sala, equipamento });
             res.status(201).json(novoEquipamento);
         } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: 'Erro ao criar equipamento' });
+            if (err.name === 'SequelizeUniqueConstraintError') {
+                return res.status(409).json({ message: 'Erro: Este número de patrimônio já está cadastrado.' });
+            }
+            console.error("Erro ao criar equipamento:", err);
+            res.status(500).json({ message: 'Erro ao criar equipamento.' });
         }
     }
 
+    // Atualizar um equipamento (Update)
     static async atualizar(req, res) {
         try {
-            const { patrimonio } = req.params;
+            const { patrimonio } = req.params; // O ID é o próprio número do patrimônio
             const { sala, equipamento } = req.body;
 
-            const equip = await Equipamento.findByPk(patrimonio);
-            if (!equip) {
-                return res.status(404).json({ message: 'Equipamento não encontrado' });
+            const eqp = await Equipamento.findByPk(patrimonio);
+            if (!eqp) {
+                return res.status(404).json({ message: "Equipamento não encontrado." });
             }
+            
+            await eqp.update({ sala, equipamento });
+            res.json(eqp);
 
-            // atualiza somente os campos enviados
-            if (sala !== undefined) equip.sala = sala;
-            if (equipamento !== undefined) equip.equipamento = equipamento;
-
-            await equip.save();
-            res.status(200).json(equip);
         } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: 'Erro ao atualizar equipamento' });
+            console.error("Erro ao atualizar equipamento:", err);
+            res.status(500).json({ message: 'Erro ao atualizar equipamento.' });
         }
     }
 
+    // Excluir um equipamento (Delete)
     static async deletar(req, res) {
         try {
             const { patrimonio } = req.params;
-
-            const equip = await Equipamento.findByPk(patrimonio);
-            if (!equip) {
-                return res.status(404).json({ message: 'Equipamento não encontrado' });
+            const eqp = await Equipamento.findByPk(patrimonio);
+            if (!eqp) {
+                return res.status(404).json({ message: "Equipamento não encontrado." });
             }
-
-            await equip.destroy();
-            res.status(200).json({ message: 'Equipamento deletado com sucesso' });
+            
+            await eqp.destroy();
+            res.json({ message: "Equipamento deletado com sucesso." });
         } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: 'Erro ao deletar equipamento' });
+            // Se houver chamados atrelados a este patrimônio, a FK pode impedir a exclusão
+            if (err.name === 'SequelizeForeignKeyConstraintError') {
+                return res.status(409).json({ message: 'Não é possível excluir este equipamento pois existem chamados associados a ele.' });
+            }
+            console.error("Erro ao deletar equipamento:", err);
+            res.status(500).json({ message: 'Erro ao deletar equipamento.' });
         }
     }
 }
