@@ -11,26 +11,26 @@ const permitir = (perfisPermitidos) => (req, res, next) => {
 }
 
 router.get('/',
-    // AuthMiddleware.verifyToken,
-    // permitir(['admin']),
+    AuthMiddleware.verifyToken,
+    permitir(['admin']),
     ApontamentoController.listar
 );
 
 router.get('/:id',
-    // AuthMiddleware.verifyToken,
-    // permitir(['admin', 'tecnico']),
+    AuthMiddleware.verifyToken,
+    permitir(['admin', 'tecnico']),
     ApontamentoController.buscarPorId
 );
 
 router.post('/',
-    // AuthMiddleware.verifyToken,
-    // permitir(['tecnico']),
+    AuthMiddleware.verifyToken,
+    permitir(['tecnico']),
     ApontamentoController.criar
 );
 
 router.patch('/:id',
-    // AuthMiddleware.verifyToken,
-    // permitir(['tecnico']),
+    AuthMiddleware.verifyToken,
+    permitir(['tecnico']),
     ApontamentoController.fechar
 );
 
