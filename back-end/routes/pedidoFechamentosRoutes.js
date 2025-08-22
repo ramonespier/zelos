@@ -10,6 +10,7 @@ const permitir = (perfisPermitidos) => (req, res, next) => {
     return autorizar.autorizacao(req.user, perfisPermitidos)(req, res, next);
 }
 
+router.get('/', AuthMiddleware.verifyToken, permitir(['admin', 'tecnico']), PedidoFechamentoController.listar);
 // Técnico cria o pedido de fechamento
 router.post('/', AuthMiddleware.verifyToken, permitir(['tecnico']), PedidoFechamentoController.criar);
 
