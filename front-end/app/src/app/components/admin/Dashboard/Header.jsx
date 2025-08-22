@@ -51,8 +51,9 @@ export default function Header({
     { id: 'abrir', label: 'Abrir Chamado' },
     { id: 'gerenciar', label: 'Gerenciar Chamados' },
     { id: 'atribuidos', label: 'Chamados Atribuídos' },
-    { id: 'pedidos', label: 'Solic. Atribuição' },
-    { id: 'fechamento', label: 'Solic. Fechamento' },
+    { id: 'pedidos', label: 'Solicitação de Atribuição' },
+    { id: 'fechamento', label: 'Solicitação de Fechamento' },
+    { id: 'patrimonio', label: 'Patrimonios' },
     { id: 'mensagens', label: 'Mensagens' },
     { id: 'relatorio', label: 'Relatórios' },
   ];

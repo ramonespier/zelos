@@ -14,7 +14,7 @@ import ProfileInfo from './ProfileInfo';
 
 // Páginas específicas do Técnico
 import InicioTecnico from '../Inicio/InicioTecnico';
-import Contato from '../Contato/ChatUsuario';
+import Contato from '../Contato/ChatUsuario'; // Renomeie se necessário
 import ChamadosAbertos from '../ChamadosAbertos/ChamadosAbertos';
 import ChamadosAtribuidos from '../ChamadosAtribuidos/ChamadosAtribuidos';
 
@@ -72,57 +72,60 @@ export default function Dashboard() {
     }
   };
 
-  // =====================================================================
-  // <<< INÍCIO DAS FUNÇÕES CORRIGIDAS DE NOTIFICAÇÃO >>>
-  // =====================================================================
+
+  // ==========================================================
+  // <<< INÍCIO DAS CORREÇÕES DAS FUNÇÕES DE NOTIFICAÇÃO >>>
+  // ==========================================================
+
 
   const marcarComoLida = async (notificationId) => {
       const notification = notifications.find(n => n.id === notificationId);
       if (!notification || notification.lida) return;
 
+
       // 1. Atualização Otimista: Muda a UI imediatamente para o usuário.
+
       setNotifications(prev => 
           prev.map(n => (n.id === notificationId ? { ...n, lida: true } : n))
       );
 
       try {
-          // 2. Chamada à API para salvar a mudança no banco de dados.
+
+          // 2. Chamada à API para salvar a mudança no banco de dados
           await api.patch(`/notificacao/${notificationId}/lida`);
       } catch (error) {
           console.error("Erro ao marcar notificação como lida:", error);
-          // 3. Rollback: Se a API falhar, desfaz a mudança na UI.
+          // 3. Rollback: Se a API falhar, desfaz a mudança na UI
           setNotifications(prev => 
               prev.map(n => (n.id === notificationId ? { ...n, lida: false } : n))
           );
-          alert("Não foi possível marcar a notificação como lida.");
+          alert("Não foi possível marcar a notificação como lida. Tente novamente.");
+
       }
   };
 
   const limparTodasNotificacoes = async () => {
-      // Guarda uma cópia de segurança para o caso de a API falhar.
-      const backup = [...notifications];
-      
-      // 1. Atualização Otimista: Limpa a UI instantaneamente.
-      setNotifications([]);
 
+      const backup = [...notifications];
+      setNotifications([]);
       try {
-          // 2. Chamada à API para deletar as notificações do banco.
+          // A rota DELETE /notificacao já remove todas as do usuário logado
           await api.delete('/notificacao');
       } catch (error) {
           console.error("Erro ao limpar notificações:", error);
-          // 3. Rollback: Se a API falhar, restaura a UI.
-          setNotifications(backup);
+          setNotifications(backup); // Restaura em caso de erro
           alert("Não foi possível limpar as notificações.");
       }
   };
-  
-  // =====================================================================
-  // <<< FIM DAS FUNÇÕES CORRIGIDAS >>>
-  // =====================================================================
+
+  // ==========================================================
+  // <<< FIM DAS CORREÇÕES >>>
+  // ==========================================================
   
   const getInitials = (name = "") => name.split(' ').map(n => n[0]).join('').toUpperCase();
 
-  // Renderização condicional
+  // Renderização
+
   if (isLoading || !funcionario) {
     return <div className="flex h-screen w-full items-center justify-center">Carregando Dashboard do Técnico...</div>;
   }

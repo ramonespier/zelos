@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PoolCard from './PoolCard';
 import PoolFiltros from './PoolFitros';
@@ -7,15 +7,20 @@ import api from '../../../lib/api';
 
 // Configuração de status para os CHAMADOS
 const statusConfig = {
-  'aberto': { label: 'Aberto', classes: 'bg-blue-100 text-blue-800' },
-  'em andamento': { label: 'Em Andamento', classes: 'bg-yellow-100 text-yellow-800' },
-  'concluido': { label: 'Concluído', classes: 'bg-green-100 text-green-800' }
+  'aberto': { label: 'Aberto' },
+  'em andamento': { label: 'Em Andamento' },
+  'concluido': { label: 'Concluído' }
 };
 
 export default function MinhasPools({ funcionario }) {
   const [chamados, setChamados] = useState([]);
-  const [filtroStatus, setFiltroStatus] = useState('Todos');
+  
+  // === ESTADOS DOS FILTROS ===
+  const [filtroStatus, setFiltroStatus] = useState(''); // Valor padrão 'Todos' representado por string vazia
+  const [filtroTipo, setFiltroTipo] = useState('');   // << NOVO ESTADO PARA O FILTRO DE TIPO
   const [termoBusca, setTermoBusca] = useState('');
+  
+  // Estados de controle
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -39,15 +44,25 @@ export default function MinhasPools({ funcionario }) {
     }
   }, [funcionario]);
 
-  const chamadosFiltrados = chamados.filter(chamado => {
-    const correspondeStatus = filtroStatus === 'Todos' || chamado.status === filtroStatus;
-    const poolTitulo = chamado.pool ? chamado.pool.titulo.toLowerCase() : '';
-    const correspondeBusca = termoBusca === '' || 
-      chamado.descricao.toLowerCase().includes(termoBusca.toLowerCase()) ||
-      chamado.titulo.toLowerCase().includes(termoBusca.toLowerCase()) ||
-      poolTitulo.includes(termoBusca.toLowerCase());
-    return correspondeStatus && correspondeBusca;
-  });
+  const chamadosFiltrados = useMemo(() => {
+    return chamados.filter(chamado => {
+      // Garantimos que os valores sejam strings vazias caso nulos/undefined para evitar erros
+      const poolTitulo = (chamado.pool?.titulo || '').toLowerCase();
+      const descricao = (chamado.descricao || '').toLowerCase();
+      const titulo = (chamado.titulo || '').toLowerCase();
+      const busca = termoBusca.toLowerCase();
+
+      // Aplica os três filtros
+      const correspondeStatus = !filtroStatus || chamado.status === filtroStatus;
+      const correspondeTipo = !filtroTipo || chamado.pool?.titulo === filtroTipo; // << LÓGICA DO NOVO FILTRO
+      const correspondeBusca = !termoBusca || 
+        descricao.includes(busca) ||
+        titulo.includes(busca) ||
+        poolTitulo.includes(busca);
+
+      return correspondeStatus && correspondeTipo && correspondeBusca;
+    });
+  }, [chamados, filtroStatus, filtroTipo, termoBusca]); // << NOVA DEPENDÊNCIA NO MEMO
   
   if (isLoading) {
     return <div className="text-center py-20 font-semibold text-gray-600">Carregando seus chamados...</div>
@@ -64,19 +79,20 @@ export default function MinhasPools({ funcionario }) {
           <p className="mt-2 text-lg text-gray-500">Acompanhe e gerencie suas solicitações e chamados.</p>
         </header>
 
+        {/* Passa as novas props para o componente de filtros */}
         <PoolFiltros
           termoBusca={termoBusca}
           setTermoBusca={setTermoBusca}
           filtroStatus={filtroStatus}
           setFiltroStatus={setFiltroStatus}
           statusConfig={statusConfig}
+          filtroTipo={filtroTipo}       // << PROP NOVA
+          setFiltroTipo={setFiltroTipo}   // << PROP NOVA
         />
 
         <AnimatePresence>
           {chamadosFiltrados.length > 0 ? (
             <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* <<< CORREÇÃO PRINCIPAL AQUI >>> */}
-              {/* Agora passamos a prop com o nome 'chamado' */}
               {chamadosFiltrados.map(chamado => (
                 <PoolCard key={chamado.id} chamado={chamado} />
               ))}

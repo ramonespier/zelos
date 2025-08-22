@@ -16,11 +16,13 @@ export default function Inicio({ onAbrirChamado }) {
   ];
 
   const faqs = [
-    { question: 'Como abrir um chamado?', answer: 'Clique no botão "Abrir Novo Chamado", preencha o formulário com os detalhes do problema e envie.' },
-    { question: 'Posso anexar documentos?', answer: 'Sim, é possível anexar imagens e documentos para ajudar na análise do problema.' },
+    { question: 'Como abrir um chamado?', answer: 'Clique no botão "Solicitar chamado", preencha o formulário com os detalhes do problema e envie.' },
     { question: 'Qual o tempo médio de resposta?', answer: 'Nosso tempo médio de resposta é de até 24 horas úteis.' },
-    { question: 'Como acompanhar meu chamado?', answer: 'Você pode ver seus chamados na seção "Meus chamados" após fazer login.' },
-    { question: 'Como eu envio uma mensagem para o suporte?', answer: 'Você pode enviar uma mensagem para nossa equipe na aba "Contato", assim que retornarmos, irá aparecer uma nova notificação. ' },
+    { question: 'Como acompanhar meu chamado?', answer: 'Você pode ver seus chamados na seção "Minhas solicitações" após fazer login.' },
+    {
+      question: "Como eu envio uma mensagem para o suporte?", answer: "Você pode enviar uma mensagem para nossa equipe no chat fixo no canto inferior direito em 'Contato'. Assim que retornarmos, aparecerá uma nova notificação."
+    }
+
   ];
 
   return (
@@ -48,7 +50,7 @@ export default function Inicio({ onAbrirChamado }) {
             onClick={onAbrirChamado}
             className="bg-red-600 text-white px-10 py-4 rounded-xl shadow-lg hover:bg-red-700 transition-colors font-semibold flex items-center justify-center gap-3 cursor-pointer"
           >
-            Solicitar chamado <FaCheckCircle size={20} />
+            Abrir chamado <FaCheckCircle size={20} />
           </button>
 
           <button
