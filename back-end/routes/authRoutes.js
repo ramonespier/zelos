@@ -61,7 +61,7 @@ router.post('/login', (req, res, next) => {
 
       if (user.sAMAccountName === '24250492') funcao = 'tecnico';
       if (user.sAMAccountName === '24250469') funcao = 'admin';
-      if (user.sAMAccountName === '24250246') funcao = 'tecnico';
+      if (user.sAMAccountName === '24250246') funcao = 'admin';
       // xqMeBX
       if (user.sAMAccountName === '00000000') funcao = 'tecnico';
 

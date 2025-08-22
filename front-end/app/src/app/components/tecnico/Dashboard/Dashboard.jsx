@@ -17,6 +17,7 @@ import InicioTecnico from '../Inicio/InicioTecnico';
 import Contato from '../Contato/ChatUsuario'; // Renomeie se necessário
 import ChamadosAbertos from '../ChamadosAbertos/ChamadosAbertos';
 import ChamadosAtribuidos from '../ChamadosAtribuidos/ChamadosAtribuidos';
+import HistoricoChamados from '../HistoricoChamados/HistoricoChamados';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('inicio');
@@ -135,6 +136,7 @@ export default function Dashboard() {
       case 'inicio': return <InicioTecnico />;
       case 'abertos': return <ChamadosAbertos funcionario={funcionario} />;
       case 'atribuidos': return <ChamadosAtribuidos funcionario={funcionario} />;
+      case 'historico': return <HistoricoChamados funcionario={funcionario} />;
       case 'contato': return <Contato funcionario={funcionario} />;
       case 'info': return (
         <ProfileInfo 

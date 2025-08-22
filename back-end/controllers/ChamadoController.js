@@ -194,56 +194,76 @@ class ChamadoController {
 
 
     static async status(req, res) {
-    try {
-        const { id } = req.params;
-        const { status } = req.body;
-        const chamado = await Chamado.findByPk(id);
-        if (!chamado) return res.status(404).json({ message: 'Chamado não encontrado' });
-        await chamado.update({ status });
-        await chamado.reload();
-        res.status(200).json(chamado);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Erro ao atualizar status do chamado" });
+        try {
+            const { id } = req.params;
+            const { status } = req.body;
+            const chamado = await Chamado.findByPk(id);
+            if (!chamado) return res.status(404).json({ message: 'Chamado não encontrado' });
+            await chamado.update({ status });
+            await chamado.reload();
+            res.status(200).json(chamado);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: "Erro ao atualizar status do chamado" });
+        }
     }
-}
 
     static async fechar(req, res) {
-    try {
-        const { id } = req.params;
-        const chamado = await Chamado.findByPk(id);
-        if (!chamado) return res.status(404).json({ message: 'Chamado não encontrado' });
-        if (chamado.status !== 'em andamento') return res.status(400).json({ message: 'Apenas chamados em andamento podem ser fechados.' });
-        await chamado.update({ status: 'concluido' });
-        await chamado.reload();
-        res.status(200).json(chamado);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Erro ao fechar chamado" });
-    }
-}
-
-     static async listarApontamentos(req, res) {
-    try {
-        const { id } = req.params; // ID do chamado
-
-        // Validação para garantir que o chamado existe antes de buscar apontamentos
-        const chamado = await Chamado.findByPk(id);
-        if (!chamado) {
-            return res.status(404).json({ message: "Chamado não encontrado." });
+        try {
+            const { id } = req.params;
+            const chamado = await Chamado.findByPk(id);
+            if (!chamado) return res.status(404).json({ message: 'Chamado não encontrado' });
+            if (chamado.status !== 'em andamento') return res.status(400).json({ message: 'Apenas chamados em andamento podem ser fechados.' });
+            await chamado.update({ status: 'concluido' });
+            await chamado.reload();
+            res.status(200).json(chamado);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: "Erro ao fechar chamado" });
         }
-
-        const apontamentos = await Apontamento.findAll({
-            where: { chamado_id: id },
-            order: [['criado_em', 'DESC']] // Ordena pelos mais recentes primeiro
-        });
-
-        res.json(apontamentos);
-    } catch (err) {
-        console.error("Erro ao buscar apontamentos:", err);
-        res.status(500).json({ message: 'Erro ao buscar apontamentos.' });
     }
-}
+
+    static async listarApontamentos(req, res) {
+        try {
+            const { id } = req.params; // ID do chamado
+
+            // Validação para garantir que o chamado existe antes de buscar apontamentos
+            const chamado = await Chamado.findByPk(id);
+            if (!chamado) {
+                return res.status(404).json({ message: "Chamado não encontrado." });
+            }
+
+            const apontamentos = await Apontamento.findAll({
+                where: { chamado_id: id },
+                order: [['criado_em', 'DESC']] // Ordena pelos mais recentes primeiro
+            });
+
+            res.json(apontamentos);
+        } catch (err) {
+            console.error("Erro ao buscar apontamentos:", err);
+            res.status(500).json({ message: 'Erro ao buscar apontamentos.' });
+        }
+    }
+
+    static async listarHistoricoTecnico(req, res) {
+        try {
+            const tecnico_id = req.user.id; // Pega o ID do técnico logado pelo token
+
+            const chamados = await Chamado.findAll({
+                where: {
+                    tecnico_id: tecnico_id,
+                    status: ['concluido', 'cancelado'] // Busca apenas chamados com estes status
+                },
+                include: ['usuario', 'pool'], // Inclui dados do criador e da pool
+                order: [['atualizado_em', 'DESC']] // Ordena pelos mais recentemente finalizados
+            });
+
+            res.json(chamados);
+        } catch (err) {
+            console.error("Erro ao buscar histórico do técnico:", err);
+            res.status(500).json({ message: 'Erro ao buscar histórico de chamados.' });
+        }
+    }
 }
 
 export default ChamadoController;

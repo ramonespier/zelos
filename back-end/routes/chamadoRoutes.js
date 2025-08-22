@@ -11,6 +11,12 @@ const permitir = (perfisPermitidos) => (req, res, next) => {
     return autorizar.autorizacao(req.user, perfisPermitidos)(req, res, next);
 }
 
+router.get('/meu-historico',
+    AuthMiddleware.verifyToken,
+    permitir(['tecnico']),
+    ChamadoController.listarHistoricoTecnico
+);
+
 router.get('/',
     AuthMiddleware.verifyToken,
     permitir(['admin', 'tecnico', 'usuario']),
@@ -66,5 +72,6 @@ router.get('/:id/apontamentos',
     permitir(['admin', 'tecnico']), 
     ChamadoController.listarApontamentos
 );
+
 
 export default router;

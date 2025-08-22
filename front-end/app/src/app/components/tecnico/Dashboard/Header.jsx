@@ -39,8 +39,8 @@ export default function Header({
     { id: 'inicio', label: 'Início' },
     { id: 'abertos', label: 'Chamados abertos' },
     { id: 'atribuidos', label: 'Chamados atribuídos' },
-    // Adicionei estas abas de usuário de volta para evitar erros caso você mude o tipo de usuário
     { id: 'meus', label: 'Minhas solicitações' },
+    { id: 'historico', label: 'Historico Chamados' },
     { id: 'chamado', label: 'Solicitar chamado' },
     { id: 'contato', label: 'Contato' },
     { id: 'info', label: 'Perfil' },
