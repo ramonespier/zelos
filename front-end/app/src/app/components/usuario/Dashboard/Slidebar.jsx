@@ -13,7 +13,7 @@ import Footer from '../../footer/page';
 
 const tabs = [
   { id: 'inicio', label: 'Início', icon: HomeIcon },
-  { id: 'chamado', label: 'Solicitar chamado', icon: PlusCircleIcon },
+  { id: 'chamado', label: 'Abrir chamado', icon: PlusCircleIcon },
   { id: 'meus', label: 'Minhas solicitações', icon: ClipboardDocumentListIcon },
   { id: 'info', label: 'Perfil', icon: UserCircleIcon },
 ];

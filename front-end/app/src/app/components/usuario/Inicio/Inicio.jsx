@@ -50,7 +50,7 @@ export default function Inicio({ onAbrirChamado }) {
             onClick={onAbrirChamado}
             className="bg-red-600 text-white px-10 py-4 rounded-xl shadow-lg hover:bg-red-700 transition-colors font-semibold flex items-center justify-center gap-3 cursor-pointer"
           >
-            Solicitar chamado <FaCheckCircle size={20} />
+            Abrir chamado <FaCheckCircle size={20} />
           </button>
 
           <button
