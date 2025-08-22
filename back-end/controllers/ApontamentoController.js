@@ -1,4 +1,5 @@
 import Apontamento from '../entities/Apontamento.js'
+
 import Chamado from '../entities/Chamado.js';
 
 class ApontamentoController {
@@ -11,6 +12,23 @@ class ApontamentoController {
             res.json(apontamento);
         } catch (err) {
             res.status(500).json({ message: 'Erro ao listar apontamento' });
+        }
+    }
+
+    static async listarApontamentos(req, res) {
+        try {
+            const { id } = req.params;
+            
+            const apontamentos = await Apontamento.findAll({
+                where: { chamado_id: id },
+                include: ['tecnico'],
+                order: [['comeco', 'DESC']]
+            });
+
+            res.json(apontamentos);
+        } catch (err) {
+            console.error("Erro ao buscar apontamentos:", err);
+            res.status(500).json({ message: "Erro ao buscar apontamentos." });
         }
     }
 
@@ -94,6 +112,7 @@ class ApontamentoController {
             res.status(500).json({ message: "Erro ao fechar apontamento" });
         }
     }
+
 }
 
 export default ApontamentoController;   

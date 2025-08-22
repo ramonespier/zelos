@@ -59,8 +59,8 @@ router.post('/login', (req, res, next) => {
       // aqui estou fazendo com que 3 users tenha o padrao de acesso do sistema
       let funcao = 'usuario';
       if (user.sAMAccountName === '24250492') funcao = 'tecnico';
-      // if (user.sAMAccountName === '24250469') funcao = 'tecnico';
-      if (user.sAMAccountName === '24250246') funcao = 'admin';
+      if (user.sAMAccountName === '24250469') funcao = 'admin';
+      if (user.sAMAccountName === '24250246') funcao = 'tecnico';
       // xqMeBX
       if (user.sAMAccountName === '00000000') funcao = 'tecnico';
 
