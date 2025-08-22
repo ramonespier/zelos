@@ -23,6 +23,7 @@ import Relatorio from '../Relatorios/Relatorios';
 import AbrirChamado from '../AbrirChamado/Chamado';
 import Mensagens from '../Contato/PainelChatAdmin';
 import GerenciarPedidos from '../GerenciarPedidos/GerenciarPedidos';
+import GerenciarPatrimonios from '../GerenciasPatrimonios/GerenciarPatrimonios';
 
 export default function Dashboard() {
     // === ESTADOS DO COMPONENTE ===
@@ -119,6 +120,7 @@ export default function Dashboard() {
             case 'atribuidos': return <ChamadosAtribuidos funcionario={funcionario}/>;
             case 'pedidos': return <GerenciarPedidos funcionario={funcionario}/>;
             case 'fechamento': return <GerenciarFechamentos funcionario={funcionario}/>;
+            case 'patrimonio': return <GerenciarPatrimonios funcionario={funcionario}/>;
             case 'mensagens': return <Mensagens funcionario={funcionario}/>;
             case 'relatorio': return <Relatorio />;
             case 'info': return <ProfileInfo funcionario={funcionario} getInitials={getInitials} />;

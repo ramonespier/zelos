@@ -53,6 +53,7 @@ export default function Header({
     { id: 'atribuidos', label: 'Chamados Atribuídos' },
     { id: 'pedidos', label: 'Solicitação de Atribuição' },
     { id: 'fechamento', label: 'Solicitação de Fechamento' },
+    { id: 'patrimonio', label: 'Patrimonios' },
     { id: 'mensagens', label: 'Mensagens' },
     { id: 'relatorio', label: 'Relatórios' },
   ];

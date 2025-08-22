@@ -1,27 +1,25 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../configs/database.js";
 
-class Equipamento extends Model {}
+class Equipamento extends Model { }
 
 Equipamento.init({
     patrimonio: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true
     },
     sala: {
-        type: DataTypes.STRING(255),
-        allowNull: true
+        type: DataTypes.STRING,
     },
-    equipamento:{
-        type: DataTypes.STRING(255),
-        allowNull: true
+    equipamento: {
+        type: DataTypes.STRING,
     }
-},{
+}, {
     sequelize,
-    tableName: 'equipamentos',
     modelName: 'Equipamento',
-    timestamps: false
-})
+    tableName: 'equipamentos',
+    timestamps: false 
+});
 
 export default Equipamento;
