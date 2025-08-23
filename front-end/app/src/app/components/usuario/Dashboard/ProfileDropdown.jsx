@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react'; // Importe useState e useEffect
+import { useState, useEffect } from 'react'; 
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 export default function ProfileDropdown({ funcionario, getInitials, isProfileOpen, setProfileOpen, handleSelecao, dropdownRef, handleLogout }) {
-  // Estado para garantir que as animações só renderizem no cliente
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
@@ -26,11 +25,8 @@ export default function ProfileDropdown({ funcionario, getInitials, isProfileOpe
           <span className="font-semibold text-sm text-gray-700">{funcionario.nome}</span>
           <span className="text-xs text-gray-500">{funcionario.funcao}</span>
         </div>
-        {/* Este motion.div vazio pode ser uma fonte de erro, mas vamos mantê-lo por enquanto */}
         <motion.div className={`w-4 h-4 text-gray-500 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`}></motion.div>
       </motion.button>
-      
-      {/* AQUI ESTÁ A CORREÇÃO: envolvmos a AnimatePresence com a verificação hasMounted */}
       {hasMounted && (
         <AnimatePresence>
           {isProfileOpen && (

@@ -9,18 +9,28 @@ import { FaHeadset, FaClock, FaShieldAlt, FaCheckCircle, FaQuestionCircle } from
 export default function Inicio({ onAbrirChamado }) {
   const [modalAberto, setModalAberto] = useState(false);
 
+
   const features = [
-    { icon: <FaHeadset size={40} className="text-red-600" />, title: 'Suporte 24/7', description: 'Nossa equipe está sempre disponível para te ajudar, a qualquer hora do dia.' },
-    { icon: <FaClock size={40} className="text-red-600" />, title: 'Resolução Rápida', description: 'Atendimento ágil para minimizar seu tempo de espera e resolver problemas rápido.' },
+    {
+      icon: <FaHeadset size={40} className="text-red-600" />,
+      title: 'Suporte Dedicado',
+      description: 'Nosso atendimento funciona de segunda a sexta, das 8h às 17h, garantindo acompanhamento e suporte durante todo o horário escolar.'
+    },
+    { 
+      icon: <FaClock size={40} className="text-red-600" />,
+      title: 'Resolução Ágil',
+      description: 'Chamados tratados de forma rápida e eficiente, reduzindo o tempo de espera e trazendo soluções sem complicação.'
+    },
     { icon: <FaShieldAlt size={40} className="text-red-600" />, title: 'Segurança', description: 'Seus dados e chamados estão protegidos com criptografia e boas práticas.' },
   ];
+
 
   const faqs = [
     { question: 'Como abrir um chamado?', answer: 'Clique no botão "Solicitar chamado", preencha o formulário com os detalhes do problema e envie.' },
     { question: 'Qual o tempo médio de resposta?', answer: 'Nosso tempo médio de resposta é de até 24 horas úteis.' },
     { question: 'Como acompanhar meu chamado?', answer: 'Você pode ver seus chamados na seção "Minhas solicitações" após fazer login.' },
     {
-      question: "Como eu envio uma mensagem para o suporte?", answer: "Você pode enviar uma mensagem para nossa equipe no chat fixo no canto inferior direito em 'Contato'. Assim que retornarmos, aparecerá uma nova notificação."
+      question: "Como eu envio uma mensagem para o suporte?", answer: "Você pode enviar uma mensagem para nossa equipe no chat fixo no canto inferior direito em 'Suporte'. Assim que retornarmos, aparecerá uma nova notificação."
     }
 
   ];
@@ -38,7 +48,7 @@ export default function Inicio({ onAbrirChamado }) {
           Bem-vindo ao Sistema de Chamados!
         </h1>
         <p className="text-gray-700 text-lg italic mb-12 max-w-xl mx-auto">
-          Gerencie seus chamados com agilidade, segurança e total suporte para que seus problemas sejam resolvidos rapidamente.
+          Envie seus chamados com agilidade e total suporte para que seus problemas sejam resolvidos rapidamente.
         </p>
 
         <div className="flex flex-col sm:flex-row justify-center gap-12 mb-16">

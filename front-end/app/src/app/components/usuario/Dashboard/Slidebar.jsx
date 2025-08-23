@@ -29,8 +29,6 @@ export default function Sidebar({ activeTab, setActiveTab }) {
           SENAI Chamados
         </h1>
       </div>
-
-      {/* Navegação */}
       <nav className="flex-1 px-4 py-6 space-y-2">
         {tabs.map(({ id, label, icon: Icon }) => (
           <motion.button
@@ -49,8 +47,6 @@ export default function Sidebar({ activeTab, setActiveTab }) {
           </motion.button>
         ))}
       </nav>
-
-      {/* Rodapé */}
       <div className="mt-auto">
         <div className="border-t border-gray-200">
           <Footer />
