@@ -12,7 +12,7 @@ export default function ConfirmaModal({
   isLoading,
   confirmText = "Sim, confirmar",
   cancelText = "Não, voltar",
-  confirmColor = "red" // Adiciona a opção de cor para o botão
+  confirmColor = "red" 
 }) {
   if (!isOpen) return null;
 

@@ -10,10 +10,8 @@ const formatarData = (dataString) => {
 };
 
 export default function ChamadoCard({ chamado, onVerDetalhes, onAbrirApontamento }) {
-    // Mapeamento de dados da API para o JSX, com valores padrão para evitar erros
     const usuarioNome = chamado.usuario?.nome || "Solicitante anônimo";
-    const imagemUrl = chamado.img_url || "/placeholder-image.png"; // Usar um placeholder se a imagem não existir
-
+    const imagemUrl = chamado.img_url || "/placeholder-image.png"; 
     return (
         <motion.div
             layout
@@ -30,7 +28,7 @@ export default function ChamadoCard({ chamado, onVerDetalhes, onAbrirApontamento
                     alt={chamado.titulo}
                     className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                     loading="lazy"
-                    onError={(e) => { e.currentTarget.src = "/placeholder-image.png"; }} // Fallback se a imagem falhar
+                    onError={(e) => { e.currentTarget.src = "/placeholder-image.png"; }} 
                 />
             </div>
 

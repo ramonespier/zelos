@@ -6,10 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 
-// API para fazer requisições
 import api from '../../../lib/api';
-
-// Componentes de layout e páginas do TÉCNICO
 import Sidebar from './Slidebar';
 import Header from './Header';
 import ProfileInfo from './ProfileInfo';
@@ -20,23 +17,19 @@ import HistoricoChamados from '../HistoricoChamados/HistoricoChamados';
 import ChatFixoIntegrado from '../Contato/Chatfixo';
 
 export default function DashboardTecnico() {
-  // === ESTADOS DO COMPONENTE ===
   const [activeTab, setActiveTab] = useState('inicio');
   const [funcionario, setFuncionario] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
   const router = useRouter();
-
-  // === LÓGICA DE AUTENTICAÇÃO ===
   useEffect(() => {
     const token = Cookies.get('token');
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
-        // Validação específica para o painel de técnico
         if (decodedToken.funcao !== 'tecnico') {
           console.error("Acesso não autorizado para esta função.");
-          router.push('/login'); // Redireciona se não for técnico
+          router.push('/login'); 
           return;
         }
         setFuncionario(decodedToken);
@@ -50,8 +43,6 @@ export default function DashboardTecnico() {
     }
     setIsLoading(false);
   }, [router]);
-
-  // === LÓGICA DE NOTIFICAÇÕES (Polling) ===
   useEffect(() => {
     if (!funcionario) return;
 
@@ -66,8 +57,6 @@ export default function DashboardTecnico() {
     const intervalId = setInterval(fetchNotifications, 10000);
     return () => clearInterval(intervalId);
   }, [funcionario]);
-
-  // === FUNÇÕES AUXILIARES ===
   const getInitials = (name = '') => name.split(' ').map(n => n[0]).join('').toUpperCase();
 
   const marcarComoLida = async (notificationId) => {
@@ -103,8 +92,6 @@ export default function DashboardTecnico() {
       throw error;
     }
   };
-
-  // === RENDERIZAÇÃO ===
   if (isLoading || !funcionario) {
     return <div className="flex h-screen items-center justify-center">Verificando autenticação...</div>;
   }

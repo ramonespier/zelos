@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, CheckCircle, X } from 'lucide-react'; // Ícones simplificados para maior clareza
+import { Bell, CheckCircle, X } from 'lucide-react';
 
 export default function Notifications({
   notifications,
@@ -12,13 +12,10 @@ export default function Notifications({
   setNotificationsOpen,
   notificationsRef
 }) {
-  // Como o seu backend não envia um "tipo" de notificação (success, warning, etc.),
-  // vamos usar um ícone padrão consistente para todas as notificações.
   const defaultIcon = <CheckCircle className="w-5 h-5 text-red-500" />;
 
   return (
     <div className="relative" ref={notificationsRef}>
-      {/* Botão para abrir o dropdown de notificações (seu código original) */}
       <motion.button
         onClick={() => setNotificationsOpen(!isNotificationsOpen)}
         className="relative p-2 rounded-full text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
@@ -36,12 +33,9 @@ export default function Notifications({
           </motion.span>
         )}
       </motion.button>
-
-      {/* Dropdown de notificações */}
       <AnimatePresence>
         {isNotificationsOpen && (
           <>
-            {/* Overlay para fechar o dropdown em telas menores */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.5 }}
@@ -58,7 +52,6 @@ export default function Notifications({
               transition={{ duration: 0.2, ease: "easeInOut" }}
               className="fixed inset-x-0 top-16 mx-auto w-[95vw] max-w-sm sm:max-w-md md:max-w-lg lg:fixed lg:right-4 lg:top-16 lg:inset-x-auto lg:mx-0 lg:w-96 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden"
             >
-              {/* Cabeçalho do dropdown */}
               <div className="flex justify-between items-center p-4 border-b border-gray-200">
                 <div className="flex items-center">
                   <h3 className="font-bold text-lg text-gray-800">Notificações</h3>
@@ -79,8 +72,6 @@ export default function Notifications({
                   </button>
                 </div>
               </div>
-
-              {/* Corpo da lista de notificações */}
               <div className="max-h-[calc(100vh-10rem)] lg:max-h-[70vh] overflow-y-auto">
                 {notifications.length > 0 ? (
                   notifications.map(n => (
@@ -93,19 +84,11 @@ export default function Notifications({
                         {defaultIcon}
                       </div>
                       <div className="flex-grow min-w-0">
-                        {/* ========================================================== */}
-                        {/* <<< AS CORREÇÕES ESTÃO AQUI >>> */}
-                        {/* 1. Usando 'n.mensagem' para o texto principal, que vem da API */}
                         <p className="text-sm text-gray-700 mt-1 line-clamp-3">{n.mensagem}</p>
-                        
-                        {/* 2. Formatando 'n.criado_em' para exibir a data e hora */}
                         <p className="text-xs text-gray-400 mt-2">
                           {new Date(n.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                         </p>
-                        {/* ========================================================== */}
                       </div>
-                      
-                      {/* 3. Usando 'n.lida' para mostrar o indicador de não lido */}
                       {!n.lida && (
                         <div className="ml-3 flex-shrink-0 mt-1">
                           <div className="w-2.5 h-2.5 bg-red-500 rounded-full" title="Não lida" />
@@ -121,8 +104,6 @@ export default function Notifications({
                   </div>
                 )}
               </div>
-              
-              {/* Rodapé para telas mobile */}
               {notifications.length > 0 && (
                 <div className="p-3 border-t border-gray-200 bg-gray-50 sm:hidden">
                   <button onClick={limparTodasNotificacoes} className="w-full py-2 text-sm text-red-600 hover:text-red-800 font-medium transition">

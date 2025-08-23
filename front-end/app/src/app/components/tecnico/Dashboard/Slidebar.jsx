@@ -10,7 +10,6 @@ import {
 } from '@heroicons/react/24/outline';
 import Footer from '../../footer/page';
 
-// ABAS ESPECÍFICAS DO TÉCNICO
 const tabs = [
   { id: 'inicio', label: 'Início', icon: HomeIcon },
   { id: 'abertos', label: 'Chamados Abertos', icon: FolderOpenIcon },
@@ -23,7 +22,6 @@ export default function Sidebar({ activeTab, setActiveTab }) {
   const handleSelecao = (opcao) => setActiveTab(opcao);
 
   return (
-    // Escondido em telas pequenas (sm, md), aparece como flex em telas grandes (lg)
     <aside className="hidden lg:flex bg-gradient-to-b from-gray-50 via-white to-gray-50 border-r border-gray-200 flex-col w-64 h-screen shadow-md">
       <div className="h-20 flex items-center justify-center border-b border-gray-200">
         <h1 className="text-2xl font-bold text-red-600 tracking-tight drop-shadow-sm">

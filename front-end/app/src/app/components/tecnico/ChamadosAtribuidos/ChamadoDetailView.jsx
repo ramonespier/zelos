@@ -10,14 +10,12 @@ import api from '../../../lib/api';
 import ConfirmaModal from './ConfirmaModal';
 import { toast } from 'sonner';
 
-// --- Função Helper ---
 const formatarData = (dataString) => {
     if (!dataString) return 'Data indisponível';
     const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
     return new Date(dataString).toLocaleDateString('pt-BR', options).replace(',', ' às');
 };
 
-// --- Subcomponente: Card de Apontamento ---
 const ApontamentoCard = ({ apontamento }) => {
     const duracao = apontamento.fim ? `${Math.floor(apontamento.duracao / 60)}h ${apontamento.duracao % 60}min` : "Em andamento";
     return (
@@ -42,8 +40,6 @@ const ApontamentoCard = ({ apontamento }) => {
     );
 };
 
-
-// --- Componente Principal ---
 export default function ChamadoDetailView({ chamado, apontamentos = [], onAbrirApontamento }) {
     const [pedidoEnviado, setPedidoEnviado] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,7 +47,7 @@ export default function ChamadoDetailView({ chamado, apontamentos = [], onAbrirA
 
     useEffect(() => {
         if (!chamado?.id) return;
-        setPedidoEnviado(false); // Reseta ao trocar de chamado
+        setPedidoEnviado(false);
         const verificarPedidoExistente = async () => {
             try {
                 const response = await api.get(`/pedidos-fechamento?chamado_id=${chamado.id}`);
@@ -94,7 +90,6 @@ export default function ChamadoDetailView({ chamado, apontamentos = [], onAbrirA
                 transition={{ duration: 0.3 }}
                 className="space-y-6"
             >
-                {/* CARD 1: INFORMAÇÕES GERAIS */}
                 <div className="bg-white rounded-2xl shadow-subtle border p-6">
                     <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 break-words">{chamado.titulo}</h2>
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-sm">
@@ -116,7 +111,6 @@ export default function ChamadoDetailView({ chamado, apontamentos = [], onAbrirA
                     </div>
                 </div>
 
-                {/* CARD 2: HISTÓRICO DE ATIVIDADES */}
                 <div className="bg-white rounded-2xl shadow-subtle border p-6">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Histórico de Atividades</h3>
                     <div className="space-y-4">
@@ -130,8 +124,6 @@ export default function ChamadoDetailView({ chamado, apontamentos = [], onAbrirA
                         )}
                     </div>
                 </div>
-
-                {/* CARD 3: IMAGEM ANEXADA */}
                 {imagemUrl && (
                   <div className="bg-white rounded-2xl shadow-subtle border p-6">
                       <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -145,7 +137,6 @@ export default function ChamadoDetailView({ chamado, apontamentos = [], onAbrirA
                   </div>
                 )}
                 
-                {/* BOTÕES DE AÇÃO (STICKY) */}
                 <div className="sticky bottom-6 flex flex-col sm:flex-row justify-end gap-3 z-10">
                     <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                         onClick={() => onAbrirApontamento(chamado)} 

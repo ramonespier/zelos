@@ -3,7 +3,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
-// O componente agora recebe a prop 'handleLogout'
 export default function ProfileDropdown({ funcionario, getInitials, isProfileOpen, setProfileOpen, handleSelecao, dropdownRef, handleLogout }) {
   return (
     <div className="relative" ref={dropdownRef}>
@@ -35,7 +34,6 @@ export default function ProfileDropdown({ funcionario, getInitials, isProfileOpe
               <p className="font-semibold text-gray-800">{funcionario.nome}</p>
             </div>
             
-            {/* O onClick deste botão agora chama a função correta de logout */}
             <button 
               onClick={handleLogout} 
               className="w-full px-4 py-3 text-left cursor-pointer text-red-600 hover:bg-red-50 flex items-center space-x-3 transition-colors"

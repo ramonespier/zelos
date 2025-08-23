@@ -21,8 +21,8 @@ export default function InicioTecnico({ setActiveTab }) {
     },
     {
       icon: <FaUserClock size={40} className="text-red-600" />,
-      title: 'Chamados Pendentes',
-      description: 'Acompanhe os chamados que aguardam resposta do usuário ou de terceiros.',
+      title: 'Histórico de chamados',
+      description: 'Visualize seus chamados concluídos.',
       action: () => setActiveTab('meus'),
     },
   ];

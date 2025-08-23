@@ -8,7 +8,6 @@ import Cookies from 'js-cookie';
 import Notifications from './Notifications';
 import ProfileDropdown from './ProfileDropdown';
 
-// ABAS DO TÉCNICO para o menu mobile
 const tabs = [
     { id: 'inicio', label: 'Início' },
     { id: 'abertos', label: 'Chamados Abertos' },
@@ -35,9 +34,12 @@ export default function Header({
       return () => { document.body.style.overflow = 'auto'; };
   }, [isMobileMenuOpen]);
 
-  const handleLogout = () => {
+ const handleLogout = () => {
+    toast.success("Logout efetuado com sucesso.");
     Cookies.remove('token');
-    router.push('/login');
+    setTimeout(() => {
+        router.push('/login');
+    }, 1000); 
   };
   
   const handleSelecao = (opcao) => {
@@ -53,7 +55,6 @@ export default function Header({
   return (
     <header className="bg-gradient-to-r from-gray-50 via-white to-gray-50 shadow-md h-20 flex items-center justify-between px-6 z-30 sticky top-0">
       <div className="flex items-center space-x-4">
-        {/* Aparece em telas pequenas, some a partir de 'lg' */}
         <motion.button whileTap={{ scale: 0.9 }} onClick={() => setMobileMenuOpen(!isMobileMenuOpen)} 
           className="lg:hidden p-2 rounded-xl text-gray-600 hover:bg-gray-200 transition" aria-label="Abrir Menu">
           {isMobileMenuOpen ? <XMarkIcon className="w-7 h-7" /> : <Bars3Icon className="w-7 h-7" />}
