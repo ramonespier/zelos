@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import Notifications from './Notifications';
 import ProfileDropdown from './ProfileDropdown';
+import { toast } from 'sonner';
 
 const tabs = [
     { id: 'inicio', label: 'Início' },
