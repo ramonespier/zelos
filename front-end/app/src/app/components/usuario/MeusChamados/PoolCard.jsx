@@ -1,7 +1,10 @@
 'use client';
+
+import { useState } from 'react'; // << Importamos useState
 import { motion } from 'framer-motion';
 import { Calendar, Tag, User, Wrench, SprayCan, CircleHelp } from 'lucide-react';
 
+// --- CONFIGURAÇÕES DE ÍCONES E STATUS ---
 const statusConfig = {
   'aberto': { label: 'Aberto', classes: 'bg-blue-100 text-blue-800' },
   'em andamento': { label: 'Em Andamento', classes: 'bg-yellow-100 text-yellow-800' },
@@ -16,16 +19,20 @@ const tituloConfig = {
   'outro': { label: 'Outro', icon: <CircleHelp size={18} /> }
 };
 
-// <<< CORREÇÃO PRINCIPAL AQUI >>>
-// Agora o componente recebe a prop 'chamado' de forma clara
+
+// --- COMPONENTE DO CARD COM A LÓGICA DE TEXTO COMPACTO ---
 export default function PoolCard({ chamado }) {
-  // Verificação de segurança: se por algum motivo o chamado não chegar, não quebra a página
-  if (!chamado) {
-    return null; // ou um card de erro/carregamento
-  }
+  // NOVO ESTADO para controlar se a descrição está expandida
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  if (!chamado) return null;
 
   const { label, classes } = statusConfig[chamado.status] || { label: 'Desconhecido', classes: 'bg-gray-100 text-gray-800'};
   const { label: tituloLabel, icon: tituloIcon } = tituloConfig[chamado.pool?.titulo] || tituloConfig.outro;
+
+  // Verifica se o texto da descrição é longo o suficiente para precisar ser cortado
+  const descricaoLonga = chamado.descricao.length > 100;
+  const textoDescricao = isExpanded ? chamado.descricao : `${chamado.descricao.substring(0, 100)}${descricaoLonga ? '...' : ''}`;
 
   return (
     <motion.div
@@ -38,18 +45,39 @@ export default function PoolCard({ chamado }) {
     >
       <div className="p-5 flex-grow">
         <header className="flex justify-between items-start mb-3">
-          <div className="flex items-center gap-3 text-red-600 font-bold">
-            {tituloIcon}
-            <span className="text-lg text-gray-800">{tituloLabel}</span>
+          <div className="flex items-center gap-3 text-red-600 font-bold min-w-0">
+            <div className="flex-shrink-0">{tituloIcon}</div>
+            <span className="text-lg text-gray-800 truncate">{tituloLabel}</span>
           </div>
-          <div className={`px-3 py-1 text-xs font-semibold rounded-full ${classes}`}>
+          <div className={`px-3 py-1 text-xs font-semibold rounded-full flex-shrink-0 ${classes}`}>
             {label}
           </div>
         </header>
-        <p className="font-semibold text-gray-800 mb-2">{chamado.titulo}</p>
-        <p className="text-sm text-gray-600 leading-relaxed">{chamado.descricao}</p>
+
+        {/* ===== TÍTULO COM TRUNCAMENTO (para evitar quebra de linha) ===== */}
+        <p 
+            className="font-semibold text-gray-800 mb-2 truncate"
+            title={chamado.titulo} // Tooltip que mostra o título completo ao passar o mouse
+        >
+            {chamado.titulo}
+        </p>
+
+        {/* ===== DESCRIÇÃO COM LÓGICA DE "VER MAIS" ===== */}
+        <p className="text-sm text-gray-600 leading-relaxed">
+            {textoDescricao}
+            {descricaoLonga && (
+                <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="text-blue-600 font-semibold hover:underline ml-1"
+                >
+                    {isExpanded ? 'Ver menos' : 'Ver mais'}
+                </button>
+            )}
+        </p>
+
       </div>
-      <footer className="bg-gray-50/70 border-t border-gray-200/80 px-5 py-3 text-xs text-gray-500 flex items-center justify-between">
+
+      <footer className="bg-gray-50/70 border-t border-gray-200/80 px-5 py-3 text-xs text-gray-500 flex items-center justify-between mt-auto">
         <div className="flex items-center gap-2">
           <Calendar size={14} />
           <span>{new Date(chamado.criado_em).toLocaleDateString('pt-BR')}</span>

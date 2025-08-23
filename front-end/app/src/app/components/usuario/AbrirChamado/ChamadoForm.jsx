@@ -15,7 +15,7 @@ export default function ChamadoForm({
 
   const handleImagemChange = (e) => {
     const file = e.target.files[0];
-    if (file && file.size < 5 * 1024 * 1024) { // Limite de 5MB
+    if (file && file.size < 5 * 1024 * 1024) { 
       setImagem(file);
       setImagemPreview(URL.createObjectURL(file));
     } else if (file) {
@@ -37,14 +37,14 @@ export default function ChamadoForm({
       <label className="flex flex-col text-gray-800 font-semibold relative">
         <div className="flex justify-between items-center mb-2">
           <span>Título do Problema</span>
-          <span className={`text-xs font-mono ${titulo.length > 50 ? 'text-red-500' : 'text-gray-400'}`}>
-              {titulo.length} / 50
+          <span className={`text-xs font-mono ${titulo.length > 30 ? 'text-red-500' : 'text-gray-400'}`}>
+              {titulo.length} / 30
           </span>
         </div>
         <input 
           type="text" value={titulo} 
           onChange={(e) => setTitulo(e.target.value)} 
-          maxLength={50}
+          maxLength={30}
           required placeholder="Ex: Computador não liga"
           className={`mt-1 p-4 border rounded-lg focus:outline-none focus:ring-4 transition shadow-sm ${erros.titulo ? 'border-red-500 ring-red-400/50' : 'border-gray-300 focus:ring-red-400/50'}`} 
         />
@@ -112,4 +112,4 @@ export default function ChamadoForm({
       </button>
     </form>
   );
-}
+} 
