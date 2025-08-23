@@ -5,10 +5,10 @@ export default function PainelAcoes({ setActiveTab }) {
   return (
     <div className="flex flex-col sm:flex-row justify-center gap-8 mb-20">
       <button
-        onClick={() => setActiveTab('abrir')}
+        onClick={() => setActiveTab('abertos')}
         className="bg-red-600 text-white px-10 py-4 rounded-xl shadow-lg hover:bg-red-700 transition-colors font-semibold flex items-center justify-center gap-3 cursor-pointer"
       >
-        Solicitar chamado <FaClipboardList size={20} />
+        Chamadodos abertos <FaClipboardList size={20} />
       </button>
 
       <button

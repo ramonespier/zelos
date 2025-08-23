@@ -9,18 +9,15 @@ import ModalImagem from './ModalImagem';
 
 export default function ChamadosAbertos({ funcionario }) {
   const [chamadosAbertos, setChamadosAbertos] = useState([]);
-  // MUDANÇA: O estado agora armazenará um objeto no formato { chamadoId: 'status' }
   const [pedidosDoTecnico, setPedidosDoTecnico] = useState({}); 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalAberto, setModalAberto] = useState(false);
   const [imagemModal, setImagemModal] = useState(null);
   
-  // Função unificada para buscar e atualizar os dados
   const fetchData = async () => {
     if (!funcionario || !funcionario.id) return;
     
-    // Na primeira carga, mostramos o spinner principal. Em atualizações, não.
     if (!chamadosAbertos.length) {
       setIsLoading(true);
     }
@@ -33,25 +30,18 @@ export default function ChamadosAbertos({ funcionario }) {
       ]);
       
       const todosChamados = chamadosResponse.data;
-      
-      // MUDANÇA: Transforma o array de pedidos em um objeto (mapa)
-      // Ex: [{ chamado_id: 1, status: 'pendente' }] -> { 1: 'pendente' }
       const pedidosMap = pedidosResponse.data.reduce((acc, pedido) => {
         acc[pedido.chamado_id] = pedido.status;
         return acc;
       }, {});
       setPedidosDoTecnico(pedidosMap);
       
-      // Filtra os chamados abertos E os que o técnico pediu mas foram recusados
       const abertos = todosChamados.filter(chamado => {
         const meuPedidoStatus = pedidosMap[chamado.id];
-        // Um chamado aparece se estiver aberto E (não tiver pedido OU meu pedido foi recusado)
         return chamado.status === 'aberto' && (!meuPedidoStatus || meuPedidoStatus === 'recusado');
       });
       
-      // Se um chamado for aceito, ele some da lista, então não precisamos mais de polling aqui
       setChamadosAbertos(abertos);
-      
     } catch (err) {
       console.error("Erro ao buscar dados iniciais:", err);
       setError("Não foi possível carregar os dados. Tente atualizar a página.");
@@ -60,20 +50,18 @@ export default function ChamadosAbertos({ funcionario }) {
     }
   };
   
-  // Roda o fetch inicial
   useEffect(() => {
     fetchData();
   }, [funcionario]);
 
   const handleAtribuir = async (chamadoId) => {
     const statusPedidoAtual = pedidosDoTecnico[chamadoId];
-    if (statusPedidoAtual && statusPedidoAtual !== 'recusado') return; // Previne múltiplos cliques
+    if (statusPedidoAtual && statusPedidoAtual !== 'recusado') return; 
     
     try {
       await api.post('/pedidos-chamado', { chamado_id: chamadoId });
-      // Atualiza o estado local para 'pendente'
       setPedidosDoTecnico(prev => ({ ...prev, [chamadoId]: 'pendente' }));
-      setModalAberto(true); // Opcional: Ainda mostra sucesso ao enviar o pedido
+      setModalAberto(true); 
     } catch (err) {
       console.error("Erro ao enviar pedido:", err);
       const errorMessage = err.response?.data?.message || "Não foi possível enviar o pedido.";
@@ -99,7 +87,6 @@ export default function ChamadosAbertos({ funcionario }) {
               <CardChamado
                 key={chamado.id}
                 chamado={chamado}
-                // MUDANÇA: Passamos o objeto inteiro de pedidos
                 pedidosDoTecnico={pedidosDoTecnico} 
                 onAtribuir={handleAtribuir}
                 onAbrirImagem={abrirModalImagem}

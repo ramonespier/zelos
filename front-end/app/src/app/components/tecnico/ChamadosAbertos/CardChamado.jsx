@@ -1,14 +1,9 @@
 'use client';
-
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
-// --- Componente de Botão de Ação ---
-// Movido para um componente separado para maior clareza.
 const ActionButton = ({ status, onClick }) => {
-  
   let config;
-  
   switch (status) {
     case 'pendente':
       config = {
@@ -24,10 +19,10 @@ const ActionButton = ({ status, onClick }) => {
         disabled: true,
       };
       break;
-    default: // Para status undefined (nenhum pedido feito)
+    default: 
       config = {
         text: 'Enviar Pedido',
-        className: 'bg-red-600 text-white hover:bg-red-700 active:scale-95',
+        className: 'bg-red-600 text-white hover:bg-red-700 active:scale-95 cursor-pointer',
         disabled: false,
       };
   }
@@ -43,10 +38,8 @@ const ActionButton = ({ status, onClick }) => {
   );
 };
 
-// --- Componente Principal CardChamado ---
 export default function CardChamado({ chamado, pedidosDoTecnico, onAtribuir, onAbrirImagem }) {
   
-  // Verifica o status do pedido para o chamado atual
   const meuPedidoStatus = pedidosDoTecnico[chamado.id];
 
   const ImagemComponente = () => (
@@ -57,7 +50,7 @@ export default function CardChamado({ chamado, pedidosDoTecnico, onAtribuir, onA
     >
       <Image
         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-        src={`http://localhost:3001${chamado.img_url}` || '/placeholder.png'} // Assumindo que a API está em localhost:3001
+        src={`http://localhost:3001${chamado.img_url}` || '/placeholder.png'} 
         alt={chamado.titulo}
         width={300}
         height={200}
@@ -75,7 +68,7 @@ export default function CardChamado({ chamado, pedidosDoTecnico, onAtribuir, onA
       className="bg-white p-5 rounded-xl shadow-md border border-gray-200/80 w-full flex flex-col"
     >
       <div className="flex flex-col flex-1 h-full">
-        {/* Corpo do Card */}
+      
         <div className="flex-1">
           <h1 className="text-xl font-bold text-gray-800 line-clamp-2">{chamado.titulo}</h1>
 
@@ -93,7 +86,6 @@ export default function CardChamado({ chamado, pedidosDoTecnico, onAtribuir, onA
 
           <p className="text-gray-600 text-sm line-clamp-3 mt-3">{chamado.descricao}</p>
 
-          {/* Imagem visível apenas no mobile (layout menor) */}
           {chamado.img_url && (
             <div className="mt-4 sm:hidden">
               <ImagemComponente />
@@ -101,14 +93,12 @@ export default function CardChamado({ chamado, pedidosDoTecnico, onAtribuir, onA
           )}
         </div>
 
-        {/* Rodapé do Card */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 mt-auto border-t border-gray-200/80 gap-3">
           <div className="flex items-center gap-4">
             <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
               Patrimônio: {chamado.numero_patrimonio || 'N/A'}
             </span>
 
-            {/* Link para ver a imagem no desktop (layout maior) */}
             {chamado.img_url && (
               <button
                 onClick={() => onAbrirImagem(chamado.img_url)}
@@ -119,7 +109,6 @@ export default function CardChamado({ chamado, pedidosDoTecnico, onAtribuir, onA
             )}
           </div>
           
-          {/* Botão de Ação Dinâmico */}
           <ActionButton status={meuPedidoStatus} onClick={() => onAtribuir(chamado.id)} />
         </div>
       </div>
