@@ -21,13 +21,10 @@ export default function InstrucoesRapidas({ isOpen, onClose }) {
                 <ol className="list-decimal list-inside space-y-2 text-gray-700">
                     <li>Clique no botão <strong className='text-red-700'>Abrir Chamado</strong>.</li>
                     <li>Preencha o formulário com detalhes do problema.</li>
-                    <li>Informe a categoria e a prioridade do chamado.</li>
-                    <li>Anexe imagens ou documentos se for necessário.</li>
+                    <li>Informe a categoria.</li>
+                    <li>Anexe imagem se for necessário.</li>
                     <li>Clique em <strong className='text-red-700'>Enviar</strong> e aguarde o retorno da equipe de suporte.</li>
                 </ol>
-                <p className="mt-4 text-sm text-gray-500">
-                    Em caso de dúvidas, contate o suporte pelo telefone: (xx) xxxx-xxxx.
-                </p>
                 <button
                     onClick={onClose}
                     className="absolute top-2 right-2 text-gray-400 hover:text-red-600 text-xl font-bold transition duration-200 cursor-pointer"
