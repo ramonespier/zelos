@@ -50,11 +50,20 @@ export default function InicioAdmin({ setActiveTab }) {
                     onClick={() => setActiveTab('gerenciar')}
                     className="bg-red-600 text-white px-10 py-4 rounded-xl shadow-lg hover:bg-red-700 transition-colors font-semibold flex items-center justify-center gap-3 cursor-pointer"
                 >
+                    Atribuir chamados <FaWrench size={20} />
+                </button>
+                <button
+                    onClick={() => setActiveTab('gerenciar')}
+                    className="bg-red-600 text-white px-10 py-4 rounded-xl shadow-lg hover:bg-red-700 transition-colors font-semibold flex items-center justify-center gap-3 cursor-pointer"
+                >
                     Gerenciar Chamados <FaWrench size={20} />
                 </button>
-                
-                {/* <<< O BOTÃO "GERENCIAR USUÁRIOS" FOI REMOVIDO DAQUI >>> */}
-
+                <button
+                    onClick={() => setActiveTab('relatorio')}
+                    className="bg-red-600 text-white px-10 py-4 rounded-xl shadow-lg hover:bg-red-700 transition-colors font-semibold flex items-center justify-center gap-3 cursor-pointer"
+                >
+                    Relatorios <FaWrench size={20} />
+                </button>
             </div>
         </motion.section>
     );
