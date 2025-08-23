@@ -93,19 +93,19 @@ export default function ApontamentoModal({ chamado, tecnicoId, onClose, onSucces
                                 <CalendarDaysIcon className="w-5 h-5 text-gray-400 absolute left-3 top-11" />
                                 <label className="block text-sm font-semibold text-gray-700">Início*</label>
                                 <input type="datetime-local" value={comeco} onChange={(e) => setComeco(e.target.value)} required
-                                    className="mt-2 w-full border border-gray-300 rounded-lg py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-red-500/50 focus:border-red-500"
+                                    className="mt-2 cursor-pointer   w-full border border-gray-300 rounded-lg py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-red-500/50 focus:border-red-500"
                                 />
                             </div>
                              <div className="relative">
                                 <ClockIcon className="w-5 h-5 text-gray-400 absolute left-3 top-11" />
-                                <label className="block text-sm font-semibold text-gray-700">Fim (opcional)</label>
+                                <label className="block text-sm  font-semibold text-gray-700">Fim (opcional)</label>
                                 <input type="datetime-local" value={fim} onChange={(e) => setFim(e.target.value)}
-                                    className="mt-2 w-full border border-gray-300 rounded-lg py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-red-500/50 focus:border-red-500"
+                                    className="mt-2 w-full border cursor-pointer border-gray-300 rounded-lg py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-red-500/50 focus:border-red-500"
                                 />
                             </div>
                         </div>
                         <button type="submit" disabled={loading}
-                            className={`w-full mt-4 px-4 py-3 rounded-lg text-white font-bold transition-colors flex items-center justify-center gap-2 ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}>
+                            className={`w-full mt-4 px-4 py-3 rounded-lg cursor-pointer text-white font-bold transition-colors flex items-center justify-center gap-2 ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}>
                             <PlusIcon className="w-5 h-5" />
                             {loading ? 'Salvando...' : 'Adicionar Apontamento'}
                         </button>

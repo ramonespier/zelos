@@ -6,9 +6,7 @@ import { FiClock, FiSearch, FiFilter, FiInbox, FiLoader } from 'react-icons/fi';
 import api from '../../../lib/api';
 import HistoricoCard from './HistoricoCard';
 
-// ===== A SINTAXE DO COMPONENTE FOI CORRIGIDA AQUI =====
 export default function HistoricoChamados({ funcionario }) {
-    // A lógica de estados e funções permanece a mesma
     const [chamados, setChamados] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
