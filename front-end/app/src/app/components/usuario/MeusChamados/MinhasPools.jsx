@@ -5,7 +5,6 @@ import PoolCard from './PoolCard';
 import PoolFiltros from './PoolFitros';
 import api from '../../../lib/api';
 
-// Configuração de status para os CHAMADOS
 const statusConfig = {
   'aberto': { label: 'Aberto' },
   'em andamento': { label: 'Em Andamento' },
@@ -14,13 +13,9 @@ const statusConfig = {
 
 export default function MinhasPools({ funcionario }) {
   const [chamados, setChamados] = useState([]);
-  
-  // === ESTADOS DOS FILTROS ===
-  const [filtroStatus, setFiltroStatus] = useState(''); // Valor padrão 'Todos' representado por string vazia
-  const [filtroTipo, setFiltroTipo] = useState('');   // << NOVO ESTADO PARA O FILTRO DE TIPO
+  const [filtroStatus, setFiltroStatus] = useState('');
+  const [filtroTipo, setFiltroTipo] = useState('');   
   const [termoBusca, setTermoBusca] = useState('');
-  
-  // Estados de controle
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -46,15 +41,12 @@ export default function MinhasPools({ funcionario }) {
 
   const chamadosFiltrados = useMemo(() => {
     return chamados.filter(chamado => {
-      // Garantimos que os valores sejam strings vazias caso nulos/undefined para evitar erros
       const poolTitulo = (chamado.pool?.titulo || '').toLowerCase();
       const descricao = (chamado.descricao || '').toLowerCase();
       const titulo = (chamado.titulo || '').toLowerCase();
       const busca = termoBusca.toLowerCase();
-
-      // Aplica os três filtros
       const correspondeStatus = !filtroStatus || chamado.status === filtroStatus;
-      const correspondeTipo = !filtroTipo || chamado.pool?.titulo === filtroTipo; // << LÓGICA DO NOVO FILTRO
+      const correspondeTipo = !filtroTipo || chamado.pool?.titulo === filtroTipo; 
       const correspondeBusca = !termoBusca || 
         descricao.includes(busca) ||
         titulo.includes(busca) ||
@@ -62,7 +54,7 @@ export default function MinhasPools({ funcionario }) {
 
       return correspondeStatus && correspondeTipo && correspondeBusca;
     });
-  }, [chamados, filtroStatus, filtroTipo, termoBusca]); // << NOVA DEPENDÊNCIA NO MEMO
+  }, [chamados, filtroStatus, filtroTipo, termoBusca]); 
   
   if (isLoading) {
     return <div className="text-center py-20 font-semibold text-gray-600">Carregando seus chamados...</div>
@@ -78,16 +70,14 @@ export default function MinhasPools({ funcionario }) {
           <h1 className="text-4xl font-extrabold text-gray-800 tracking-tight">Meus Chamados</h1>
           <p className="mt-2 text-lg text-gray-500">Acompanhe e gerencie suas solicitações e chamados.</p>
         </header>
-
-        {/* Passa as novas props para o componente de filtros */}
         <PoolFiltros
           termoBusca={termoBusca}
           setTermoBusca={setTermoBusca}
           filtroStatus={filtroStatus}
           setFiltroStatus={setFiltroStatus}
           statusConfig={statusConfig}
-          filtroTipo={filtroTipo}       // << PROP NOVA
-          setFiltroTipo={setFiltroTipo}   // << PROP NOVA
+          filtroTipo={filtroTipo}      
+          setFiltroTipo={setFiltroTipo}   
         />
 
         <AnimatePresence>

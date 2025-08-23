@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react'; // << Importamos useState
+import { useState } from 'react'; 
 import { motion } from 'framer-motion';
 import { Calendar, Tag, User, Wrench, SprayCan, CircleHelp } from 'lucide-react';
 
-// --- CONFIGURAÇÕES DE ÍCONES E STATUS ---
 const statusConfig = {
   'aberto': { label: 'Aberto', classes: 'bg-blue-100 text-blue-800' },
   'em andamento': { label: 'Em Andamento', classes: 'bg-yellow-100 text-yellow-800' },
@@ -19,10 +18,7 @@ const tituloConfig = {
   'outro': { label: 'Outro', icon: <CircleHelp size={18} /> }
 };
 
-
-// --- COMPONENTE DO CARD COM A LÓGICA DE TEXTO COMPACTO ---
 export default function PoolCard({ chamado }) {
-  // NOVO ESTADO para controlar se a descrição está expandida
   const [isExpanded, setIsExpanded] = useState(false);
   
   if (!chamado) return null;
@@ -30,7 +26,6 @@ export default function PoolCard({ chamado }) {
   const { label, classes } = statusConfig[chamado.status] || { label: 'Desconhecido', classes: 'bg-gray-100 text-gray-800'};
   const { label: tituloLabel, icon: tituloIcon } = tituloConfig[chamado.pool?.titulo] || tituloConfig.outro;
 
-  // Verifica se o texto da descrição é longo o suficiente para precisar ser cortado
   const descricaoLonga = chamado.descricao.length > 100;
   const textoDescricao = isExpanded ? chamado.descricao : `${chamado.descricao.substring(0, 100)}${descricaoLonga ? '...' : ''}`;
 
@@ -54,15 +49,12 @@ export default function PoolCard({ chamado }) {
           </div>
         </header>
 
-        {/* ===== TÍTULO COM TRUNCAMENTO (para evitar quebra de linha) ===== */}
         <p 
             className="font-semibold text-gray-800 mb-2 truncate"
-            title={chamado.titulo} // Tooltip que mostra o título completo ao passar o mouse
+            title={chamado.titulo} 
         >
             {chamado.titulo}
         </p>
-
-        {/* ===== DESCRIÇÃO COM LÓGICA DE "VER MAIS" ===== */}
         <p className="text-sm text-gray-600 leading-relaxed">
             {textoDescricao}
             {descricaoLonga && (

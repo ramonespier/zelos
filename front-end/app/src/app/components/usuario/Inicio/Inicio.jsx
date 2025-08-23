@@ -24,7 +24,6 @@ export default function Inicio({ onAbrirChamado }) {
     { icon: <FaShieldAlt size={40} className="text-red-600" />, title: 'Segurança', description: 'Seus dados e chamados estão protegidos com criptografia e boas práticas.' },
   ];
 
-
   const faqs = [
     { question: 'Como abrir um chamado?', answer: 'Clique no botão "Solicitar chamado", preencha o formulário com os detalhes do problema e envie.' },
     { question: 'Qual o tempo médio de resposta?', answer: 'Nosso tempo médio de resposta é de até 24 horas úteis.' },
