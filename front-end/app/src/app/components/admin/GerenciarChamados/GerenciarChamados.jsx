@@ -3,9 +3,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiInbox, FiUsers, FiTrendingUp, FiCheckCircle, FiChevronDown, FiCornerUpRight, FiLoader } from 'react-icons/fi';
-import api from '../../../lib/api'; // Certifique-se de que o caminho está correto
-
-// --- SUBCOMPONENTES DE UI REUTILIZÁVEIS ---
+import api from '../../../lib/api';
+import { toast } from 'sonner';         
 
 const StatCard = ({ icon, label, value }) => (
     <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-5">
@@ -43,7 +42,7 @@ const ChamadoPendenteCard = ({ chamado, tecnicos, onAtribuir }) => (
 );
 
 const TecnicoCard = ({ tecnico, chamados, onDesatribuir }) => {
-    const getInitials = (name) => {
+    const getInitials = (name = "") => {
         const names = name.split(' ');
         if (names.length > 1) {
             return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
@@ -66,20 +65,13 @@ const TecnicoCard = ({ tecnico, chamados, onDesatribuir }) => {
                 <AnimatePresence>
                     {chamados.map(chamado => (
                         <motion.div
-                            layout
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            key={chamado.id}
-                            className="bg-slate-100 p-2.5 rounded-md text-sm group"
-                        >
+                            layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                            key={chamado.id} className="bg-slate-100 p-2.5 rounded-md text-sm group" >
                             <div className="flex justify-between items-center">
                                 <p className="text-slate-700 truncate" title={chamado.titulo}>{chamado.titulo}</p>
-                                <button
-                                    onClick={() => onDesatribuir(chamado.id)}
+                                <button onClick={() => onDesatribuir(chamado.id)}
                                     className="text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
-                                    title="Desatribuir"
-                                >
+                                    title="Desatribuir" >
                                     <FiCornerUpRight />
                                 </button>
                             </div>
@@ -91,31 +83,10 @@ const TecnicoCard = ({ tecnico, chamados, onDesatribuir }) => {
     );
 };
 
-const Toast = ({ message }) => (
-    <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 20 }}
-        className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white py-2.5 px-5 rounded-lg shadow-2xl flex items-center gap-3"
-    >
-        <FiCheckCircle className="text-emerald-400" />
-        <span className="font-medium text-sm">{message}</span>
-    </motion.div>
-);
-
-
-// --- COMPONENTE PRINCIPAL INTEGRADO ---
 export default function PainelAtribuicaoAdmin() {
     const [tecnicos, setTecnicos] = useState([]);
     const [chamados, setChamados] = useState([]);
-    const [toast, setToast] = useState(null);
     const [pageLoading, setPageLoading] = useState(true);
-
-    const showToast = (message) => {
-        setToast(null);
-        setTimeout(() => setToast(message), 50);
-        setTimeout(() => setToast(null), 3000);
-    };
 
     const fetchData = async () => {
         if (!chamados.length) setPageLoading(true);
@@ -125,7 +96,6 @@ export default function PainelAtribuicaoAdmin() {
                 api.get('/usuarios/tecnicos')
             ]);
             
-            // Mapeamento que preserva o status do chamado
             const mappedChamados = chamadosRes.data.map(c => ({
                 id: c.id,
                 titulo: c.titulo,
@@ -137,7 +107,7 @@ export default function PainelAtribuicaoAdmin() {
             setTecnicos(tecnicosRes.data);
         } catch (error) {
             console.error("Erro ao buscar dados:", error);
-            showToast("Erro ao carregar dados. Tente novamente.");
+            toast.error("Erro ao carregar dados. Tente novamente."); 
         } finally {
             setPageLoading(false);
         }
@@ -151,12 +121,12 @@ export default function PainelAtribuicaoAdmin() {
         if (!tecnicoId) return;
         try {
             await api.patch(`/chamados/${chamadoId}/atribuir`, { tecnico_id: tecnicoId });
-            await fetchData(); // Rebusca todos os dados para ter o estado mais atual
+            await fetchData();
             const tecnicoNome = tecnicos.find(t => t.id === tecnicoId)?.nome;
-            showToast(`Atribuído a ${tecnicoNome || 'um técnico'}!`);
+            toast.success(`Atribuído a ${tecnicoNome || 'um técnico'}!`); 
         } catch (error) {
             console.error("Erro ao atribuir chamado:", error.response?.data || error);
-            showToast("Falha ao atribuir chamado.");
+            toast.error("Falha ao atribuir chamado."); 
         }
     };
 
@@ -164,21 +134,18 @@ export default function PainelAtribuicaoAdmin() {
         try {
             await api.patch(`/chamados/${chamadoId}/atribuir`, { tecnico_id: null });
             await fetchData();
-            showToast('Chamado retornado para a fila.');
+            toast.success('Chamado retornado para a fila.'); 
         } catch (error) {
             console.error("Erro ao desatribuir chamado:", error);
-            showToast("Falha ao desatribuir chamado.");
+            toast.error("Falha ao desatribuir chamado."); 
         }
     };
 
-
-    // Lógica de filtragem aprimorada
     const { pendentes, chamadosAtribuiveis } = useMemo(() => {
         const pendentes = chamados.filter(c => !c.tecnico && c.status === 'aberto');
         const atribuidosAtivos = chamados.filter(c => c.tecnico && (c.status === 'aberto' || c.status === 'em andamento'));
         return { pendentes, chamadosAtribuiveis: atribuidosAtivos };
     }, [chamados]);
-
 
     if (pageLoading) {
         return (
@@ -192,7 +159,6 @@ export default function PainelAtribuicaoAdmin() {
     return (
         <div className="font-sans p-4 sm:p-6 lg:p-8 min-h-screen">
             <div className="max-w-7xl mx-auto">
-                
                 <header className="mb-8">
                     <h1 className="text-4xl font-black text-red-600 tracking-tight">Painel de Atribuição</h1>
                     <p className="text-lg text-slate-500 mt-1">Atribua rapidamente os chamados pendentes para a sua equipe.</p>
@@ -202,7 +168,6 @@ export default function PainelAtribuicaoAdmin() {
                         <StatCard icon={<FiUsers className="text-green-600"/>} label="Em Atendimento" value={chamadosAtribuiveis.length} />
                     </div>
                 </header>
-
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                     <main className="lg:col-span-2 space-y-4">
                         <h2 className="text-xl font-bold text-slate-800 px-2">Fila de Espera</h2>
@@ -219,7 +184,6 @@ export default function PainelAtribuicaoAdmin() {
                             )}
                         </AnimatePresence>
                     </main>
-                    
                     <aside className="space-y-6 lg:sticky lg:top-8">
                         <h2 className="text-xl font-bold text-slate-800 px-2">Equipe Técnica</h2>
                         {tecnicos.map(tecnico => (
@@ -233,10 +197,6 @@ export default function PainelAtribuicaoAdmin() {
                     </aside>
                 </div>
             </div>
-
-            <AnimatePresence>
-                {toast && <Toast message={toast} />}
-            </AnimatePresence>
         </div>
     );
 }
