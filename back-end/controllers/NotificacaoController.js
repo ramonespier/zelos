@@ -1,5 +1,3 @@
-// /controllers/NotificacaoController.js
-
 import Notificacao from '../entities/Notificacao.js';
 
 class NotificacaoController {

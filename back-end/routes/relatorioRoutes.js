@@ -3,6 +3,8 @@ import RelatorioController from "../controllers/RelatorioController.js";
 
 const router = express.Router();
 
-router.get('/', RelatorioController.listar);
+router.get('/',
+    RelatorioController.listar
+);
 
 export default router;

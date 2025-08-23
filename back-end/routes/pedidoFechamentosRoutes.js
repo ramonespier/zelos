@@ -10,14 +10,28 @@ const permitir = (perfisPermitidos) => (req, res, next) => {
     return autorizar.autorizacao(req.user, perfisPermitidos)(req, res, next);
 }
 
-router.get('/', AuthMiddleware.verifyToken, permitir(['admin', 'tecnico']), PedidoFechamentoController.listar);
-// Técnico cria o pedido de fechamento
-router.post('/', AuthMiddleware.verifyToken, permitir(['tecnico']), PedidoFechamentoController.criar);
+router.get('/',
+    AuthMiddleware.verifyToken,
+    permitir(['admin', 'tecnico']),
+    PedidoFechamentoController.listar
+);
 
-// Admin lista os pedidos pendentes
-router.get('/pendentes', AuthMiddleware.verifyToken, permitir(['admin']), PedidoFechamentoController.listarPendentes);
+router.post('/',
+    AuthMiddleware.verifyToken,
+    permitir(['tecnico']),
+    PedidoFechamentoController.criar
+);
 
-// Admin aprova ou reprova
-router.patch('/:id/responder', AuthMiddleware.verifyToken, permitir(['admin']), PedidoFechamentoController.responder);
+router.get('/pendentes',
+    AuthMiddleware.verifyToken,
+    permitir(['admin']),
+    PedidoFechamentoController.listarPendentes
+);
+
+router.patch('/:id/responder',
+    AuthMiddleware.verifyToken,
+    permitir(['admin']),
+    PedidoFechamentoController.responder
+);
 
 export default router;

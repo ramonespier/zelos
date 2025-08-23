@@ -2,7 +2,6 @@ import Equipamento from '../entities/Equipamento.js';
 
 class EquipamentoController {
 
-    // Listar todos os equipamentos (Read)
     static async listar(req, res) {
         try {
             const equipamentos = await Equipamento.findAll({ order: [['patrimonio', 'ASC']] });
@@ -13,7 +12,6 @@ class EquipamentoController {
         }
     }
 
-    // Criar um novo equipamento (Create)
     static async criar(req, res) {
         try {
             const { patrimonio, sala, equipamento } = req.body;
@@ -32,10 +30,9 @@ class EquipamentoController {
         }
     }
 
-    // Atualizar um equipamento (Update)
     static async atualizar(req, res) {
         try {
-            const { patrimonio } = req.params; // O ID é o próprio número do patrimônio
+            const { patrimonio } = req.params; 
             const { sala, equipamento } = req.body;
 
             const eqp = await Equipamento.findByPk(patrimonio);
@@ -52,7 +49,6 @@ class EquipamentoController {
         }
     }
 
-    // Excluir um equipamento (Delete)
     static async deletar(req, res) {
         try {
             const { patrimonio } = req.params;
@@ -64,7 +60,6 @@ class EquipamentoController {
             await eqp.destroy();
             res.json({ message: "Equipamento deletado com sucesso." });
         } catch (err) {
-            // Se houver chamados atrelados a este patrimônio, a FK pode impedir a exclusão
             if (err.name === 'SequelizeForeignKeyConstraintError') {
                 return res.status(409).json({ message: 'Não é possível excluir este equipamento pois existem chamados associados a ele.' });
             }

@@ -1,9 +1,5 @@
-// /entities/PedidoChamado.js
-
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../configs/database.js";
-
-// Importações para definir as associações
 import Chamado from "./Chamado.js";
 import Usuario from "./Usuario.js";
 
@@ -38,8 +34,6 @@ PedidoChamado.init({
     updatedAt: 'atualizado_em',
 });
 
-// === ASSOCIAÇÕES DEFINIDAS AQUI ===
-// Isso informa ao Sequelize como PedidoChamado se relaciona com Chamado e Usuario.
 PedidoChamado.belongsTo(Chamado, { foreignKey: 'chamado_id', as: 'chamado' });
 PedidoChamado.belongsTo(Usuario, { foreignKey: 'tecnico_id', as: 'tecnico' });
 

@@ -30,7 +30,7 @@ export const sendMensagem = async (req, res) => {
 
         let data;
 
-        // Se for admin ou técnico respondendo...
+        // se for admin ou técnico respondendo...
         if (['admin', 'tecnico'].includes(remetente.funcao)) {
             if (!conversaUsuarioId) {
                 return res.status(400).json({ error: "É necessário especificar o ID do usuário da conversa." });

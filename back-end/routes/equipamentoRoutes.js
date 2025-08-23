@@ -10,31 +10,27 @@ const permitir = (perfisPermitidos) => (req, res, next) => {
     return autorizar.autorizacao(req.user, perfisPermitidos)(req, res, next);
 }
 
-// GET /equipamentos -> Listar todos
 router.get('/',
     AuthMiddleware.verifyToken,
-    permitir(['admin', 'tecnico', 'usuario']), // Todos podem ver a lista para abrir chamados
+    permitir(['admin', 'tecnico', 'usuario']),
     EquipamentoController.listar
 );
 
-// POST /equipamentos -> Criar um novo
 router.post('/',
     AuthMiddleware.verifyToken,
-    permitir(['admin']), // Apenas admins podem criar
+    permitir(['admin']),
     EquipamentoController.criar
 );
 
-// PATCH /equipamentos/:patrimonio -> Atualizar
 router.patch('/:patrimonio',
     AuthMiddleware.verifyToken,
-    permitir(['admin']), // Apenas admins podem editar
+    permitir(['admin']),
     EquipamentoController.atualizar
 );
 
-// DELETE /equipamentos/:patrimonio -> Deletar
 router.delete('/:patrimonio',
     AuthMiddleware.verifyToken,
-    permitir(['admin']), // Apenas admins podem deletar
+    permitir(['admin']),
     EquipamentoController.deletar
 );
 

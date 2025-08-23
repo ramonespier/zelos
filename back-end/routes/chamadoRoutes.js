@@ -1,7 +1,7 @@
 import ChamadoController from "../controllers/ChamadoController.js";
 import Autorizar from "../middlewares/Autorizar.js";
 import AuthMiddleware from "../middlewares/AuthMiddleware.js";
-import upload from '../middlewares/upload.js'; 
+import upload from '../middlewares/upload.js';
 import express from "express";
 
 const router = express.Router();
@@ -29,7 +29,7 @@ router.get('/:id',
     ChamadoController.buscarPorId
 );
 
-router.get('/:id/apontamentos', 
+router.get('/:id/apontamentos',
     AuthMiddleware.verifyToken,
     permitir(['admin', 'tecnico']),
     ChamadoController.listarApontamentos
@@ -38,12 +38,12 @@ router.get('/:id/apontamentos',
 router.post('/',
     AuthMiddleware.verifyToken,
     permitir(['usuario', 'admin', 'tecnico']),
-    upload.single('imagem'), 
+    upload.single('imagem'),
     ChamadoController.criar
 );
 
 router.patch('/:id/atribuir',
-    AuthMiddleware.verifyToken,         
+    AuthMiddleware.verifyToken,
     permitir(['admin', 'tecnico']),
     ChamadoController.atribuir
 );
@@ -51,7 +51,7 @@ router.patch('/:id/atribuir',
 router.patch('/:id/status',
     AuthMiddleware.verifyToken,
     permitir(['admin', 'tecnico']),
-    ChamadoController.status 
+    ChamadoController.status
 );
 
 router.patch('/:id',
@@ -62,14 +62,14 @@ router.patch('/:id',
 
 
 router.patch('/:id/fechar',
-    AuthMiddleware.verifyToken,         
+    AuthMiddleware.verifyToken,
     permitir(['admin']),
     ChamadoController.fechar
 );
 
 router.get('/:id/apontamentos',
     AuthMiddleware.verifyToken,
-    permitir(['admin', 'tecnico']), 
+    permitir(['admin', 'tecnico']),
     ChamadoController.listarApontamentos
 );
 

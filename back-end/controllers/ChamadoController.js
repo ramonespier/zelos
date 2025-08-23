@@ -48,30 +48,28 @@ class ChamadoController {
         }
     }
 
-    // /controllers/ChamadoController.js
-
     static async criar(req, res) {
         try {
             const { titulo, numero_patrimonio, descricao, pool_id } = req.body;
 
             const img_url = req.file ? `/uploads/${req.file.filename}` : null;
 
-            // Validação dos campos que são sempre obrigatórios
+            // validação dos campos que são sempre obrigatórios
             if (!titulo || !descricao || !pool_id) {
                 return res.status(400).json({ message: 'Campos obrigatórios faltando: Título, Descrição e Tipo de Solicitação.' });
             }
 
 
-            // Só executa as validações de patrimônio se ele for fornecido
+            // só executa as validações de patrimônio se ele for fornecido
             if (numero_patrimonio && numero_patrimonio.trim() !== '') {
 
-                // 1. Verifica se o equipamento existe
+                // verifica se o equipamento existe
                 const equipamento = await Equipamento.findByPk(numero_patrimonio);
                 if (!equipamento) {
                     return res.status(404).json({ message: `Equipamento com o patrimônio "${numero_patrimonio}" não foi encontrado. Verifique o número ou deixe o campo em branco.` });
                 }
 
-                // 2. Verifica se já existe um chamado ativo para este equipamento
+                // verifica se já existe um chamado ativo para este equipamento
                 const chamadoExistente = await Chamado.findOne({
                     where: {
                         numero_patrimonio: numero_patrimonio,
@@ -83,7 +81,7 @@ class ChamadoController {
                 }
             }
 
-            // Cria o chamado. Se numero_patrimonio for uma string vazia, salva como null.
+            // se numero_patrimonio for vazio salva como null
             const chamado = await Chamado.create({
                 titulo,
                 numero_patrimonio: numero_patrimonio || null,
@@ -101,12 +99,10 @@ class ChamadoController {
         }
     }
 
-
-    // ===== MÉTODO 'ATRIBUIR' CORRIGIDO E APRIMORADO =====
     static async atribuir(req, res) {
         try {
             const { id } = req.params;
-            const { tecnico_id } = req.body; // pode ser um ID de técnico ou null (para desatribuir)
+            const { tecnico_id } = req.body;
 
             const chamado = await Chamado.findByPk(id);
             if (!chamado) {
@@ -116,30 +112,26 @@ class ChamadoController {
                 return res.status(400).json({ message: 'Não é possível atribuir um chamado que já foi concluído ou cancelado.' });
             }
 
-            // O objeto que será usado para a atualização
+            // o objeto que será usado para a atualização
             let updateData = {
                 tecnico_id: null,
-                status: 'aberto' // Se desatribuído, volta a ser 'aberto'
+                status: 'aberto' // se desatribuído, volta a ser 'aberto'
             };
 
-            // Se um tecnico_id válido foi fornecido...
+            // se um tecnico_id válido foi fornecido...
             if (tecnico_id) {
                 const tecnico = await Usuario.findByPk(tecnico_id);
                 if (!tecnico || tecnico.funcao !== 'tecnico') {
                     return res.status(400).json({ message: 'Atribuição falhou: o usuário selecionado não é um técnico.' });
                 }
 
-                // ...preparamos para atribuir e mudar o status
+                // preparamos para atribuir e mudar o status
                 updateData.tecnico_id = tecnico_id;
                 updateData.status = 'em andamento';
             }
 
-            // Aplica as atualizações de uma só vez
             await chamado.update(updateData);
-
-            // Recarrega os dados com o técnico associado para retornar a resposta completa
             await chamado.reload({ include: ['tecnico'] });
-
             res.status(200).json(chamado);
         } catch (err) {
             console.error("Erro ao atribuir chamado:", err);
@@ -147,7 +139,6 @@ class ChamadoController {
         }
     }
 
-    // ATUALIZAR (MODAL DE EDIÇÃO): agora precisa ser mais cuidadoso
     static async atualizar(req, res) {
         try {
             const { id } = req.params;
@@ -156,26 +147,22 @@ class ChamadoController {
             const chamado = await Chamado.findByPk(id);
             if (!chamado) { return res.status(404).json({ message: 'Chamado não encontrado' }); }
 
-            // Regra de negócio: Se o admin está definindo um técnico e o chamado está 'aberto',
-            // então o status deve MUDAR para 'em andamento' automaticamente.
             if (tecnico_id && chamado.status === 'aberto') {
                 status = 'em andamento';
             }
-            // Regra de negócio: Se o admin está removendo o técnico (desatribuindo),
-            // o status deve voltar para 'aberto'.
+
             if (tecnico_id === null && chamado.status === 'em andamento') {
                 status = 'aberto';
             }
 
             if (tecnico_id !== undefined) {
-                // Valida o técnico apenas se o ID for fornecido (diferente de nulo/undefined)
                 if (tecnico_id) {
                     const tecnico = await Usuario.findByPk(tecnico_id);
                     if (!tecnico || tecnico.funcao !== 'tecnico') {
                         return res.status(400).json({ message: 'Atribuição falhou: usuário não é técnico.' });
                     }
                 }
-                chamado.tecnico_id = tecnico_id; // Permite atribuir null
+                chamado.tecnico_id = tecnico_id;
             }
 
             if (titulo !== undefined) chamado.titulo = titulo;
@@ -189,9 +176,6 @@ class ChamadoController {
             res.status(500).json({ message: "Erro ao atualizar chamado" });
         }
     }
-
-    // (O resto dos seus métodos: status, fechar, listarApontamentos permanecem os mesmos)
-
 
     static async status(req, res) {
         try {
@@ -225,9 +209,8 @@ class ChamadoController {
 
     static async listarApontamentos(req, res) {
         try {
-            const { id } = req.params; // ID do chamado
+            const { id } = req.params;
 
-            // Validação para garantir que o chamado existe antes de buscar apontamentos
             const chamado = await Chamado.findByPk(id);
             if (!chamado) {
                 return res.status(404).json({ message: "Chamado não encontrado." });
@@ -235,7 +218,7 @@ class ChamadoController {
 
             const apontamentos = await Apontamento.findAll({
                 where: { chamado_id: id },
-                order: [['criado_em', 'DESC']] // Ordena pelos mais recentes primeiro
+                order: [['criado_em', 'DESC']]
             });
 
             res.json(apontamentos);
@@ -247,15 +230,15 @@ class ChamadoController {
 
     static async listarHistoricoTecnico(req, res) {
         try {
-            const tecnico_id = req.user.id; // Pega o ID do técnico logado pelo token
+            const tecnico_id = req.user.id;
 
             const chamados = await Chamado.findAll({
                 where: {
                     tecnico_id: tecnico_id,
-                    status: ['concluido', 'cancelado'] // Busca apenas chamados com estes status
+                    status: ['concluido', 'cancelado']
                 },
-                include: ['usuario', 'pool'], // Inclui dados do criador e da pool
-                order: [['atualizado_em', 'DESC']] // Ordena pelos mais recentemente finalizados
+                include: ['usuario', 'pool'],
+                order: [['atualizado_em', 'DESC']]
             });
 
             res.json(chamados);
@@ -266,4 +249,4 @@ class ChamadoController {
     }
 }
 
-export default ChamadoController;
+export default ChamadoController;   

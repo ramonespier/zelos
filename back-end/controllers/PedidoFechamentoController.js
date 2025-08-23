@@ -1,19 +1,15 @@
 import PedidoFechamento from '../entities/PedidoFechamento.js';
 import Chamado from '../entities/Chamado.js';
 import sequelize from '../configs/database.js';
-import Usuario from '../entities/Usuario.js'; // Importação para o include
+import Usuario from '../entities/Usuario.js'; 
 
 class PedidoFechamentoController {
     
-    // ROTA: POST /pedidos-fechamento
-    // Cria uma nova solicitação de fechamento
     static async criar(req, res) {
         const { chamado_id } = req.body;
         const tecnico_id = req.user.id;
         
         try {
-            // ===== LÓGICA DE VALIDAÇÃO APRIMORADA =====
-            // Só impede a criação se já houver um pedido PENDENTE para este chamado.
             const pedidoPendente = await PedidoFechamento.findOne({
                 where: {
                     chamado_id: chamado_id,
@@ -33,8 +29,6 @@ class PedidoFechamentoController {
         }
     }
 
-    // ROTA: GET /pedidos-fechamento (com filtro opcional por chamado_id)
-    // Permite que o técnico verifique se já há um pedido pendente
     static async listar(req, res) {
         try {
             const { chamado_id } = req.query;
@@ -51,8 +45,6 @@ class PedidoFechamentoController {
         }
     }
     
-    // ROTA: GET /pedidos-fechamento/pendentes
-    // Lista os pedidos para o painel de admin
     static async listarPendentes(req, res) {
         try {
             const pedidos = await PedidoFechamento.findAll({
@@ -69,11 +61,9 @@ class PedidoFechamentoController {
         }
     }
     
-    // ROTA: PATCH /pedidos-fechamento/:id/responder
-    // Admin aprova ou reprova
     static async responder(req, res) {
         const { id } = req.params;
-        const { status } = req.body; // 'aprovado' ou 'reprovado'
+        const { status } = req.body; 
 
         if (!['aprovado', 'reprovado'].includes(status)) {
             return res.status(400).json({ message: "Status inválido." });
@@ -89,19 +79,15 @@ class PedidoFechamentoController {
             }
 
             if (status === 'aprovado') {
-                // APROVADO: Muda o status do CHAMADO para 'concluido'
                 await Chamado.update({ status: 'concluido' }, {
                     where: { id: pedido.chamado_id },
                     transaction: t
                 });
-                // E muda o status do PEDIDO para 'aprovado' para manter registro
+
                 pedido.status = 'aprovado';
                 await pedido.save({ transaction: t });
 
             } else { // status === 'reprovado'
-                // ===== LÓGICA DE REPROVAÇÃO APRIMORADA =====
-                // REPROVADO: Em vez de mudar o status, simplesmente deletamos o pedido.
-                // Isso permite que o técnico crie uma nova solicitação no futuro.
                 await pedido.destroy({ transaction: t });
             }
 
