@@ -70,7 +70,7 @@ const TecnicoCard = ({ tecnico, chamados, onDesatribuir }) => {
                             <div className="flex justify-between items-center">
                                 <p className="text-slate-700 truncate" title={chamado.titulo}>{chamado.titulo}</p>
                                 <button onClick={() => onDesatribuir(chamado.id)}
-                                    className="text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
+                                    className="text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0 cursor-pointer"
                                     title="Desatribuir" >
                                     <FiCornerUpRight />
                                 </button>

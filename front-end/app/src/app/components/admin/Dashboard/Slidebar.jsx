@@ -10,6 +10,7 @@ import {
   PaperAirplaneIcon,
   ChartBarIcon,
   UserCircleIcon,
+  ArchiveBoxIcon,
   ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline';
 import Footer from '../../footer/page'; // Ajuste o caminho se necessário
@@ -21,7 +22,7 @@ const tabs = [
   { id: 'atribuidos', label: 'Gerenciar Chamados', icon: ClipboardDocumentCheckIcon },
   { id: 'pedidos', label: 'Gerenciar Pedidos', icon: FolderArrowDownIcon },
   { id: 'fechamento', label: 'Gerenciar Fechamentos', icon: DocumentCheckIcon },
-  { id: 'patrimonio', label: 'Patrimonio', icon: DocumentCheckIcon },
+  { id: 'patrimonio', label: 'Patrimonio', icon: ArchiveBoxIcon },
   { id: 'mensagens', label: 'Mensagens', icon: PaperAirplaneIcon },
   { id: 'relatorio', label: 'Relatórios', icon: ChartBarIcon },
   { id: 'info', label: 'Perfil', icon: UserCircleIcon },

@@ -19,7 +19,7 @@ function ConfirmationModal({ title, message, onConfirm, onCancel, isLoading }) {
                 <h3 className="font-bold text-xl text-gray-800">{title}</h3>
                 <p className="text-gray-600 my-4">{message}</p>
                 <div className="flex gap-4 justify-center mt-6">
-                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onCancel} className="py-2 px-6 rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-700">Cancelar</motion.button>
+                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onCancel} className="py-2 cursor-pointer px-6 rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-700 ">Cancelar</motion.button>
                     <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onConfirm} disabled={isLoading} className="py-2 cursor-pointer px-6 rounded-lg text-white bg-red-600 hover:bg-red-700 font-semibold flex items-center justify-center gap-2 min-w-[120px]">
                         {isLoading ? <FiLoader className="animate-spin"/> : 'Confirmar'}
                     </motion.button>
@@ -75,7 +75,7 @@ function PatrimonioModal({ equipamento, onClose, onSave, isLoading }) {
                         </div>
                     </div>
                     <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t">
-                        <motion.button type="button" onClick={onClose} className="py-2 px-5  rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-800 transition" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Cancelar</motion.button>
+                        <motion.button type="button" onClick={onClose} className="py-2 px-5  cursor-pointer rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-800 transition" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Cancelar</motion.button>
                         <motion.button type="submit" disabled={isLoading} className="py-2 px-5 rounded-lg cursor-pointer text-white bg-red-600 hover:bg-red-700 font-semibold disabled:bg-red-400 flex items-center gap-2 transition" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                             {isLoading && <FiLoader className="animate-spin" />}
                             {isLoading ? 'Salvando...' : 'Salvar'}

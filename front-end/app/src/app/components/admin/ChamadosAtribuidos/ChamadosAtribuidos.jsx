@@ -174,8 +174,8 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
                                             <div className="flex gap-2 justify-end">
                                                 {isActionable ? (
                                                     <>
-                                                        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setEditingTicket({ ...chamado })} aria-label="Editar" className="p-2 text-gray-400 hover:text-blue-600"><FiEdit size={18} /></motion.button>
-                                                        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setTicketToCancel(chamado)} aria-label="Cancelar" className="p-2 text-gray-400 hover:text-red-600"><FiX size={18} /></motion.button>
+                                                        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setEditingTicket({ ...chamado })} aria-label="Editar" className="p-2 cursor-pointer text-gray-400 hover:text-blue-600"><FiEdit size={18} /></motion.button>
+                                                        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setTicketToCancel(chamado)} aria-label="Cancelar" className="p-2 cursor-pointer text-gray-400 hover:text-red-600"><FiX size={18} /></motion.button>
                                                     </>
                                                 ) : (
                                                     <span className="text-xs text-gray-400 italic pr-4">N/A</span>
@@ -218,8 +218,8 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
                                             </div>
                                         </div>
                                         <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">
-                                            <motion.button type="button" onClick={() => setEditingTicket(null)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="py-2 px-5 rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-800 transition">Voltar</motion.button>
-                                            <motion.button onClick={handleSave} disabled={actionLoading} className="py-2 px-5 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 flex justify-center items-center gap-2 disabled:bg-red-400" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>{actionLoading ? <Spinner /> : 'Salvar Alterações'}</motion.button>
+                                            <motion.button type="button" onClick={() => setEditingTicket(null)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="cursor-pointer py-2 px-5 rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-800 transition">Voltar</motion.button>
+                                            <motion.button onClick={handleSave} disabled={actionLoading} className="cursor-pointer py-2 px-5 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 flex justify-center items-center gap-2 disabled:bg-red-400" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>{actionLoading ? <Spinner /> : 'Salvar Alterações'}</motion.button>
                                         </div>
                                     </>
                                 )}
@@ -229,8 +229,8 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
                                         <h3 className="font-bold text-xl mb-2 text-gray-800">Confirmar Cancelamento</h3>
                                         <p className="text-gray-600 mb-6">Tem certeza de que deseja cancelar o chamado "{ticketToCancel.titulo}"? Esta ação não pode ser desfeita.</p>
                                         <div className="flex gap-4 justify-center">
-                                            <motion.button onClick={() => setTicketToCancel(null)} disabled={actionLoading} className="py-2 px-6 rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-700" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Voltar</motion.button>
-                                            <motion.button onClick={handleCancel} disabled={actionLoading} className="py-2 px-6 rounded-lg text-white bg-red-600 hover:bg-red-700 font-semibold flex items-center justify-center gap-2 min-w-[120px]" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>{actionLoading ? <Spinner /> : 'Sim, Cancelar'}</motion.button>
+                                            <motion.button onClick={() => setTicketToCancel(null)} disabled={actionLoading} className="cursor-pointer py-2 px-6 rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-700" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Voltar</motion.button>
+                                            <motion.button onClick={handleCancel} disabled={actionLoading} className="cursor-pointer py-2 px-6 rounded-lg text-white bg-red-600 hover:bg-red-700 font-semibold flex items-center justify-center gap-2 min-w-[120px]" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>{actionLoading ? <Spinner /> : 'Sim, Cancelar'}</motion.button>
                                         </div>
                                     </div>
                                 )}
