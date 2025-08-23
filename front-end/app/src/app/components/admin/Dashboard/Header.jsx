@@ -2,9 +2,10 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'; // Adicionando o ícone de 'X'
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'; 
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { toast } from 'sonner';
 
 import Notifications from './Notifications';
 import ProfileDropdown from './ProfileDropdown';
@@ -41,8 +42,11 @@ export default function Header({
 
 
   const handleLogout = () => {
+    toast.success("Logout efetuado com sucesso.");
     Cookies.remove('token');
-    router.push('/login');
+    setTimeout(() => {
+      router.push('/login');
+    }, 1000);
   };
 
   // Lógica de abas separada
@@ -86,7 +90,7 @@ export default function Header({
           {isMobileMenuOpen ? <XMarkIcon className="w-7 h-7" /> : <Bars3Icon className="w-7 h-7" />}
         </motion.button>
         {/* =========================================== */}
-        
+
         <h2 className="text-2xl font-bold text-gray-800 tracking-tight drop-shadow-sm">
           {getActiveTabLabel()}
         </h2>
@@ -119,33 +123,32 @@ export default function Header({
         {isMobileMenuOpen && (
           <>
             <motion.div
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="fixed inset-0 bg-black/50 z-20"
-                onClick={() => setMobileMenuOpen(false)}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/50 z-20"
+              onClick={() => setMobileMenuOpen(false)}
             />
             <motion.nav
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="absolute top-full left-0 w-full bg-white shadow-lg border-t z-20 rounded-b-2xl overflow-hidden"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="absolute top-full left-0 w-full bg-white shadow-lg border-t z-20 rounded-b-2xl overflow-hidden"
             >
-                <ul className="flex flex-col p-2">
+              <ul className="flex flex-col p-2">
                 {tabs.map(tab => (
-                    <li key={tab.id}>
+                  <li key={tab.id}>
                     <button
-                        onClick={() => handleSelecao(tab.id)}
-                        className={`w-full text-left px-4 py-3 transition rounded-lg text-base ${
-                        activeTab === tab.id
-                            ? 'bg-red-600 text-white font-semibold shadow-sm'
-                            : 'text-gray-700 hover:bg-gray-100'
+                      onClick={() => handleSelecao(tab.id)}
+                      className={`w-full text-left px-4 py-3 transition rounded-lg text-base ${activeTab === tab.id
+                          ? 'bg-red-600 text-white font-semibold shadow-sm'
+                          : 'text-gray-700 hover:bg-gray-100'
                         }`}
                     >
-                        {tab.label}
+                      {tab.label}
                     </button>
-                    </li>
+                  </li>
                 ))}
-                </ul>
+              </ul>
             </motion.nav>
           </>
         )}

@@ -6,16 +6,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 
-// API para fazer requisições
-import api from '../../../lib/api'; 
+import api from '../../../lib/api';
 
-// Componentes de layout do Dashboard
 import Sidebar from './Slidebar';
 import Header from './Header';
 import ProfileInfo from './ProfileInfo';
 
-// Componentes de conteúdo (Páginas do Admin)
-import Inicio from '../Inicio/Inicio'; 
+import Inicio from '../Inicio/Inicio';
 import GerenciarChamados from '../GerenciarChamados/GerenciarChamados';
 import ChamadosAtribuidos from '../ChamadosAtribuidos/ChamadosAtribuidos';
 import GerenciarFechamentos from '../GerenciarFechamento/GerenciarFechamento';
@@ -26,14 +23,13 @@ import GerenciarPedidos from '../GerenciarPedidos/GerenciarPedidos';
 import GerenciarPatrimonios from '../GerenciasPatrimonios/GerenciarPatrimonios';
 
 export default function Dashboard() {
-    // === ESTADOS DO COMPONENTE ===
     const [activeTab, setActiveTab] = useState('inicio');
     const [funcionario, setFuncionario] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [notifications, setNotifications] = useState([]);
     const router = useRouter();
 
-    // === LÓGICA DE AUTENTICAÇÃO E BUSCA INICIAL ===
+
     useEffect(() => {
         const token = Cookies.get('token');
         if (token) {
@@ -55,12 +51,11 @@ export default function Dashboard() {
         setIsLoading(false);
     }, [router]);
 
-    // === LÓGICA DE NOTIFICAÇÕES (Polling) ===
     useEffect(() => {
-        if (!funcionario) return; 
+        if (!funcionario) return;
         const fetchNotifications = async () => {
             try {
-                const response = await api.get('/notificacao'); 
+                const response = await api.get('/notificacao');
                 setNotifications(response.data);
             } catch (error) {
                 console.error("Erro ao buscar notificações:", error.response?.data || error.message);
@@ -68,10 +63,9 @@ export default function Dashboard() {
         };
         fetchNotifications();
         const intervalId = setInterval(fetchNotifications, 15000);
-        return () => clearInterval(intervalId); 
+        return () => clearInterval(intervalId);
     }, [funcionario]);
 
-    // === FUNÇÕES AUXILIARES ===
     const getInitials = (name = '') => {
         if (!name) return '?';
         return name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -82,7 +76,7 @@ export default function Dashboard() {
         if (!notification || notification.lida) return;
         setNotifications(prev => prev.map(n => (n.id === notificationId ? { ...n, lida: true } : n)));
         try {
-            await api.patch(`/notificacao/${notificationId}/lida`); 
+            await api.patch(`/notificacao/${notificationId}/lida`);
         } catch (error) {
             console.error("Erro ao marcar notificação como lida:", error);
             setNotifications(prev => prev.map(n => (n.id === notificationId ? { ...n, lida: false } : n)));
@@ -101,27 +95,24 @@ export default function Dashboard() {
         }
     };
 
-    // === RENDERIZAÇÃO ===
     if (isLoading) {
         return <div className="flex h-screen items-center justify-center text-lg text-gray-600">Verificando autenticação...</div>;
     }
-    
+
     if (!funcionario) {
-        return null; // Não renderiza nada enquanto redireciona
+        return null;
     }
-    
+
     const renderContent = () => {
         switch (activeTab) {
-            case 'inicio':
-                // <<< CORREÇÃO AQUI: Passamos a função setActiveTab como uma prop >>>
-                return <Inicio setActiveTab={setActiveTab} />;
-            case 'abrir': return <AbrirChamado funcionario={funcionario}/>;
-            case 'gerenciar': return <GerenciarChamados funcionario={funcionario}/>;
-            case 'atribuidos': return <ChamadosAtribuidos funcionario={funcionario}/>;
-            case 'pedidos': return <GerenciarPedidos funcionario={funcionario}/>;
-            case 'fechamento': return <GerenciarFechamentos funcionario={funcionario}/>;
-            case 'patrimonio': return <GerenciarPatrimonios funcionario={funcionario}/>;
-            case 'mensagens': return <Mensagens funcionario={funcionario}/>;
+            case 'inicio': return <Inicio setActiveTab={setActiveTab} />;
+            case 'abrir': return <AbrirChamado funcionario={funcionario} />;
+            case 'gerenciar': return <GerenciarChamados funcionario={funcionario} />;
+            case 'atribuidos': return <ChamadosAtribuidos funcionario={funcionario} setActiveTab={setActiveTab} />;
+            case 'pedidos': return <GerenciarPedidos funcionario={funcionario} />;
+            case 'fechamento': return <GerenciarFechamentos funcionario={funcionario} />;
+            case 'patrimonio': return <GerenciarPatrimonios funcionario={funcionario} />;
+            case 'mensagens': return <Mensagens funcionario={funcionario} />;
             case 'relatorio': return <Relatorio />;
             case 'info': return <ProfileInfo funcionario={funcionario} getInitials={getInitials} />;
             default: return <Inicio setActiveTab={setActiveTab} />;
