@@ -37,7 +37,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     <aside className="bg-gradient-to-b from-gray-50 via-white to-gray-50 border-r border-gray-200 flex flex-col w-72 hidden lg:flex h-screen shadow-md">
       <div className="h-20 flex items-center justify-center border-b border-gray-200">
         <h1 className="text-2xl font-bold text-red-600 tracking-tight drop-shadow-sm">
-          SENAI | Admin
+          SENAI CHAMADOS  
         </h1>
       </div>
       <nav className="flex-1 px-4 py-6 space-y-2">
