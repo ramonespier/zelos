@@ -73,10 +73,10 @@ export default function LoginForm() {
         
         <form className="w-full mt-6" onSubmit={handleLogin}>
           <div className="w-full">
-            <label className="text-base font-semibold text-gray-700">Matrícula</label>
+            <label className="text-base font-semibold text-gray-700">Username</label>
             <input
               name="email"
-              placeholder="Insira sua matrícula"
+              placeholder="Insira seu username"
               className="mt-2 focus:outline-none w-full border-2 border-gray-200 rounded-md h-[45px] text-black px-4 transition-all focus:border-red-500 focus:ring-1 focus:ring-red-200 disabled:bg-gray-100"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
