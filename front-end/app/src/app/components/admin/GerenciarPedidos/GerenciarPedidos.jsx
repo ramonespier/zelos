@@ -2,16 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiInbox, FiCheck, FiX, FiLoader, FiAlertTriangle, FiUserPlus } from 'react-icons/fi';
+import { FiInbox, FiCheck, FiX, FiLoader, FiUserPlus } from 'react-icons/fi';
 import api from '../../../lib/api';
-
-const Toast = ({ message, type }) => (
-    <motion.div initial={{ y: 50, opacity: 0 }} animate={{ opacity: 1 }} exit={{ y: -50, opacity: 0 }}
-        className={`fixed bottom-6 right-6 py-3 px-5 rounded-lg shadow-2xl flex items-center gap-3 z-50 ${type === 'error' ? 'bg-red-600' : 'bg-green-600'} text-white`}>
-        {type === 'success' ? <FiCheck /> : <FiAlertTriangle />}
-        <span className="font-medium">{message}</span>
-    </motion.div>
-);
+import { toast } from 'sonner'; 
 
 const PedidoCard = ({ pedido, onResponder, isLoading }) => (
     <motion.div
@@ -29,13 +22,13 @@ const PedidoCard = ({ pedido, onResponder, isLoading }) => (
             <button
                 onClick={() => onResponder(pedido.id, 'aceito')}
                 disabled={isLoading}
-                className="flex-1 flex justify-center items-center gap-2 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition disabled:bg-green-400">
+                className="flex-1 flex justify-center items-center cursor-pointer gap-2 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition disabled:bg-green-400">
                 {isLoading ? <FiLoader className="animate-spin" /> : <FiCheck />} Aceitar
             </button>
             <button
                 onClick={() => onResponder(pedido.id, 'recusado')}
                 disabled={isLoading}
-                className="flex-1 flex justify-center items-center gap-2 bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition disabled:bg-red-400">
+                className="flex-1 flex justify-center items-center cursor-pointer  gap-2 bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition disabled:bg-red-400">
                 {isLoading ? <FiLoader className="animate-spin" /> : <FiX />} Recusar
             </button>
         </div>
@@ -46,27 +39,19 @@ export default function GerenciarPedidos() {
     const [pedidos, setPedidos] = useState([]);
     const [pageLoading, setPageLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(null);
-    const [toast, setToast] = useState(null);
-
-    const showToast = (message, type = 'success') => {
-        setToast({ message, type });
-        setTimeout(() => setToast(null), 3000);
-    };
-
-    const fetchPedidos = async () => {
-        setPageLoading(true);
-        try {
-            const response = await api.get('/pedidos-chamado/pendentes');
-            setPedidos(response.data);
-        } catch (error) {
-            console.error("Erro ao buscar pedidos:", error);
-            showToast("Falha ao carregar pedidos de atribuição.", "error");
-        } finally {
-            setPageLoading(false);
-        }
-    };
-
     useEffect(() => {
+        const fetchPedidos = async () => {
+            setPageLoading(true);
+            try {
+                const response = await api.get('/pedidos-chamado/pendentes');
+                setPedidos(response.data);
+            } catch (error) {
+                console.error("Erro ao buscar pedidos:", error);
+                toast.error("Falha ao carregar pedidos de atribuição.");
+            } finally {
+                setPageLoading(false);
+            }
+        };
         fetchPedidos();
     }, []);
 
@@ -75,10 +60,10 @@ export default function GerenciarPedidos() {
         try {
             await api.patch(`/pedidos-chamado/${pedidoId}/responder`, { status });
             setPedidos(prev => prev.filter(p => p.id !== pedidoId));
-            showToast(`Pedido de atribuição ${status} com sucesso!`, 'success');
+            toast.success(`Pedido de atribuição ${status} com sucesso!`);
         } catch (error) {
             console.error("Erro ao responder pedido:", error);
-            showToast(error.response?.data?.message || `Falha ao ${status} pedido.`, "error");
+            toast.error(error.response?.data?.message || `Falha ao ${status} pedido.`);
         } finally {
             setActionLoading(null);
         }
@@ -115,14 +100,10 @@ export default function GerenciarPedidos() {
                                 <p className="font-semibold text-lg">Nenhuma solicitação pendente.</p>
                                 <p className="text-sm">A caixa de entrada está limpa!</p>
                             </motion.div>
-                        )}
+                        )}  
                     </AnimatePresence>
                 </div>
             </motion.div>
-            
-            <AnimatePresence>
-                {toast && <Toast message={toast.message} type={toast.type} />}
-            </AnimatePresence>
         </div>
     );
 }
