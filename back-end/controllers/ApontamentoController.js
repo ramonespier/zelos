@@ -18,7 +18,7 @@ class ApontamentoController {
     static async listarApontamentos(req, res) {
         try {
             const { id } = req.params;
-            
+
             const apontamentos = await Apontamento.findAll({
                 where: { chamado_id: id },
                 include: ['tecnico'],
@@ -47,39 +47,44 @@ class ApontamentoController {
 
     static async criar(req, res) {
         try {
-            const { comeco, fim, descricao, chamado_id, tecnico_id } = req.body;
+            const { comeco, fim, descricao, chamado_id } = req.body;
+            const tecnico_id = req.user.id;
 
             // validação de campos obrigatórios
-            if (!comeco || !descricao || !chamado_id || !tecnico_id) {
-                return res.status(400).json({ message: 'Campos obrigatórios faltando.' });
+            if (!comeco || !descricao || !chamado_id) {
+                return res.status(400).json({ message: 'Campos obrigatórios faltando: Descrição e Início.' });
             }
 
-            // verifica se o chamado existe
+
+            const dataComeco = new Date(comeco);
+            const dataFim = fim ? new Date(fim) : null;
+
+            // verificação para que fim nao seja antes do começo
+            if (dataFim && dataFim < dataComeco) {
+                return res.status(400).json({ message: 'A data/hora de Fim não pode ser anterior à data/hora de Início.' });
+            }
+
             const chamado = await Chamado.findByPk(chamado_id);
             if (!chamado) {
-                return res.status(404).json({ message: 'Chamado não encontrado' });
+                return res.status(404).json({ message: 'Chamado não encontrado.' });
             }
 
-            // verifica se o chamado está atribuído ao técnico
             if (chamado.tecnico_id !== tecnico_id) {
-                return res.status(403).json({ message: 'Chamado não está atribuído a este técnico' });
+                return res.status(403).json({ message: 'Este chamado não está atribuído a você.' });
             }
 
-            // verifica se o chamado está em andamento
             if (chamado.status !== 'em andamento') {
-                return res.status(400).json({ message: 'Chamado não está em andamento' });
+                return res.status(400).json({ message: 'Só é possível criar apontamentos para chamados "em andamento".' });
             }
 
-            // cria o apontamento
             const apontamento = await Apontamento.create({
                 chamado_id,
                 tecnico_id,
                 descricao,
-                comeco,
-                fim
+                comeco: dataComeco,
+                fim: dataFim,
             });
 
-            // retorna o apontamento com dados relacionados
             const apontamentoCompleto = await Apontamento.findByPk(apontamento.id, {
                 include: ['chamado', 'tecnico']
             });
@@ -87,7 +92,7 @@ class ApontamentoController {
             res.status(201).json(apontamentoCompleto);
         } catch (err) {
             console.error(err);
-            res.status(500).json({ message: 'Erro ao criar apontamento' });
+            res.status(500).json({ message: 'Erro ao criar apontamento.' });
         }
     }
 
