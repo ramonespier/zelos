@@ -53,13 +53,13 @@ export default function Header({
   const tabs = [
     { id: 'inicio', label: 'Início' },
     { id: 'abrir', label: 'Abrir Chamado' },
-    { id: 'gerenciar', label: 'Gerenciar Chamados' },
-    { id: 'atribuidos', label: 'Chamados Atribuídos' },
-    { id: 'pedidos', label: 'Solicitação de Atribuição' },
-    { id: 'fechamento', label: 'Solicitação de Fechamento' },
+    { id: 'gerenciar', label: 'Painel de Atribuição' },
+    { id: 'atribuidos', label: 'Gerenciar Chamados' },
+    { id: 'pedidos', label: 'Gerenciar Pedidos' },
+    { id: 'fechamento', label: 'Gerenciar Fechamentos' },
     { id: 'patrimonio', label: 'Patrimonios' },
     { id: 'mensagens', label: 'Mensagens' },
-    { id: 'relatorio', label: 'Relatórios' },
+    { id: 'info', label: 'Perfil' },
   ];
   const profileTab = { id: 'info', label: 'Meu Perfil' };
 

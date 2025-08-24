@@ -14,6 +14,7 @@ const tabs = [
     { id: 'abertos', label: 'Chamados Abertos' },
     { id: 'atribuidos', label: 'Meus Chamados' },
     { id: 'historico', label: 'Meu Histórico' },
+    { id: 'info', label: 'Perfil' },
 ];
 const profileTab = { id: 'info', label: 'Meu Perfil' };
 

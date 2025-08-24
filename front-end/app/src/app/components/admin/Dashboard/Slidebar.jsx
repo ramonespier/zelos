@@ -22,7 +22,7 @@ const tabs = [
   { id: 'atribuidos', label: 'Gerenciar Chamados', icon: ClipboardDocumentCheckIcon },
   { id: 'pedidos', label: 'Gerenciar Pedidos', icon: FolderArrowDownIcon },
   { id: 'fechamento', label: 'Gerenciar Fechamentos', icon: DocumentCheckIcon },
-  { id: 'patrimonio', label: 'Patrimonio', icon: ArchiveBoxIcon },
+  { id: 'patrimonio', label: 'Patrimonios', icon: ArchiveBoxIcon },
   { id: 'mensagens', label: 'Mensagens', icon: PaperAirplaneIcon },
   { id: 'relatorio', label: 'Relatórios', icon: ChartBarIcon },
   { id: 'info', label: 'Perfil', icon: UserCircleIcon },
