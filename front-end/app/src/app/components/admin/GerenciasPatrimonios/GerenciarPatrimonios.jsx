@@ -4,11 +4,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiPlus, FiEdit, FiTrash2, FiSearch, FiAlertTriangle, FiLoader, FiPackage, FiX } from 'react-icons/fi';
 import api from '../../../lib/api';
-import { toast } from 'sonner'; // <<< IMPORTAÇÃO DA SONNER
+import { toast } from 'sonner';
 
-// --- SUBCOMPONENTES DE MODAIS ---
-// Estes componentes continuam os mesmos, pois a lógica de toast agora é externa a eles.
-
+// modal
 function ConfirmationModal({ title, message, onConfirm, onCancel, isLoading }) {
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -19,8 +17,8 @@ function ConfirmationModal({ title, message, onConfirm, onCancel, isLoading }) {
                 <h3 className="font-bold text-xl text-gray-800">{title}</h3>
                 <p className="text-gray-600 my-4">{message}</p>
                 <div className="flex gap-4 justify-center mt-6">
-                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onCancel} className="py-2 cursor-pointer px-6 rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-700 ">Cancelar</motion.button>
-                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onConfirm} disabled={isLoading} className="py-2 cursor-pointer px-6 rounded-lg text-white bg-red-600 hover:bg-red-700 font-semibold flex items-center justify-center gap-2 min-w-[120px]">
+                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onCancel} className="py-2 px-6 rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-700">Cancelar</motion.button>
+                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onConfirm} disabled={isLoading} className="py-2 px-6 rounded-lg text-white bg-red-600 hover:bg-red-700 font-semibold flex items-center justify-center gap-2 min-w-[120px]">
                         {isLoading ? <FiLoader className="animate-spin"/> : 'Confirmar'}
                     </motion.button>
                 </div>
@@ -75,7 +73,7 @@ function PatrimonioModal({ equipamento, onClose, onSave, isLoading }) {
                         </div>
                     </div>
                     <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t">
-                        <motion.button type="button" onClick={onClose} className="py-2 px-5  cursor-pointer rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-800 transition" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Cancelar</motion.button>
+                        <motion.button type="button" onClick={onClose} className="py-2 px-5 cursor-pointer rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-800 transition" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Cancelar</motion.button>
                         <motion.button type="submit" disabled={isLoading} className="py-2 px-5 rounded-lg cursor-pointer text-white bg-red-600 hover:bg-red-700 font-semibold disabled:bg-red-400 flex items-center gap-2 transition" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                             {isLoading && <FiLoader className="animate-spin" />}
                             {isLoading ? 'Salvando...' : 'Salvar'}
@@ -87,7 +85,6 @@ function PatrimonioModal({ equipamento, onClose, onSave, isLoading }) {
     );
 }
 
-// --- COMPONENTE PRINCIPAL DA PÁGINA ---
 export default function GerenciarPatrimonios() {
     const [equipamentos, setEquipamentos] = useState([]);
     const [pesquisa, setPesquisa] = useState('');
@@ -95,7 +92,6 @@ export default function GerenciarPatrimonios() {
     const [modal, setModal] = useState({ formOpen: false, deleteOpen: false });
     const [selectedEquipamento, setSelectedEquipamento] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
-    // O estado do toast foi removido, pois a sonner gerencia isso globalmente
 
     const fetchData = async () => {
         setPageLoading(true);
@@ -167,7 +163,6 @@ export default function GerenciarPatrimonios() {
         );
     }, [equipamentos, pesquisa]);
     
-
     if (pageLoading) return <div className="p-8 flex justify-center items-center h-[50vh]"><FiLoader className="text-4xl text-red-600 animate-spin"/></div>;
 
     return (
@@ -192,9 +187,9 @@ export default function GerenciarPatrimonios() {
                     />
                 </div>
                 
-                <div className="overflow-x-auto">
+                <div>
                     <motion.table initial="hidden" animate="show" variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } }}}
-                        className="w-full text-left text-sm table-auto">
+                        className="w-full text-left text-sm table-auto hidden md:table">
                         <thead className="bg-gray-50 text-gray-600 uppercase tracking-wider">
                             <tr>
                                 <th className="px-4 py-3 font-semibold">Patrimônio</th>
@@ -216,16 +211,43 @@ export default function GerenciarPatrimonios() {
                                     </td>
                                 </motion.tr>
                             ))}
-                             {filteredEquipamentos.length === 0 && (
-                                <tr className="border-t">
-                                    <td colSpan="4" className="text-center py-16 text-gray-500">
-                                        <FiPackage className="mx-auto text-4xl mb-2 text-gray-400" />
-                                        Nenhum equipamento encontrado.
-                                    </td>
-                                </tr>
-                             )}
                         </tbody>
                     </motion.table>
+                    
+                    <motion.div initial="hidden" animate="show" variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } }}}
+                        className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
+                        
+                        {filteredEquipamentos.map((eq, index) => (
+                            <motion.div variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+                                key={`${eq.patrimonio}-${index}`} 
+                                className="bg-white border rounded-lg p-4 space-y-3 shadow-sm"
+                            >
+                                <div className="flex justify-between items-start">
+                                    <span className="font-bold text-gray-800 font-mono pr-2">{eq.patrimonio}</span>
+                                </div>
+                                <div className="text-sm text-gray-500 border-t pt-3 space-y-1">
+                                    <p><strong>Equipamento:</strong> {eq.equipamento || 'Não informado'}</p>
+                                    <p><strong>Sala/Local:</strong> {eq.sala || 'Não informada'}</p>
+                                </div>
+                                <div className="flex gap-4 pt-3 border-t mt-3">
+                                    <button onClick={() => openFormModal(eq)} className="flex items-center gap-2 text-blue-600 font-medium text-sm">
+                                        <FiEdit size={16} /> Editar
+                                    </button>
+                                    <button onClick={() => openDeleteModal(eq)} className="flex items-center gap-2 text-red-600 font-medium text-sm">
+                                        <FiTrash2 size={16} /> Excluir
+                                    </button>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+
+                    {filteredEquipamentos.length === 0 && !pageLoading && (
+                        <div className="text-center py-16 text-gray-500">
+                             <FiPackage className="mx-auto text-4xl mb-2 text-gray-400" />
+                             <p className="font-semibold">Nenhum equipamento encontrado.</p>
+                             <p className="text-sm">Tente refinar sua busca ou cadastre um novo equipamento.</p>
+                        </div>
+                    )}
                 </div>
             </motion.div>
 
@@ -243,7 +265,7 @@ export default function GerenciarPatrimonios() {
                     <ConfirmationModal
                         key="confirm-modal"
                         title="Confirmar Exclusão"
-                        message={`Tem certeza que deseja excluir o patrimônio "${selectedEquipamento.patrimonio}"? Esta ação não pode ser desfeita.`}
+                        message={`Tem certeza que deseja excluir o patrimônio "${selectedEquipamento.patrimonio}"? Esta ação pode ter implicações nos chamados existentes.`}
                         onConfirm={handleDelete}
                         onCancel={() => setModal({ ...modal, deleteOpen: false })}
                         isLoading={actionLoading}
