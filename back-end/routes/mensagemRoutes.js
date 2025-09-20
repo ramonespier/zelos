@@ -1,6 +1,5 @@
-// src/routes/mensagemRoutes.js
 import express from 'express';
-import { getMinhasMensagens, sendMensagem, getConversasAdmin, getMensagensPorUsuarioAdmin } from '../controllers/mensagemController.js';
+import { getMinhasMensagens, sendMensagem, getConversasAdmin, getMensagensPorUsuarioAdmin } from '../controllers/MensagemController.js';
 import AuthMiddleware from '../middlewares/AuthMiddleware.js';
 const router = express.Router();
 

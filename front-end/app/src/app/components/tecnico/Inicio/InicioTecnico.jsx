@@ -11,19 +11,16 @@ export default function InicioTecnico({ setActiveTab }) {
       icon: <FaTicketAlt size={40} className="text-red-600" />,
       title: 'Novos Chamados',
       description: 'Visualize e atribua os chamados que acabaram de chegar na fila.',
-      action: () => setActiveTab('abertos'),
     },
     {
       icon: <FaRegListAlt size={40} className="text-red-600" />,
       title: 'Meus Chamados Atribuídos',
       description: 'Acesse a lista de chamados que estão sob sua responsabilidade.',
-      action: () => setActiveTab('atribuidos'),
     },
     {
       icon: <FaUserClock size={40} className="text-red-600" />,
       title: 'Histórico de chamados',
       description: 'Visualize seus chamados concluídos.',
-      action: () => setActiveTab('meus'),
     },
   ];
 
