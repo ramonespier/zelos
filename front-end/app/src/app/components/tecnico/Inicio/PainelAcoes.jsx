@@ -8,7 +8,7 @@ export default function PainelAcoes({ setActiveTab }) {
         onClick={() => setActiveTab('abertos')}
         className="bg-red-600 text-white px-10 py-4 rounded-xl shadow-lg hover:bg-red-700 transition-colors font-semibold flex items-center justify-center gap-3 cursor-pointer"
       >
-        Chamadodos abertos <FaClipboardList size={20} />
+        Chamados abertos <FaClipboardList size={20} />
       </button>
 
       <button
