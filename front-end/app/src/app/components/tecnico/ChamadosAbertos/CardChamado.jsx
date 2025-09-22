@@ -42,19 +42,32 @@ export default function CardChamado({ chamado, pedidosDoTecnico, onAtribuir, onA
   
   const meuPedidoStatus = pedidosDoTecnico[chamado.id];
 
+  // Função para construir a URL da imagem corretamente
+  const getImageUrl = (imgPath) => {
+    if (!imgPath) return "/placeholder.png";
+    
+    // Se já é uma URL completa, retorna como está
+    if (imgPath.startsWith('http')) return imgPath;
+    
+    // Se é um caminho relativo, constrói a URL completa
+    return `http://localhost:3001${imgPath.startsWith('/') ? imgPath : `/${imgPath}`}`;
+  };
+
   const ImagemComponente = () => (
     <motion.div
       whileHover={{ scale: 1.03 }}
       className="w-full h-48 rounded-lg overflow-hidden border border-gray-200 cursor-pointer group"
-      onClick={() => onAbrirImagem(chamado.img_url)}
+      onClick={() => onAbrirImagem(getImageUrl(chamado.img_url))}
     >
       <Image
         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-        src={`http://localhost:3001${chamado.img_url}` || '/placeholder.png'} 
-        alt={chamado.titulo}
+        src={getImageUrl(chamado.img_url)}
+        alt={chamado.titulo || "Imagem do chamado"}
         width={300}
         height={200}
-        onError={(e) => { e.currentTarget.src = '/placeholder.png'; }}
+        onError={(e) => {
+          e.target.src = "/placeholder.png";
+        }}
       />
     </motion.div>
   );

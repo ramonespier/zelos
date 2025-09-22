@@ -4,6 +4,12 @@ import sequelize from './configs/database.js';
 import passport from './configs/ldap.js';
 import cors from 'cors';
 import session from 'express-session';
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Apenas para simular __dirname no ES Module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 // routes
 import usuarioRoutes from './routes/usuarioRoutes.js';
 import poolRoutes from './routes/poolRoutes.js';
@@ -57,7 +63,7 @@ app.get('/', (req, res) => {
     res.status(200).json({ message: 'Página inicial' })
 })
 
-app.use('/uploads', express.static('uploads'));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use('/usuarios', usuarioRoutes);
 app.use('/pools', poolRoutes);
 app.use('/chamados', chamadoRoutes);
@@ -77,7 +83,7 @@ async function StartServer() {
 
         // server
         app.listen(PORT, () => {
-            console.log('Servidor sendo executado em: localhost:3000');
+            console.log('Servidor sendo executado em: localhost:3001');
         })
 
     } catch (err) {
