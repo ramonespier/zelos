@@ -58,6 +58,7 @@ export default function Header({
     { id: 'pedidos', label: 'Gerenciar Pedidos' },
     { id: 'fechamento', label: 'Gerenciar Fechamentos' },
     { id: 'patrimonio', label: 'Patrimonios' },
+    { id: 'apontamentos', label: 'Apontamentos' },
     { id: 'mensagens', label: 'Mensagens' },
     { id: 'info', label: 'Perfil' },
   ];
