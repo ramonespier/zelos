@@ -2,9 +2,77 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiAlertTriangle, FiLoader, FiPackage, FiX } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2, FiSearch, FiAlertTriangle, FiLoader, FiPackage, FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import api from '../../../lib/api';
 import { toast } from 'sonner';
+
+// --- NOVO COMPONENTE DE PAGINAÇÃO ---
+const PaginationControls = ({ currentPage, totalPages, setCurrentPage }) => {
+    const pages = useMemo(() => {
+        const p = [];
+        const maxVisible = 5; 
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+        // Ajusta se estiver no final
+        if (totalPages > maxVisible && endPage - startPage + 1 < maxVisible) {
+            startPage = Math.max(1, totalPages - maxVisible + 1);
+            endPage = totalPages;
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            p.push(i);
+        }
+        
+        return p;
+    }, [currentPage, totalPages]);
+
+    if (totalPages <= 1) return null;
+
+    return (
+        <div className="flex justify-center items-center gap-2 mt-8">
+            {/* Botão Anterior */}
+            <motion.button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                whileHover={{ scale: currentPage === 1 ? 1 : 1.05 }}
+                whileTap={{ scale: currentPage === 1 ? 1 : 0.95 }}
+                className="p-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+                <FiChevronLeft size={20} />
+            </motion.button>
+
+            {/* Botões de Página */}
+            {pages.map(page => (
+                <motion.button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                    className={`py-2 px-4 rounded-lg font-semibold transition ${
+                        currentPage === page
+                            ? 'bg-red-600 text-white shadow-md'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                >
+                    {page}
+                </motion.button>
+            ))}
+            
+            {/* Botão Próximo */}
+            <motion.button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                whileHover={{ scale: currentPage === totalPages ? 1 : 1.05 }}
+                whileTap={{ scale: currentPage === totalPages ? 1 : 0.95 }}
+                className="p-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+                <FiChevronRight size={20} />
+            </motion.button>
+        </div>
+    );
+};
+// --- FIM NOVO COMPONENTE DE PAGINAÇÃO ---
+
 
 // modal
 function ConfirmationModal({ title, message, onConfirm, onCancel, isLoading }) {
@@ -93,11 +161,17 @@ export default function GerenciarPatrimonios() {
     const [selectedEquipamento, setSelectedEquipamento] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
 
+    // --- ESTADOS DE PAGINAÇÃO ---
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10); // 10 itens por página
+    // --- FIM ESTADOS DE PAGINAÇÃO ---
+
     const fetchData = async () => {
         setPageLoading(true);
         try {
             const response = await api.get('/equipamentos');
             setEquipamentos(response.data);
+            setCurrentPage(1); // Resetar página ao buscar novos dados
         } catch (error) {
             toast.error("Erro ao carregar equipamentos.");
         } finally {
@@ -108,6 +182,11 @@ export default function GerenciarPatrimonios() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    // Resetar a página ao mudar a pesquisa
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [pesquisa]);
 
     const handleSave = async (data) => {
         setActionLoading(true);
@@ -162,6 +241,14 @@ export default function GerenciarPatrimonios() {
             (eq.equipamento || '').toLowerCase().includes(p)
         );
     }, [equipamentos, pesquisa]);
+
+    // --- LÓGICA DE PAGINAÇÃO ---
+    const totalPages = Math.ceil(filteredEquipamentos.length / itemsPerPage);
+    const paginatedEquipamentos = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return filteredEquipamentos.slice(startIndex, startIndex + itemsPerPage);
+    }, [filteredEquipamentos, currentPage, itemsPerPage]);
+    // --- FIM LÓGICA DE PAGINAÇÃO ---
     
     if (pageLoading) return <div className="p-8 flex justify-center items-center h-[50vh]"><FiLoader className="text-4xl text-red-600 animate-spin"/></div>;
 
@@ -188,6 +275,7 @@ export default function GerenciarPatrimonios() {
                 </div>
                 
                 <div>
+                    {/* Tabela para Desktop */}
                     <motion.table initial="hidden" animate="show" variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } }}}
                         className="w-full text-left text-sm table-auto hidden md:table">
                         <thead className="bg-gray-50 text-gray-600 uppercase tracking-wider">
@@ -199,7 +287,7 @@ export default function GerenciarPatrimonios() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredEquipamentos.map((eq, index) => (
+                            {paginatedEquipamentos.map((eq, index) => (
                                 <motion.tr variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
                                     key={`${eq.patrimonio}-${index}`} className="border-t hover:bg-zinc-50/50 transition-colors">
                                     <td className="px-4 py-4 font-mono font-semibold text-gray-700">{eq.patrimonio}</td>
@@ -214,10 +302,11 @@ export default function GerenciarPatrimonios() {
                         </tbody>
                     </motion.table>
                     
+                    {/* Cards para Mobile */}
                     <motion.div initial="hidden" animate="show" variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } }}}
                         className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
                         
-                        {filteredEquipamentos.map((eq, index) => (
+                        {paginatedEquipamentos.map((eq, index) => (
                             <motion.div variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
                                 key={`${eq.patrimonio}-${index}`} 
                                 className="bg-white border rounded-lg p-4 space-y-3 shadow-sm"
@@ -249,6 +338,15 @@ export default function GerenciarPatrimonios() {
                         </div>
                     )}
                 </div>
+
+                {/* CONTROLES DE PAGINAÇÃO */}
+                <PaginationControls
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    setCurrentPage={setCurrentPage}
+                />
+                {/* FIM CONTROLES DE PAGINAÇÃO */}
+
             </motion.div>
 
             <AnimatePresence>

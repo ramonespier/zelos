@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { FiFilter, FiEdit, FiX, FiPlus, FiSearch, FiAlertTriangle, FiCheckCircle, FiChevronDown, FiInbox, FiSlash, FiLoader } from 'react-icons/fi';
+import { FiFilter, FiEdit, FiX, FiPlus, FiSearch, FiAlertTriangle, FiCheckCircle, FiChevronDown, FiInbox, FiSlash, FiLoader, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '../../../lib/api';
@@ -32,6 +32,87 @@ const StatusBadge = ({ status }) => {
 
 const Spinner = () => <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="w-5 h-5 border-2 border-white border-t-transparent rounded-full" />;
 
+// Componente de Paginação
+const Paginacao = ({ currentPage, totalPages, onPageChange }) => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+    }
+
+    return (
+        <div className="flex items-center justify-between sm:justify-end gap-4 mt-6">
+            <div className="text-sm text-gray-600 hidden sm:block">
+                Página {currentPage} de {totalPages}
+            </div>
+            
+            <div className="flex items-center gap-1">
+                <button
+                    onClick={() => onPageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="p-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                >
+                    <FiChevronLeft size={16} />
+                </button>
+
+                {startPage > 1 && (
+                    <>
+                        <button
+                            onClick={() => onPageChange(1)}
+                            className="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                        >
+                            1
+                        </button>
+                        {startPage > 2 && <span className="px-2">...</span>}
+                    </>
+                )}
+
+                {pages.map(page => (
+                    <button
+                        key={page}
+                        onClick={() => onPageChange(page)}
+                        className={`px-3 py-2 rounded-lg border transition-colors ${
+                            currentPage === page
+                                ? 'bg-red-600 text-white border-red-600'
+                                : 'border-gray-300 hover:bg-gray-50'
+                        }`}
+                    >
+                        {page}
+                    </button>
+                ))}
+
+                {endPage < totalPages && (
+                    <>
+                        {endPage < totalPages - 1 && <span className="px-2">...</span>}
+                        <button
+                            onClick={() => onPageChange(totalPages)}
+                            className="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                        >
+                            {totalPages}
+                        </button>
+                    </>
+                )}
+
+                <button
+                    onClick={() => onPageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                >
+                    <FiChevronRight size={16} />
+                </button>
+            </div>
+        </div>
+    );
+};
+
 export default function TabelaChamados({ setActiveTab, funcionario }) {
     const [chamados, setChamados] = useState([]);
     const [tecnicos, setTecnicos] = useState([]);
@@ -41,6 +122,10 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
     const [pesquisa, setPesquisa] = useState('');
     const [pageLoading, setPageLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
+    
+    // Estados de paginação
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
     const fetchData = async () => {
         if (!chamados.length) setPageLoading(true);
@@ -63,6 +148,11 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
     useEffect(() => {
         fetchData();
     }, []);
+
+    // Resetar para página 1 quando filtros mudarem
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filtroStatus, pesquisa]);
 
     const handleSave = async () => {
         if (!editingTicket) return;
@@ -109,6 +199,13 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
         });
     }, [chamados, pesquisa, filtroStatus]);
 
+    // Cálculos da paginação
+    const totalItems = filteredTickets.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentItems = filteredTickets.slice(startIndex, endIndex);
+
     const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
     const itemVariants = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } };
 
@@ -122,7 +219,10 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
                 <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-200/80 pb-6 mb-6">
                     <div>
                         <h1 className="text-3xl font-extrabold text-red-600 drop-shadow-md">Gerenciamento de Chamados</h1>
-                        <p className="text-sm text-gray-600 mt-1">Visualize, edite e gerencie todos os chamados.</p>
+                        <p className="text-sm text-gray-600 mt-1">
+                            {totalItems} chamado{totalItems !== 1 ? 's' : ''} encontrado{totalItems !== 1 ? 's' : ''}
+                            {filtroStatus && ` • Filtrado por: ${capitalize(filtroStatus)}`}
+                        </p>
                     </div>
                     <motion.button
                         onClick={() => setActiveTab('abrir')}
@@ -148,6 +248,21 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
                             <option value="cancelado">Cancelado</option>
                         </select>
                     </div>
+                    <div className="relative w-full md:w-auto group">
+                        <select 
+                            value={itemsPerPage} 
+                            onChange={e => {
+                                setItemsPerPage(Number(e.target.value));
+                                setCurrentPage(1);
+                            }}
+                            className="bg-zinc-100 border-2 border-transparent font-medium text-gray-700 p-3 rounded-lg w-full md:w-32 appearance-none focus:bg-white focus:border-red-500 transition-all outline-none"
+                        >
+                            <option value={5}>5 por página</option>
+                            <option value={10}>10 por página</option>
+                            <option value={20}>20 por página</option>
+                            <option value={50}>50 por página</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -162,7 +277,7 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredTickets.length > 0 ? filteredTickets.map((chamado, index) => {
+                            {currentItems.length > 0 ? currentItems.map((chamado, index) => {
                                 const isActionable = chamado.status === 'aberto' || chamado.status === 'em andamento';
                                 return (
                                     <motion.tr variants={itemVariants} key={`${chamado.id}-${index}`} className="border-b border-gray-200/80 hover:bg-zinc-50/50 transition-colors">
@@ -190,6 +305,16 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
                         </tbody>
                     </motion.table>
                 </div>
+
+                {/* Paginação */}
+                {totalPages > 1 && (
+                    <Paginacao 
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
+                )}
+
                 <AnimatePresence>
                     {(editingTicket || ticketToCancel) && (
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 p-4">
