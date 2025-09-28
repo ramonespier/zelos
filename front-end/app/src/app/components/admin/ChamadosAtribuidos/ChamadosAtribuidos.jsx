@@ -45,12 +45,10 @@ const ReportCard = ({ title, count, icon, color, onClick, isActive, isLoading, i
         clickClasses = "cursor-default";
     }
 
-    // A borda ativa usa a cor do card, exceto no ReportCard original que estava com a cor 'red' forçada.
-    // Revertendo a borda para usar a cor 'color' passada via prop, mas mantendo a classe 'red' para o card 'Todos' se for o caso.
     const borderColor = color === 'red' ? 'red' : color; 
 
     const activeClasses = isActive 
-        ? `ring-4 ring-offset-2 ring-${borderColor}-500/50 border-2 border-${borderColor}-600/50`
+        ? `border-2 border-red-500`
         : `hover:shadow-xl`; 
     
     const handleClick = () => {
@@ -185,27 +183,24 @@ export default function TabelaChamados({ setActiveTab: originalSetActiveTab, fun
     const fetchCounts = useCallback(async () => {
         setCountsLoading(true);
         try {
-            // Requisição para TUDO, que será usada para calcular a contagem de "em_andamento" localmente.
             const [
                 chamadosTodosRes,
                 pedidosRes, 
                 fechamentosRes
             ] = await Promise.all([
-                api.get('/chamados'), // Pega todos os chamados
+                api.get('/chamados'), 
                 api.get('/pedidos-chamado/pendentes'),
                 api.get('/pedidos-fechamento/pendentes')
             ]);
 
             const todosChamados = chamadosTodosRes.data || [];
-            
-            // CORREÇÃO APLICADA: Filtra a contagem de chamados em andamento localmente.
             const emAndamentoCount = todosChamados.filter(c => 
                 c.status === 'em andamento'
             ).length;
 
             setCounts({
                 todos: todosChamados.length,
-                em_andamento: emAndamentoCount, // Valor corrigido
+                em_andamento: emAndamentoCount, 
                 solicitacao_pedido: pedidosRes.data.length,
                 solicitacao_fechamento: fechamentosRes.data.length,
             });
@@ -440,12 +435,12 @@ export default function TabelaChamados({ setActiveTab: originalSetActiveTab, fun
                         icon={<FiLoader size={24} />}
                         color="yellow"
                         isLoading={countsLoading}
-                        onClick={() => { // Reabilitado o clique
+                        onClick={() => { 
                             setActiveTab('tabela');
                             setFiltroStatus('em andamento'); 
                             setCurrentPage(1);
                         }}
-                        isClickable={true} // Definido explicitamente como clicável
+                        isClickable={true} 
                         isActive={activeTab === 'tabela' && filtroStatus === 'em andamento'}
                     />
                     <ReportCard 
