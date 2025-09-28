@@ -2,27 +2,23 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiLoader, FiUsers, FiClock, FiCalendar, FiUser, FiInfo, FiHash, FiPackage, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiLoader, FiClock, FiCalendar, FiUser, FiInfo, FiHash, FiPackage, FiChevronLeft, FiChevronRight, FiFilter, FiSearch } from 'react-icons/fi';
 import api from '../../../lib/api'; 
 import { toast } from 'sonner';
 
-// --- NOVO COMPONENTE DE PAGINAÇÃO (Reutilizado e adaptado) ---
 const PaginationControls = ({ currentPage, totalPages, setCurrentPage, totalItems }) => {
     const pages = useMemo(() => {
         const p = [];
         const maxVisible = 5; 
         let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
         let endPage = Math.min(totalPages, startPage + maxVisible - 1);
-
         if (totalPages > maxVisible && endPage - startPage + 1 < maxVisible) {
             startPage = Math.max(1, totalPages - maxVisible + 1);
             endPage = totalPages;
         }
-
         for (let i = startPage; i <= endPage; i++) {
             p.push(i);
         }
-        
         return p;
     }, [currentPage, totalPages]);
 
@@ -34,7 +30,6 @@ const PaginationControls = ({ currentPage, totalPages, setCurrentPage, totalItem
                 Mostrando página {currentPage} de {totalPages} ({totalItems} apontamentos no total).
             </span>
             <div className="flex justify-center items-center gap-2">
-                {/* Botão Anterior */}
                 <motion.button
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
@@ -44,8 +39,6 @@ const PaginationControls = ({ currentPage, totalPages, setCurrentPage, totalItem
                 >
                     <FiChevronLeft size={20} />
                 </motion.button>
-
-                {/* Botões de Página */}
                 {pages.map(page => (
                     <motion.button
                         key={page}
@@ -60,8 +53,6 @@ const PaginationControls = ({ currentPage, totalPages, setCurrentPage, totalItem
                         {page}
                     </motion.button>
                 ))}
-                
-                {/* Botão Próximo */}
                 <motion.button
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
@@ -75,14 +66,11 @@ const PaginationControls = ({ currentPage, totalPages, setCurrentPage, totalItem
         </div>
     );
 };
-// --- FIM NOVO COMPONENTE DE PAGINAÇÃO ---
 
-// Função auxiliar para formatar datas/horas
 const formatDateTime = (dateString) => {
     if (!dateString) return 'Em andamento';
     const date = new Date(dateString);
     if (isNaN(date)) return 'Data inválida';
-    
     return date.toLocaleTimeString('pt-BR', { 
         hour: '2-digit', 
         minute: '2-digit', 
@@ -92,11 +80,9 @@ const formatDateTime = (dateString) => {
     });
 };
 
-// Componente para exibir um único apontamento
 const ApontamentoCard = ({ apontamento }) => {
     const inicio = formatDateTime(apontamento.comeco);
     const fim = formatDateTime(apontamento.fim);
-    
     const duracao = useMemo(() => {
         if (!apontamento.fim) return null;
         const start = new Date(apontamento.comeco);
@@ -106,7 +92,6 @@ const ApontamentoCard = ({ apontamento }) => {
         const minutes = Math.floor((diffInMs % (1000 * 60 * 60)) / (1000 * 60));
         return `${hours}h ${minutes}m`;
     }, [apontamento.comeco, apontamento.fim]);
-
 
     return (
         <motion.div 
@@ -123,11 +108,9 @@ const ApontamentoCard = ({ apontamento }) => {
                     {apontamento.fim ? 'Finalizado' : 'Em Curso'}
                 </span>
             </div>
-            
             <p className="text-gray-800 text-sm italic whitespace-pre-wrap">
                 <strong className="text-red-600">Descrição:</strong> {apontamento.descricao}
             </p>
-
             <div className="grid grid-cols-2 gap-2 text-xs text-gray-500 pt-2 border-t">
                 <div className="flex items-center gap-1">
                     <FiCalendar size={14} className="text-gray-400" />
@@ -146,26 +129,22 @@ const ApontamentoCard = ({ apontamento }) => {
             </div>
         </motion.div>
     );
-}
+};
 
-// Componente principal para a lista de apontamentos
 export default function Apontamentos() {
     const [apontamentos, setApontamentos] = useState([]);
     const [pageLoading, setPageLoading] = useState(true);
-
-    // --- ESTADOS DE PAGINAÇÃO ---
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10); // 10 apontamentos por página
-    // --- FIM ESTADOS DE PAGINAÇÃO ---
-
+    const [itemsPerPage] = useState(10);
+    const [filterStatus, setFilterStatus] = useState('all');
+    const [search, setSearch] = useState('');
 
     const fetchData = async () => {
         setPageLoading(true);
         try {
-            // Buscamos todos os dados, a paginação será feita no frontend
             const response = await api.get('/apontamentos');
             setApontamentos(response.data);
-            setCurrentPage(1); // Resetar página ao buscar novos dados
+            setCurrentPage(1);
         } catch (error) {
             toast.error("Erro ao carregar a lista de apontamentos.");
         } finally {
@@ -177,15 +156,29 @@ export default function Apontamentos() {
         fetchData();
     }, []);
 
-    // 1. Lógica de Paginação (Filtra a lista total)
-    const totalPages = Math.ceil(apontamentos.length / itemsPerPage);
+    const filteredApontamentos = useMemo(() => {
+        let data = apontamentos;
+        if (filterStatus === 'finalizado') {
+            data = data.filter(a => a.fim);
+        } else if (filterStatus === 'andamento') {
+            data = data.filter(a => !a.fim);
+        }
+        if (search.trim()) {
+            data = data.filter(a => 
+                a.descricao?.toLowerCase().includes(search.toLowerCase()) ||
+                a.tecnico?.nome?.toLowerCase().includes(search.toLowerCase()) ||
+                String(a.chamado_id).includes(search)
+            );
+        }
+        return data;
+    }, [apontamentos, filterStatus, search]);
+
+    const totalPages = Math.ceil(filteredApontamentos.length / itemsPerPage);
     const paginatedApontamentos = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
-        return apontamentos.slice(startIndex, startIndex + itemsPerPage);
-    }, [apontamentos, currentPage, itemsPerPage]);
+        return filteredApontamentos.slice(startIndex, startIndex + itemsPerPage);
+    }, [filteredApontamentos, currentPage, itemsPerPage]);
 
-
-    // 2. Lógica de Agrupamento (Agrupa a lista paginada)
     const apontamentosAgrupados = useMemo(() => {
         return paginatedApontamentos.reduce((acc, apontamento) => {
             const tecnicoNome = apontamento.tecnico?.nome || `Técnico ID ${apontamento.tecnico_id}`;
@@ -225,17 +218,42 @@ export default function Apontamentos() {
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} 
                 className="bg-white p-5 sm:p-8 rounded-2xl shadow-xl border border-gray-200/80">
                 
-                <header className="border-b border-gray-200/80 pb-6 mb-6">
-                    <h1 className="text-3xl font-extrabold text-red-600 drop-shadow-md flex items-center gap-2">
-                        <FiInfo /> Detalhamento de Apontamentos
-                    </h1>
-                    <p className="text-sm text-gray-600 mt-1">Apontamentos de trabalho agrupados por técnico.</p>
+                <header className="border-b border-gray-200/80 pb-6 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h1 className="text-3xl font-extrabold text-red-600 drop-shadow-md flex items-center gap-2">
+                            <FiInfo /> Detalhamento de Apontamentos
+                        </h1>
+                        <p className="text-sm text-gray-600 mt-1">Apontamentos de trabalho agrupados por técnico.</p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                        <div className="relative flex-1 sm:w-64">
+                            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Pesquisar..."
+                                value={search}
+                                onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+                                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                            />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <FiFilter className="text-gray-600" />
+                            <select
+                                value={filterStatus}
+                                onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
+                                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                            >
+                                <option value="all">Todos</option>
+                                <option value="finalizado">Finalizados</option>
+                                <option value="andamento">Em Andamento</option>
+                            </select>
+                        </div>
+                    </div>
                 </header>
                 
                 <div className="space-y-8">
                     {nomesDosTecnicos.map((tecnicoNome) => (
                         <section key={tecnicoNome} className="border border-gray-100 rounded-xl p-4 bg-zinc-50 shadow-inner">
-                            {/* Cabeçalho do Técnico */}
                             <motion.h2 
                                 initial={{ opacity: 0, x: -10 }} 
                                 animate={{ opacity: 1, x: 0 }} 
@@ -246,8 +264,6 @@ export default function Apontamentos() {
                                     {apontamentosAgrupados[tecnicoNome].length} Apontamento(s) nesta página
                                 </span>
                             </motion.h2>
-
-                            {/* Lista de Apontamentos do Técnico */}
                             <motion.div 
                                 layout
                                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
@@ -260,24 +276,24 @@ export default function Apontamentos() {
                             </motion.div>
                         </section>
                     ))}
-
-                    {/* Mensagem de Sem Resultados (se a página atual não tiver dados, mas a lista total tiver) */}
-                    {paginatedApontamentos.length === 0 && apontamentos.length > 0 && (
+                    {paginatedApontamentos.length === 0 && filteredApontamentos.length > 0 && (
                         <div className="text-center py-8 text-gray-500">
                              <p>Não há apontamentos nesta página. Tente voltar uma página.</p>
                         </div>
                     )}
+                    {filteredApontamentos.length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                             <p>Nenhum apontamento corresponde à sua busca.</p>
+                        </div>
+                    )}
                 </div>
 
-                {/* CONTROLES DE PAGINAÇÃO */}
                 <PaginationControls
                     currentPage={currentPage}
                     totalPages={totalPages}
                     setCurrentPage={setCurrentPage}
-                    totalItems={apontamentos.length}
+                    totalItems={filteredApontamentos.length}
                 />
-                {/* FIM CONTROLES DE PAGINAÇÃO */}
-
             </motion.div>
         </div>
     );
