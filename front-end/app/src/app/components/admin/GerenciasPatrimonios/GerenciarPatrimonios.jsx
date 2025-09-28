@@ -1,80 +1,150 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { FiFilter, FiEdit, FiX, FiPlus, FiSearch, FiAlertTriangle, FiCheckCircle, FiChevronDown, FiInbox, FiSlash, FiLoader, FiChevronLeft, FiChevronRight, FiPackage, FiMonitor, FiMapPin, FiRefreshCw, FiTrash2} from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiAlertTriangle, FiLoader, FiPackage, FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import api from '../../../lib/api';
 import { toast } from 'sonner';
+// Assumindo que o 'api' está no caminho correto
+import api from '../../../lib/api'; 
 
-// --- NOVO COMPONENTE DE PAGINAÇÃO ---
-const PaginationControls = ({ currentPage, totalPages, setCurrentPage }) => {
+// --- UTILS & SHARED COMPONENTS (Padrão Unificado) ---
+
+const capitalize = (s = '') => {
+    if (!s) return '';
+    const str = s.replace(/_/g, ' ');
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+const Spinner = () => <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="w-5 h-5 border-2 border-white border-t-transparent rounded-full" />;
+
+// Componente de Card de Resumo (ReportCard)
+const ReportCard = ({ title, count, icon, color, onClick, isActive, isLoading, isClickable = true }) => {
+    const baseClasses = "flex flex-col p-5 rounded-xl shadow-lg transition-all duration-300 transform bg-white";
+    
+    let clickClasses = "";
+    if (isClickable) {
+        clickClasses = "cursor-pointer hover:scale-[1.02] active:scale-[0.98]";
+    } else {
+        clickClasses = "cursor-default";
+    }
+
+    const activeClasses = isActive 
+        ? `border-2 border-red-500`
+        : `hover:shadow-xl`;
+    
+    const handleClick = () => {
+        if (isClickable && onClick) {
+            onClick();
+        }
+    };
+
+    return (
+        <motion.div 
+            layout 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            className={`${baseClasses} ${clickClasses} ${activeClasses} min-w-[200px]`}
+            onClick={handleClick}
+        >
+            <div className={`text-${color}-600 p-2 rounded-full bg-${color}-100/70 w-fit mb-3`}>
+                {icon}
+            </div>
+            <p className="text-xl font-extrabold text-gray-800">
+                {isLoading ? <FiLoader className="animate-spin inline-block mr-1 text-base" /> : count}
+            </p>
+            <p className="text-sm text-gray-500 font-medium mt-1">{title}</p>
+        </motion.div>
+    );
+};
+
+// Componente de Paginação (Paginacao)
+const Paginacao = ({ currentPage, totalPages, onPageChange }) => {
     const pages = useMemo(() => {
         const p = [];
-        const maxVisible = 5; 
-        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
-
-        // Ajusta se estiver no final
-        if (totalPages > maxVisible && endPage - startPage + 1 < maxVisible) {
-            startPage = Math.max(1, totalPages - maxVisible + 1);
-            endPage = totalPages;
+        const maxVisiblePages = 5;
+        
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
 
         for (let i = startPage; i <= endPage; i++) {
             p.push(i);
         }
-        
         return p;
     }, [currentPage, totalPages]);
 
     if (totalPages <= 1) return null;
 
     return (
-        <div className="flex justify-center items-center gap-2 mt-8">
-            {/* Botão Anterior */}
-            <motion.button
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                whileHover={{ scale: currentPage === 1 ? 1 : 1.05 }}
-                whileTap={{ scale: currentPage === 1 ? 1 : 0.95 }}
-                className="p-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-                <FiChevronLeft size={20} />
-            </motion.button>
-
-            {/* Botões de Página */}
-            {pages.map(page => (
-                <motion.button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                    className={`py-2 px-4 rounded-lg font-semibold transition ${
-                        currentPage === page
-                            ? 'bg-red-600 text-white shadow-md'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                >
-                    {page}
-                </motion.button>
-            ))}
+        <div className="flex items-center justify-between sm:justify-end gap-4 mt-6">
+            <div className="text-sm text-gray-600 hidden sm:block">
+                Página {currentPage} de {totalPages}
+            </div>
             
-            {/* Botão Próximo */}
-            <motion.button
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-                whileHover={{ scale: currentPage === totalPages ? 1 : 1.05 }}
-                whileTap={{ scale: currentPage === totalPages ? 1 : 0.95 }}
-                className="p-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-                <FiChevronRight size={20} />
-            </motion.button>
+            <div className="flex items-center gap-1">
+                <button
+                    onClick={() => onPageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="p-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                >
+                    <FiChevronLeft size={16} />
+                </button>
+
+                {pages[0] > 1 && (
+                    <>
+                        <button
+                            onClick={() => onPageChange(1)}
+                            className="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                        >
+                            1
+                        </button>
+                        {pages[0] > 2 && <span className="px-2">...</span>}
+                    </>
+                )}
+
+                {pages.map(page => (
+                    <button
+                        key={page}
+                        onClick={() => onPageChange(page)}
+                        className={`px-3 py-2 rounded-lg border transition-colors ${
+                            currentPage === page
+                                ? 'bg-red-600 text-white border-red-600'
+                                : 'border-gray-300 hover:bg-gray-50'
+                        }`}
+                    >
+                        {page}
+                    </button>
+                ))}
+
+                {pages[pages.length - 1] < totalPages && (
+                    <>
+                        {pages[pages.length - 1] < totalPages - 1 && <span className="px-2">...</span>}
+                        <button
+                            onClick={() => onPageChange(totalPages)}
+                            className="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                        >
+                            {totalPages}
+                        </button>
+                    </>
+                )}
+
+                <button
+                    onClick={() => onPageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                >
+                    <FiChevronRight size={16} />
+                </button>
+            </div>
         </div>
     );
 };
-// --- FIM NOVO COMPONENTE DE PAGINAÇÃO ---
 
+// --- MODALS ---
 
-// modal
 function ConfirmationModal({ title, message, onConfirm, onCancel, isLoading }) {
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -153,6 +223,8 @@ function PatrimonioModal({ equipamento, onClose, onSave, isLoading }) {
     );
 }
 
+// --- COMPONENTE PRINCIPAL: GERENCIAR PATRIMÔNIOS ---
+
 export default function GerenciarPatrimonios() {
     const [equipamentos, setEquipamentos] = useState([]);
     const [pesquisa, setPesquisa] = useState('');
@@ -161,17 +233,51 @@ export default function GerenciarPatrimonios() {
     const [selectedEquipamento, setSelectedEquipamento] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
 
-    // --- ESTADOS DE PAGINAÇÃO ---
+    // Cards de Resumo: Total, Em Manutenção, Sem Localização
+    const [counts, setCounts] = useState({ todos: 0, emManutencao: 0, semLocalizacao: 0 });
+    const [countsLoading, setCountsLoading] = useState(true);
+    const [filtroStatus, setFiltroStatus] = useState(''); // '', 'emManutencao', 'disponivel', 'semLocalizacao'
+
+    // Paginação
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10); // 10 itens por página
-    // --- FIM ESTADOS DE PAGINAÇÃO ---
+    const [itemsPerPage] = useState(10); 
+
+
+    // --- FUNÇÕES DE BUSCA E CONTAGEM ---
+
+    const fetchCounts = useCallback(async (allEquipamentos = null) => {
+        setCountsLoading(true);
+        try {
+            // NOTE: A API real precisaria fornecer o status de manutenção (e.g., equipamento.status).
+            // Aqui, simularemos "em manutenção" como um filtro genérico para demonstrar a estrutura do card.
+            const data = allEquipamentos || (await api.get('/equipamentos')).data || [];
+
+            // SIMULAÇÃO: 10% dos equipamentos estão em manutenção (Para fins de demonstração)
+            const emManutencaoCount = Math.floor(data.length * 0.1); 
+            const semLocalizacaoCount = data.filter(eq => !eq.sala || eq.sala.trim() === '').length;
+
+            setCounts({
+                todos: data.length,
+                emManutencao: emManutencaoCount,
+                semLocalizacao: semLocalizacaoCount,
+            });
+            if (!allEquipamentos) setEquipamentos(data);
+
+        } catch (error) {
+            console.error("Erro ao buscar contagens:", error);
+            if (countsLoading) toast.error("Falha ao carregar dados de resumo."); 
+        } finally {
+            setCountsLoading(false);
+        }
+    }, [countsLoading]);
 
     const fetchData = async () => {
         setPageLoading(true);
         try {
             const response = await api.get('/equipamentos');
             setEquipamentos(response.data);
-            setCurrentPage(1); // Resetar página ao buscar novos dados
+            await fetchCounts(response.data); 
+            setCurrentPage(1); 
         } catch (error) {
             toast.error("Erro ao carregar equipamentos.");
         } finally {
@@ -179,14 +285,20 @@ export default function GerenciarPatrimonios() {
         }
     };
     
+    const handleRefresh = () => {
+        fetchData();
+        toast.info("A atualizar dados...");
+    }
+
     useEffect(() => {
         fetchData();
     }, []);
 
-    // Resetar a página ao mudar a pesquisa
     useEffect(() => {
         setCurrentPage(1);
-    }, [pesquisa]);
+    }, [pesquisa, filtroStatus]);
+
+    // --- LÓGICA DE AÇÕES (CRUD) ---
 
     const handleSave = async (data) => {
         setActionLoading(true);
@@ -233,47 +345,126 @@ export default function GerenciarPatrimonios() {
         setModal({ deleteOpen: false, formOpen: true });
     };
     
+    // --- LÓGICA DE FILTRAGEM E PAGINAÇÃO ---
+
     const filteredEquipamentos = useMemo(() => {
         const p = pesquisa.toLowerCase();
-        return equipamentos.filter(eq => 
-            (eq.patrimonio || '').toLowerCase().includes(p) ||
-            (eq.sala || '').toLowerCase().includes(p) ||
-            (eq.equipamento || '').toLowerCase().includes(p)
-        );
-    }, [equipamentos, pesquisa]);
+        
+        // SIMULAÇÃO: Criterio para filtro de "Em Manutenção"
+        const isEmManutencao = (index) => index % 10 === 0; // Exemplo simples
 
-    // --- LÓGICA DE PAGINAÇÃO ---
+        return equipamentos.filter((eq, index) => {
+            const matchesSearch = (eq.patrimonio || '').toLowerCase().includes(p) ||
+                                  (eq.sala || '').toLowerCase().includes(p) ||
+                                  (eq.equipamento || '').toLowerCase().includes(p);
+            
+            let matchesStatus = true;
+            if (filtroStatus === 'emManutencao') {
+                // Simulação de filtro: se o card de 'Em Manutenção' foi clicado
+                matchesStatus = isEmManutencao(index); 
+            } else if (filtroStatus === 'semLocalizacao') {
+                matchesStatus = !eq.sala || eq.sala.trim() === '';
+            } else if (filtroStatus === 'disponivel') {
+                // Simulação: Não está em manutenção E tem localização
+                matchesStatus = !isEmManutencao(index) && (eq.sala && eq.sala.trim() !== '');
+            }
+
+            return matchesSearch && matchesStatus;
+        });
+    }, [equipamentos, pesquisa, filtroStatus]);
+
     const totalPages = Math.ceil(filteredEquipamentos.length / itemsPerPage);
     const paginatedEquipamentos = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         return filteredEquipamentos.slice(startIndex, startIndex + itemsPerPage);
     }, [filteredEquipamentos, currentPage, itemsPerPage]);
-    // --- FIM LÓGICA DE PAGINAÇÃO ---
+
+    // Função para determinar o status do item (SIMULAÇÃO)
+    const getStatusLabel = (eq, index) => {
+        // SIMULAÇÃO: Se o índice for divisível por 10, está em manutenção (para fins de visualização)
+        const isMaintenance = index % 10 === 0; 
+        
+        if (isMaintenance) return { label: 'Em Manutenção', color: 'yellow', icon: <FiLoader size={12} /> };
+        if (!eq.sala || eq.sala.trim() === '') return { label: 'Sem Localização', color: 'orange', icon: <FiMapPin size={12} /> };
+        return { label: 'Disponível', color: 'green', icon: <FiCheckCircle size={12} /> };
+    }
+
+    // --- RENDERIZAÇÃO ---
     
-    if (pageLoading) return <div className="p-8 flex justify-center items-center h-[50vh]"><FiLoader className="text-4xl text-red-600 animate-spin"/></div>;
+    if (pageLoading && countsLoading) return <div className="p-8 flex justify-center items-center h-[50vh]"><FiLoader className="text-4xl text-red-600 animate-spin"/></div>;
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 font-sans">
             <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="bg-white p-5 sm:p-8 rounded-2xl shadow-subtle max-w-7xl mx-auto border border-gray-200/80">
+                
+                {/* Cabeçalho */}
                 <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-200/80 pb-6 mb-6">
                     <div>
                         <h1 className="text-3xl font-extrabold text-red-600 drop-shadow-md">Gerenciar Patrimônios</h1>
                         <p className="text-sm text-gray-600 mt-1">Adicione, edite ou remova equipamentos do sistema.</p>
                     </div>
-                    <motion.button onClick={() => openFormModal()} whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}
-                        className="flex items-center gap-2 bg-red-600 text-white font-semibold cursor-pointer py-2.5 px-5 rounded-lg shadow-sm hover:bg-red-700 transition-all w-full sm:w-auto justify-center">
-                        <FiPlus /> Novo Equipamento
-                    </motion.button>
+                    <div className="flex gap-3 w-full sm:w-auto">
+                        <motion.button onClick={handleRefresh} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                            className="flex items-center gap-2 bg-gray-200 text-gray-700 font-semibold cursor-pointer py-2.5 px-4 rounded-lg shadow-sm hover:bg-gray-300 transition-all justify-center text-sm"
+                            title="Atualizar Dados">
+                            <FiRefreshCw size={16} />
+                        </motion.button>
+                        <motion.button onClick={() => openFormModal()} whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}
+                            className="flex items-center gap-2 bg-red-600 text-white font-semibold cursor-pointer py-2.5 px-5 rounded-lg shadow-sm hover:bg-red-700 transition-all w-full sm:w-auto justify-center">
+                            <FiPlus /> Novo Equipamento
+                        </motion.button>
+                    </div>
                 </header>
-            
-                <div className="mb-6 relative group">
-                    <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-red-600" />
-                    <input type="text" placeholder="Buscar por patrimônio, sala ou nome do equipamento..." value={pesquisa}
-                        onChange={(e) => setPesquisa(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-zinc-100 border-2 border-transparent rounded-lg focus:bg-white focus:border-red-500 transition-all outline-none"
+
+                {/* Cartões de Resumo (Report Cards) */}
+                <motion.div layout className="flex flex-wrap gap-4 mb-8 justify-center lg:justify-start">
+                    <ReportCard 
+                        title="Patrimônios Totais"
+                        count={counts.todos}
+                        icon={<FiPackage size={24} />}
+                        color="red"
+                        isActive={filtroStatus === ''}
+                        onClick={() => setFiltroStatus('')}
+                        isLoading={countsLoading}
                     />
-                </div>
+                    <ReportCard 
+                        title="Em Manutenção"
+                        count={counts.emManutencao}
+                        icon={<FiLoader size={24} />}
+                        color="yellow"
+                        isActive={filtroStatus === 'emManutencao'}
+                        onClick={() => setFiltroStatus('emManutencao')}
+                        isLoading={countsLoading}
+                    />
+                </motion.div>
                 
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                    <div className="relative group flex-grow">
+                        <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-red-600" />
+                        <input type="text" placeholder="Buscar por patrimônio, sala ou nome do equipamento..." value={pesquisa}
+                            onChange={(e) => setPesquisa(e.target.value)}
+                            className="w-full pl-12 pr-4 py-3 bg-zinc-100 border-2 border-transparent rounded-lg focus:bg-white focus:border-red-500 transition-all outline-none"
+                        />
+                    </div>
+                    
+                    <div className="relative">
+                        <select 
+                            value={filtroStatus} 
+                            onChange={(e) => setFiltroStatus(e.target.value)}
+                            className="w-full md:w-auto appearance-none bg-zinc-100 border-2 border-transparent p-3 pr-10 rounded-lg focus:bg-white focus:border-red-500 transition-all outline-none text-gray-700 font-medium"
+                        >
+                            <option value="">Status (Todos)</option>
+                            <option value="disponivel">Disponível/Localizado</option>
+                            <option value="emManutencao">Em Manutenção</option>
+                            <option value="semLocalizacao">Sem Localização</option>
+                        </select>
+                        <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                    </div>
+                </div>
+
+                {/* --- */}
+
+                {/* Tabela/Cards de Equipamentos */}
                 <div>
                     {/* Tabela para Desktop */}
                     <motion.table initial="hidden" animate="show" variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } }}}
@@ -283,22 +474,33 @@ export default function GerenciarPatrimonios() {
                                 <th className="px-4 py-3 font-semibold">Patrimônio</th>
                                 <th className="px-4 py-3 font-semibold">Equipamento</th>
                                 <th className="px-4 py-3 font-semibold">Sala/Local</th>
+                                <th className="px-4 py-3 font-semibold">Status</th>
                                 <th className="px-4 py-3 font-semibold text-right">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {paginatedEquipamentos.map((eq, index) => (
-                                <motion.tr variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
-                                    key={`${eq.patrimonio}-${index}`} className="border-t hover:bg-zinc-50/50 transition-colors">
-                                    <td className="px-4 py-4 font-mono font-semibold text-gray-700">{eq.patrimonio}</td>
-                                    <td className="px-4 py-4 text-gray-800">{eq.equipamento || '-'}</td>
-                                    <td className="px-4 py-4 text-gray-600">{eq.sala || '-'}</td>
-                                    <td className="px-4 py-4 text-right">
-                                        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => openFormModal(eq)} className="p-2 cursor-pointer text-gray-500 hover:text-blue-600"><FiEdit /></motion.button>
-                                        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => openDeleteModal(eq)} className="p-2 cursor-pointer text-gray-500 hover:text-red-600"><FiTrash2 /></motion.button>
-                                    </td>
-                                </motion.tr>
-                            ))}
+                            <AnimatePresence>
+                                {paginatedEquipamentos.map((eq, index) => {
+                                    const status = getStatusLabel(eq, index);
+                                    return (
+                                        <motion.tr variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+                                            key={`${eq.patrimonio}-${index}`} className="border-t hover:bg-zinc-50/50 transition-colors">
+                                            <td className="px-4 py-4 font-mono font-semibold text-gray-700">{eq.patrimonio}</td>
+                                            <td className="px-4 py-4 text-gray-800">{eq.equipamento || '-'}</td>
+                                            <td className="px-4 py-4 text-gray-600">{eq.sala || <span className="text-orange-500 font-medium">Não Informada</span>}</td>
+                                            <td className="px-4 py-4">
+                                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-${status.color}-100 text-${status.color}-800`}>
+                                                    {status.icon} {status.label}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-4 text-right">
+                                                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => openFormModal(eq)} className="p-2 cursor-pointer text-gray-500 hover:text-blue-600"><FiEdit /></motion.button>
+                                                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => openDeleteModal(eq)} className="p-2 cursor-pointer text-gray-500 hover:text-red-600"><FiTrash2 /></motion.button>
+                                            </td>
+                                        </motion.tr>
+                                    );
+                                })}
+                            </AnimatePresence>
                         </tbody>
                     </motion.table>
                     
@@ -306,28 +508,36 @@ export default function GerenciarPatrimonios() {
                     <motion.div initial="hidden" animate="show" variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } }}}
                         className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
                         
-                        {paginatedEquipamentos.map((eq, index) => (
-                            <motion.div variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
-                                key={`${eq.patrimonio}-${index}`} 
-                                className="bg-white border rounded-lg p-4 space-y-3 shadow-sm"
-                            >
-                                <div className="flex justify-between items-start">
-                                    <span className="font-bold text-gray-800 font-mono pr-2">{eq.patrimonio}</span>
-                                </div>
-                                <div className="text-sm text-gray-500 border-t pt-3 space-y-1">
-                                    <p><strong>Equipamento:</strong> {eq.equipamento || 'Não informado'}</p>
-                                    <p><strong>Sala/Local:</strong> {eq.sala || 'Não informada'}</p>
-                                </div>
-                                <div className="flex gap-4 pt-3 border-t mt-3">
-                                    <button onClick={() => openFormModal(eq)} className="flex items-center gap-2 text-blue-600 font-medium text-sm">
-                                        <FiEdit size={16} /> Editar
-                                    </button>
-                                    <button onClick={() => openDeleteModal(eq)} className="flex items-center gap-2 text-red-600 font-medium text-sm">
-                                        <FiTrash2 size={16} /> Excluir
-                                    </button>
-                                </div>
-                            </motion.div>
-                        ))}
+                        <AnimatePresence>
+                            {paginatedEquipamentos.map((eq, index) => {
+                                const status = getStatusLabel(eq, index);
+                                return (
+                                    <motion.div variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+                                        key={`${eq.patrimonio}-${index}`} 
+                                        className="bg-white border rounded-lg p-4 space-y-3 shadow-sm"
+                                    >
+                                        <div className="flex justify-between items-start">
+                                            <span className="font-bold text-gray-800 font-mono pr-2">{eq.patrimonio}</span>
+                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-${status.color}-100 text-${status.color}-800`}>
+                                                {status.icon} {status.label}
+                                            </span>
+                                        </div>
+                                        <div className="text-sm text-gray-500 border-t pt-3 space-y-1">
+                                            <p><strong>Equipamento:</strong> {eq.equipamento || 'Não informado'}</p>
+                                            <p><strong>Sala/Local:</strong> {eq.sala || <span className="text-orange-500">Não informada</span>}</p>
+                                        </div>
+                                        <div className="flex gap-4 pt-3 border-t mt-3">
+                                            <button onClick={() => openFormModal(eq)} className="flex items-center gap-2 text-blue-600 font-medium text-sm">
+                                                <FiEdit size={16} /> Editar
+                                            </button>
+                                            <button onClick={() => openDeleteModal(eq)} className="flex items-center gap-2 text-red-600 font-medium text-sm">
+                                                <FiTrash2 size={16} /> Excluir
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                );
+                            })}
+                        </AnimatePresence>
                     </motion.div>
 
                     {filteredEquipamentos.length === 0 && !pageLoading && (
@@ -339,11 +549,13 @@ export default function GerenciarPatrimonios() {
                     )}
                 </div>
 
+                {/* --- */}
+
                 {/* CONTROLES DE PAGINAÇÃO */}
-                <PaginationControls
+                <Paginacao
                     currentPage={currentPage}
                     totalPages={totalPages}
-                    setCurrentPage={setCurrentPage}
+                    onPageChange={setCurrentPage}
                 />
                 {/* FIM CONTROLES DE PAGINAÇÃO */}
 
@@ -363,7 +575,7 @@ export default function GerenciarPatrimonios() {
                     <ConfirmationModal
                         key="confirm-modal"
                         title="Confirmar Exclusão"
-                        message={`Tem certeza que deseja excluir o patrimônio "${selectedEquipamento.patrimonio}"? Esta ação pode ter implicações nos chamados existentes.`}
+                        message={`Tem certeza que deseja excluir o patrimônio "${selectedEquipamento.patrimonio}"? Esta ação é irreversível.`}
                         onConfirm={handleDelete}
                         onCancel={() => setModal({ ...modal, deleteOpen: false })}
                         isLoading={actionLoading}
