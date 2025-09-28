@@ -14,7 +14,6 @@ import InicioTecnico from '../Inicio/InicioTecnico';
 import ChamadosAbertos from '../ChamadosAbertos/ChamadosAbertos';
 import ChamadosAtribuidos from '../ChamadosAtribuidos/ChamadosAtribuidos';
 import HistoricoChamados from '../HistoricoChamados/HistoricoChamados';
-import ChatFixoIntegrado from '../Contato/Chatfixo';
 
 export default function DashboardTecnico() {
   const [activeTab, setActiveTab] = useState('inicio');
@@ -128,7 +127,6 @@ export default function DashboardTecnico() {
         </main>
       </div>
 
-      <ChatFixoIntegrado funcionario={funcionario} />
     </div>
   );
 }

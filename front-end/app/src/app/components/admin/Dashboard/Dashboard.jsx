@@ -17,7 +17,6 @@ import GerenciarChamados from '../GerenciarChamados/GerenciarChamados';
 import ChamadosAtribuidos from '../ChamadosAtribuidos/ChamadosAtribuidos';
 import Relatorio from '../Relatorios/Relatorios';
 import AbrirChamado from '../AbrirChamado/Chamado';
-import Mensagens from '../Contato/PainelChatAdmin';
 import GerenciarPatrimonios from '../GerenciasPatrimonios/GerenciarPatrimonios';
 import Apontamentos from '../Apontamentos/Apontamentos';
 
@@ -110,7 +109,6 @@ export default function Dashboard() {
             case 'atribuidos': return <ChamadosAtribuidos funcionario={funcionario} setActiveTab={setActiveTab} />;
             case 'patrimonio': return <GerenciarPatrimonios funcionario={funcionario} />;
             case 'apontamentos': return <Apontamentos funcionario={funcionario} />;
-            case 'mensagens': return <Mensagens funcionario={funcionario} />;
             case 'relatorio': return <Relatorio />;
             case 'info': return <ProfileInfo funcionario={funcionario} getInitials={getInitials} />;
             default: return <Inicio setActiveTab={setActiveTab} />;

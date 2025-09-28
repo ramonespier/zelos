@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
-import Chat from '../Contato/Chatfixo';
 import api from '../../../lib/api';
 import Sidebar from './Slidebar';
 import Header from './Header';
@@ -13,7 +12,6 @@ import Inicio from '../Inicio/Inicio';
 import Chamado from '../AbrirChamado/Chamado';
 import MeusChamados from '../MeusChamados/MinhasPools';
 import InstrucoesRapidas from '../Instrucoes/page';
-import Contato from '../Contato/ChatUsuario';
 import ProfileInfo from './ProfileInfo';
 
 export default function Dashboard() {
@@ -94,7 +92,6 @@ export default function Dashboard() {
       case 'inicio': return <><Inicio onAbrirChamado={() => setActiveTab('chamado')} /><InstrucoesRapidas /></>;
       case 'chamado': return <Chamado funcionario={funcionario} />;
       case 'meus': return <MeusChamados funcionario={funcionario} />;
-      case 'contato': return <Contato funcionario={funcionario} />;
       case 'info': return <ProfileInfo funcionario={funcionario} getInitials={getInitials} />;
       default: return null;
     }
@@ -129,7 +126,6 @@ export default function Dashboard() {
           </AnimatePresence>
         </main>
 
-        <Chat />
       </div>
     </div>
   );
