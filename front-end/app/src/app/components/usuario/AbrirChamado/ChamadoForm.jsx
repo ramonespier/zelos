@@ -1,6 +1,7 @@
 'use client';
 
 import { FiPaperclip, FiXCircle, FiLoader } from 'react-icons/fi';
+import { toast } from 'sonner';
 
 export default function ChamadoForm({
   titulo, setTitulo,
@@ -15,21 +16,21 @@ export default function ChamadoForm({
 
   const handleImagemChange = (e) => {
     const file = e.target.files[0];
-    if (file && file.size < 5 * 1024 * 1024) { 
-      setImagem(file);
-      setImagemPreview(URL.createObjectURL(file));
-    } else if (file) {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { 
       toast.error("Arquivo muito grande! O limite é de 5MB.");
       e.target.value = '';
+      return;
     }
+    setImagem(file);
+    setImagemPreview(URL.createObjectURL(file));
   };
 
   const handleRemoveImagem = () => {
     setImagem(null);
     setImagemPreview('');
-    if (document.getElementById('file-upload')) {
-        document.getElementById('file-upload').value = ''; 
-    }
+    const input = document.getElementById('file-upload');
+    if (input) input.value = ''; 
   };
 
   return (
@@ -112,4 +113,4 @@ export default function ChamadoForm({
       </button>
     </form>
   );
-} 
+}
