@@ -17,6 +17,7 @@ const tabs = [
   { id: 'inicio', label: 'Início', icon: HomeIcon },
   { id: 'abrir', label: 'Abrir Chamado', icon: PlusCircleIcon },
   { id: 'gerenciar', label: 'Painel de Atribuição', icon: WrenchScrewdriverIcon },
+  { id: 'usuarios', label: 'Gerenciar Usuários', icon: WrenchScrewdriverIcon },
   { id: 'atribuidos', label: 'Gerenciar Chamados', icon: ClipboardDocumentCheckIcon },
   { id: 'patrimonio', label: 'Patrimonios', icon: ArchiveBoxIcon },
   { id: 'apontamentos', label: 'Apontamentos', icon: ArchiveBoxIcon },

@@ -28,4 +28,18 @@ router.get('/:id',
     UsuarioController.buscarPorId
 );
 
+// Adicione estas rotas no seu arquivo de routes de usuários
+
+router.patch('/:id',
+    AuthMiddleware.verifyToken,
+    permitir(['admin']),
+    UsuarioController.atualizar
+);
+
+router.patch('/:id/status',
+    AuthMiddleware.verifyToken,
+    permitir(['admin']),
+    UsuarioController.alterarStatus
+);
+
 export default router;

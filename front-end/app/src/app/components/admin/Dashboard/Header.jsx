@@ -51,6 +51,7 @@ export default function Header({
     { id: 'inicio', label: 'Início' },
     { id: 'abrir', label: 'Abrir Chamado' },
     { id: 'gerenciar', label: 'Painel de Atribuição' },
+    { id: 'usuarios', label: 'Gerenciar Usuários' },
     { id: 'atribuidos', label: 'Gerenciar Chamados' },
     { id: 'patrimonio', label: 'Patrimonios' },
     { id: 'apontamentos', label: 'Apontamentos' },

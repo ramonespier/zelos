@@ -37,6 +37,51 @@ class UsuarioController {
             res.status(500).json({ message: 'Erro ao buscar usuário' });
         }
     }
+    // Adicione estes métodos ao seu controller
+
+    static async atualizar(req, res) {
+        try {
+            const { id } = req.params;
+            const { nome, email, funcao, especialidade } = req.body;
+
+            const usuario = await Usuario.findByPk(id);
+            if (!usuario) {
+                return res.status(404).json({ message: 'Usuário não encontrado' });
+            }
+
+            await usuario.update({
+                nome,
+                email,
+                funcao,
+                especialidade: funcao === 'tecnico' ? especialidade : null
+            });
+
+            res.json(usuario);
+        } catch (error) {
+            console.error('Erro ao atualizar usuário:', error);
+            res.status(500).json({ message: 'Erro interno do servidor' });
+        }
+    }
+
+    static async alterarStatus(req, res) {
+        try {
+            const { id } = req.params;
+            const { status } = req.body;
+
+            const usuario = await Usuario.findByPk(id);
+            if (!usuario) {
+                return res.status(404).json({ message: 'Usuário não encontrado' });
+            }
+
+            await usuario.update({ status });
+
+            res.json(usuario);
+        } catch (error) {
+            console.error('Erro ao alterar status do usuário:', error);
+            res.status(500).json({ message: 'Erro interno do servidor' });
+        }
+    }
+
 }
 
 export default UsuarioController;   
