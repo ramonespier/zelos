@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { FiFilter, FiEdit, FiX, FiPlus, FiSearch, FiAlertTriangle, FiCheckCircle, FiChevronDown, FiInbox, FiSlash, FiLoader, FiChevronLeft, FiChevronRight, FiBriefcase, FiCheckSquare, FiList } from 'react-icons/fi';
+import { FiFilter, FiEdit, FiX, FiPlus, FiSearch, FiAlertTriangle, FiCheckCircle, FiChevronDown, FiInbox, FiSlash, FiLoader, FiChevronLeft, FiChevronRight, FiBriefcase, FiCheckSquare, FiList, FiRefreshCw } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '../../../lib/api';
@@ -230,6 +230,12 @@ export default function TabelaChamados({ setActiveTab: originalSetActiveTab, fun
         }
     };
 
+    const handleRefresh = () => {
+        fetchChamadosData();
+        fetchCounts();
+        toast.info("A atualizar dados...");
+    }
+
     useEffect(() => {
         fetchChamadosData();
         fetchCounts();
@@ -317,12 +323,21 @@ export default function TabelaChamados({ setActiveTab: originalSetActiveTab, fun
                                     {filtroStatus && ` • Filtrado por: ${capitalize(filtroStatus)}`}
                                 </p>
                             </div>
-                            <motion.button
-                                onClick={() => originalSetActiveTab('abrir')} 
-                                whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}
-                                className="flex items-center gap-2 bg-red-600 text-white font-semibold py-2.5 px-5 rounded-lg shadow-sm hover:bg-red-700 transition-all w-full sm:w-auto justify-center cursor-pointer">
-                                <FiPlus size={18} /> Novo Chamado
-                            </motion.button>
+                            <div className="flex gap-3 w-full sm:w-auto">
+                                <motion.button
+                                    onClick={handleRefresh}
+                                    disabled={countsLoading || pageLoading}
+                                    className="flex items-center gap-2 bg-gray-200 text-gray-800 font-semibold py-2.5 px-4 rounded-lg shadow-sm hover:bg-gray-300 transition-all w-full sm:w-auto justify-center cursor-pointer disabled:opacity-50 disabled:cursor-wait">
+                                    {countsLoading || pageLoading ? <FiLoader size={18} className="animate-spin" /> : <FiRefreshCw size={18} />} 
+                                    Atualizar
+                                </motion.button>
+                                <motion.button
+                                    onClick={() => originalSetActiveTab('abrir')} 
+                                    whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}
+                                    className="flex items-center gap-2 bg-red-600 text-white font-semibold py-2.5 px-5 rounded-lg shadow-sm hover:bg-red-700 transition-all w-full sm:w-auto justify-center cursor-pointer">
+                                    <FiPlus size={18} /> Novo Chamado
+                                </motion.button>
+                            </div>
                         </header>
 
                         <div className="flex flex-col md:flex-row items-center gap-4 mb-6">

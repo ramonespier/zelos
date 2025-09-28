@@ -2,20 +2,34 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
+/**
+ * Componente Botão de Ação: Mostra o status do pedido do técnico logado
+ * @param {string} status - Pode ser 'pendente', 'recusado', 'aceito', ou undefined (sem pedido)
+ * @param {function} onClick - Função a ser chamada ao clicar
+ */
 const ActionButton = ({ status, onClick }) => {
   let config;
+  
+  // O status é passado como 'pendente', 'aceito', 'recusado' ou undefined/null (sem pedido)
   switch (status) {
     case 'pendente':
       config = {
         text: 'Pedido Enviado',
-        className: 'bg-green-100 text-green-700 cursor-not-allowed',
+        className: 'bg-yellow-100 text-yellow-700 cursor-not-allowed border border-yellow-300', 
+        disabled: true,
+      };
+      break;
+    case 'aceito':
+      config = {
+        text: 'Pedido Aceite',
+        className: 'bg-green-600 text-white cursor-not-allowed', 
         disabled: true,
       };
       break;
     case 'recusado':
       config = {
         text: 'Pedido Recusado',
-        className: 'bg-yellow-100 text-yellow-700 cursor-not-allowed',
+        className: 'bg-red-100 text-red-700 cursor-not-allowed border border-red-300', 
         disabled: true,
       };
       break;
@@ -40,16 +54,13 @@ const ActionButton = ({ status, onClick }) => {
 
 export default function CardChamado({ chamado, pedidosDoTecnico, onAtribuir, onAbrirImagem }) {
   
+  // pedidosDoTecnico deve ser um mapa { chamado_id: status } que contém o status do pedido do técnico logado
   const meuPedidoStatus = pedidosDoTecnico[chamado.id];
 
   // Função para construir a URL da imagem corretamente
   const getImageUrl = (imgPath) => {
     if (!imgPath) return "/placeholder.png";
-    
-    // Se já é uma URL completa, retorna como está
     if (imgPath.startsWith('http')) return imgPath;
-    
-    // Se é um caminho relativo, constrói a URL completa
     return `http://localhost:3001${imgPath.startsWith('/') ? imgPath : `/${imgPath}`}`;
   };
 
@@ -105,6 +116,18 @@ export default function CardChamado({ chamado, pedidosDoTecnico, onAtribuir, onA
             </div>
           )}
         </div>
+        
+        {/* Etiqueta de Status Global do Chamado */}
+        <div className="mt-3">
+             <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                chamado.tecnico_id 
+                ? 'bg-blue-100 text-blue-700' // Atribuído
+                : 'bg-red-100 text-red-700' // Aberto
+             }`}>
+                {chamado.tecnico_id ? 'ATRIBUÍDO' : 'ABERTO'}
+            </span>
+        </div>
+
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 mt-auto border-t border-gray-200/80 gap-3">
           <div className="flex items-center gap-4">
@@ -122,7 +145,15 @@ export default function CardChamado({ chamado, pedidosDoTecnico, onAtribuir, onA
             )}
           </div>
           
-          <ActionButton status={meuPedidoStatus} onClick={() => onAtribuir(chamado.id)} />
+          {/* Ação de Pedido: Visível apenas se o chamado NÃO estiver atribuído */}
+          {!chamado.tecnico_id ? (
+            <ActionButton 
+                status={meuPedidoStatus} 
+                onClick={() => onAtribuir(chamado.id)} 
+            />
+          ) : (
+             <span className="text-sm font-semibold text-blue-700">Chamado já atribuído.</span>
+          )}
         </div>
       </div>
     </motion.div>
