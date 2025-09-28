@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { FiFilter, FiEdit, FiX, FiPlus, FiSearch, FiAlertTriangle, FiCheckCircle, FiChevronDown, FiInbox, FiSlash, FiLoader, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { FiFilter, FiEdit, FiX, FiPlus, FiSearch, FiAlertTriangle, FiCheckCircle, FiChevronDown, FiInbox, FiSlash, FiLoader, FiChevronLeft, FiChevronRight, FiBriefcase, FiCheckSquare, FiList } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '../../../lib/api';
+
+import GerenciarPedidos from '../GerenciarPedidos/GerenciarPedidos'; 
+import GerenciarFechamentos from '../GerenciarFechamento/GerenciarFechamento'; 
 
 const capitalize = (s = '') => {
     if (!s) return '';
@@ -32,7 +35,50 @@ const StatusBadge = ({ status }) => {
 
 const Spinner = () => <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="w-5 h-5 border-2 border-white border-t-transparent rounded-full" />;
 
-// Componente de Paginação
+const ReportCard = ({ title, count, icon, color, onClick, isActive, isLoading, isClickable = true }) => {
+    const baseClasses = "flex flex-col p-5 rounded-xl shadow-lg transition-all duration-300 transform bg-white";
+    
+    let clickClasses = "";
+    if (isClickable) {
+        clickClasses = "cursor-pointer hover:scale-[1.02] active:scale-[0.98]";
+    } else {
+        clickClasses = "cursor-default";
+    }
+
+    // A borda ativa usa a cor do card, exceto no ReportCard original que estava com a cor 'red' forçada.
+    // Revertendo a borda para usar a cor 'color' passada via prop, mas mantendo a classe 'red' para o card 'Todos' se for o caso.
+    const borderColor = color === 'red' ? 'red' : color; 
+
+    const activeClasses = isActive 
+        ? `ring-4 ring-offset-2 ring-${borderColor}-500/50 border-2 border-${borderColor}-600/50`
+        : `hover:shadow-xl`; 
+    
+    const handleClick = () => {
+        if (isClickable && onClick) {
+            onClick();
+        }
+    };
+
+    return (
+        <motion.div 
+            layout 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            className={`${baseClasses} ${clickClasses} ${activeClasses} min-w-[200px]`}
+            onClick={handleClick}
+        >
+            <div className={`text-${color}-600 p-2 rounded-full bg-${color}-100/70 w-fit mb-3`}>
+                {icon}
+            </div>
+            <p className="text-xl font-extrabold text-gray-800">
+                {isLoading ? <FiLoader className="animate-spin inline-block mr-1 text-base" /> : count}
+            </p>
+            <p className="text-sm text-gray-500 font-medium mt-1">{title}</p>
+        </motion.div>
+    );
+};
+
+
 const Paginacao = ({ currentPage, totalPages, onPageChange }) => {
     const pages = [];
     const maxVisiblePages = 5;
@@ -113,7 +159,17 @@ const Paginacao = ({ currentPage, totalPages, onPageChange }) => {
     );
 };
 
-export default function TabelaChamados({ setActiveTab, funcionario }) {
+export default function TabelaChamados({ setActiveTab: originalSetActiveTab, funcionario }) {
+    const [activeTab, setActiveTab] = useState('tabela');
+    
+    const [counts, setCounts] = useState({
+        todos: 0,
+        em_andamento: 0,
+        solicitacao_pedido: 0,
+        solicitacao_fechamento: 0,
+    });
+    
+    const [countsLoading, setCountsLoading] = useState(true);
     const [chamados, setChamados] = useState([]);
     const [tecnicos, setTecnicos] = useState([]);
     const [editingTicket, setEditingTicket] = useState(null);
@@ -123,11 +179,45 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
     const [pageLoading, setPageLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     
-    // Estados de paginação
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+    
+    const fetchCounts = useCallback(async () => {
+        setCountsLoading(true);
+        try {
+            // Requisição para TUDO, que será usada para calcular a contagem de "em_andamento" localmente.
+            const [
+                chamadosTodosRes,
+                pedidosRes, 
+                fechamentosRes
+            ] = await Promise.all([
+                api.get('/chamados'), // Pega todos os chamados
+                api.get('/pedidos-chamado/pendentes'),
+                api.get('/pedidos-fechamento/pendentes')
+            ]);
 
-    const fetchData = async () => {
+            const todosChamados = chamadosTodosRes.data || [];
+            
+            // CORREÇÃO APLICADA: Filtra a contagem de chamados em andamento localmente.
+            const emAndamentoCount = todosChamados.filter(c => 
+                c.status === 'em andamento'
+            ).length;
+
+            setCounts({
+                todos: todosChamados.length,
+                em_andamento: emAndamentoCount, // Valor corrigido
+                solicitacao_pedido: pedidosRes.data.length,
+                solicitacao_fechamento: fechamentosRes.data.length,
+            });
+        } catch (error) {
+            console.error("Erro ao buscar contagens:", error);
+            if (countsLoading) toast.error("Falha ao carregar dados de resumo."); 
+        } finally {
+            setCountsLoading(false);
+        }
+    }, [countsLoading]);
+
+    const fetchChamadosData = async () => {
         if (!chamados.length) setPageLoading(true);
         try {
             const [chamadosRes, tecnicosRes] = await Promise.all([
@@ -138,18 +228,18 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
             setChamados(chamadosRes.data);
             setTecnicos(tecnicosRes.data);
         } catch (error) {
-            toast.error("Erro ao carregar dados do sistema.");
-            console.error("Erro ao buscar dados:", error);
+            toast.error("Erro ao carregar dados da tabela.");
+            console.error("Erro ao buscar dados da tabela:", error);
         } finally {
             setPageLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchData();
+        fetchChamadosData();
+        fetchCounts();
     }, []);
 
-    // Resetar para página 1 quando filtros mudarem
     useEffect(() => {
         setCurrentPage(1);
     }, [filtroStatus, pesquisa]);
@@ -163,7 +253,8 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
                 tecnico_id: editingTicket.tecnico_id || null,
                 status: editingTicket.status
             });
-            await fetchData();
+            await fetchChamadosData();
+            fetchCounts(); 
             setEditingTicket(null);
             toast.success('Chamado atualizado com sucesso!');
         } catch (error) {
@@ -179,7 +270,8 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
         setActionLoading(true);
         try {
             await api.patch(`/chamados/${ticketToCancel.id}/status`, { status: 'cancelado' });
-            await fetchData();
+            await fetchChamadosData();
+            fetchCounts(); 
             setTicketToCancel(null);
             toast.success('Chamado cancelado com sucesso!');
         } catch (error) {
@@ -199,7 +291,6 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
         });
     }, [chamados, pesquisa, filtroStatus]);
 
-    // Cálculos da paginação
     const totalItems = filteredTickets.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -209,111 +300,194 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
     const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
     const itemVariants = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } };
 
-    if (pageLoading) {
-        return <div className="flex justify-center items-center h-[50vh]"><FiLoader className="animate-spin text-4xl text-red-600" /></div>;
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'pedidos':
+                return <GerenciarPedidos onUpdate={fetchCounts} />;
+            case 'fechamentos':
+                return <GerenciarFechamentos onUpdate={fetchCounts} />;
+            case 'tabela':
+            default:
+                if (pageLoading) {
+                    return <div className="flex justify-center items-center h-[50vh]"><FiLoader className="animate-spin text-4xl text-red-600" /></div>;
+                }
+                
+                return (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-2">
+                        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-200/80 pb-6 mb-6">
+                            <div>
+                                <h1 className="text-3xl font-extrabold text-red-600 drop-shadow-md">Gerenciamento de Chamados</h1>
+                                <p className="text-sm text-gray-600 mt-1">
+                                    {totalItems} chamado{totalItems !== 1 ? 's' : ''} encontrado{totalItems !== 1 ? 's' : ''}
+                                    {filtroStatus && ` • Filtrado por: ${capitalize(filtroStatus)}`}
+                                </p>
+                            </div>
+                            <motion.button
+                                onClick={() => originalSetActiveTab('abrir')} 
+                                whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}
+                                className="flex items-center gap-2 bg-red-600 text-white font-semibold py-2.5 px-5 rounded-lg shadow-sm hover:bg-red-700 transition-all w-full sm:w-auto justify-center cursor-pointer">
+                                <FiPlus size={18} /> Novo Chamado
+                            </motion.button>
+                        </header>
+
+                        <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
+                            <div className="relative w-full md:flex-1 group">
+                                <FiSearch className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400 group-focus-within:text-red-600 transition-colors" />
+                                <input type="text" placeholder="Pesquisar por título ou técnico..." className="bg-zinc-100 border-2 border-transparent p-3 pl-12 rounded-lg w-full focus:bg-white focus:border-red-500 transition-all outline-none" value={pesquisa} onChange={e => setPesquisa(e.target.value)} />
+                            </div>
+                            <div className="relative w-full md:w-auto group">
+                                <FiFilter className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                <FiChevronDown className="absolute top-1/2 right-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                <select className="bg-zinc-100 border-2 border-transparent font-medium text-gray-700 p-3 pl-12 rounded-lg w-full md:w-60 appearance-none focus:bg-white focus:border-red-500 transition-all outline-none" value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)}>
+                                    <option value="">Todos os Status</option>
+                                    <option value="aberto">Aberto</option>
+                                    <option value="em andamento">Em Andamento</option>
+                                    <option value="concluido">Concluído</option>
+                                    <option value="cancelado">Cancelado</option>
+                                </select>
+                            </div>
+                            <div className="relative w-full md:w-auto group">
+                                <select 
+                                    value={itemsPerPage} 
+                                    onChange={e => {
+                                        setItemsPerPage(Number(e.target.value));
+                                        setCurrentPage(1);
+                                    }}
+                                    className="bg-zinc-100 border-2 border-transparent font-medium text-gray-700 p-3 rounded-lg w-full md:w-32 appearance-none focus:bg-white focus:border-red-500 transition-all outline-none"
+                                >
+                                    <option value={5}>5 por página</option>
+                                    <option value={10}>10 por página</option>
+                                    <option value={20}>20 por página</option>
+                                    <option value={50}>50 por página</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                            <motion.table variants={containerVariants} initial="hidden" animate="show" className="w-full text-left table-auto hidden md:table">
+                                <thead className="bg-gray-50/70 text-gray-600 text-xs uppercase">
+                                    <tr>
+                                        <th className="px-4 py-3 font-semibold">Patrimônio</th>
+                                        <th className="px-4 py-3 font-semibold">Título</th>
+                                        <th className="px-4 py-3 font-semibold">Técnico Atribuído</th>
+                                        <th className="px-4 py-3 font-semibold">Status</th>
+                                        <th className="px-4 py-3 font-semibold text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {currentItems.length > 0 ? currentItems.map((chamado, index) => {
+                                        const isActionable = chamado.status === 'aberto' || chamado.status === 'em andamento';
+                                        return (
+                                            <motion.tr variants={itemVariants} key={`${chamado.id}-${index}`} className="border-b border-gray-200/80 hover:bg-zinc-50/50 transition-colors">
+                                                <td className="px-4 py-4 font-mono text-sm text-gray-500">{chamado.numero_patrimonio || 'N/A'}</td>
+                                                <td className="px-4 py-4 font-medium text-gray-800">{chamado.titulo}</td>
+                                                <td className="px-4 py-4 text-gray-600">{chamado.tecnico ? chamado.tecnico.nome : 'Não atribuído'}</td>
+                                                <td className="px-4 py-4"><StatusBadge status={chamado.status} /></td>
+                                                <td className="px-4 py-4">
+                                                    <div className="flex gap-2 justify-end">
+                                                        {isActionable ? (
+                                                            <>
+                                                                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setEditingTicket({ ...chamado })} aria-label="Editar" className="p-2 cursor-pointer text-gray-400 hover:text-blue-600"><FiEdit size={18} /></motion.button>
+                                                                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setTicketToCancel(chamado)} aria-label="Cancelar" className="p-2 cursor-pointer text-gray-400 hover:text-red-600"><FiX size={18} /></motion.button>
+                                                            </>
+                                                        ) : (
+                                                            <span className="text-xs text-gray-400 italic pr-4">N/A</span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </motion.tr>
+                                        )
+                                    }) : (
+                                        <motion.tr><td colSpan="5" className="text-center py-12 text-gray-500"><FiInbox className="mx-auto text-3xl mb-2" />Nenhum chamado encontrado.</td></motion.tr>
+                                    )}
+                                </tbody>
+                            </motion.table>
+                        </div>
+
+                        {totalPages > 1 && (
+                            <Paginacao 
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={setCurrentPage}
+                            />
+                        )}
+                    </motion.div>
+                );
+        }
     }
+
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 font-sans">
-            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="bg-white p-5 sm:p-8 rounded-2xl shadow-subtle max-w-7xl mx-auto border border-gray-200/80">
-                <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-200/80 pb-6 mb-6">
-                    <div>
-                        <h1 className="text-3xl font-extrabold text-red-600 drop-shadow-md">Gerenciamento de Chamados</h1>
-                        <p className="text-sm text-gray-600 mt-1">
-                            {totalItems} chamado{totalItems !== 1 ? 's' : ''} encontrado{totalItems !== 1 ? 's' : ''}
-                            {filtroStatus && ` • Filtrado por: ${capitalize(filtroStatus)}`}
-                        </p>
-                    </div>
-                    <motion.button
-                        onClick={() => setActiveTab('abrir')}
-                        whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}
-                        className="flex items-center gap-2 bg-red-600 text-white font-semibold py-2.5 px-5 rounded-lg shadow-sm hover:bg-red-700 transition-all w-full sm:w-auto justify-center cursor-pointer">
-                        <FiPlus size={18} /> Novo Chamado
-                    </motion.button>
-                </header>
-
-                <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
-                    <div className="relative w-full md:flex-1 group">
-                        <FiSearch className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400 group-focus-within:text-red-600 transition-colors" />
-                        <input type="text" placeholder="Pesquisar por título ou técnico..." className="bg-zinc-100 border-2 border-transparent p-3 pl-12 rounded-lg w-full focus:bg-white focus:border-red-500 transition-all outline-none" value={pesquisa} onChange={e => setPesquisa(e.target.value)} />
-                    </div>
-                    <div className="relative w-full md:w-auto group">
-                        <FiFilter className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                        <FiChevronDown className="absolute top-1/2 right-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                        <select className="bg-zinc-100 border-2 border-transparent font-medium text-gray-700 p-3 pl-12 rounded-lg w-full md:w-60 appearance-none focus:bg-white focus:border-red-500 transition-all outline-none" value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)}>
-                            <option value="">Todos os Status</option>
-                            <option value="aberto">Aberto</option>
-                            <option value="em andamento">Em Andamento</option>
-                            <option value="concluido">Concluído</option>
-                            <option value="cancelado">Cancelado</option>
-                        </select>
-                    </div>
-                    <div className="relative w-full md:w-auto group">
-                        <select 
-                            value={itemsPerPage} 
-                            onChange={e => {
-                                setItemsPerPage(Number(e.target.value));
-                                setCurrentPage(1);
-                            }}
-                            className="bg-zinc-100 border-2 border-transparent font-medium text-gray-700 p-3 rounded-lg w-full md:w-32 appearance-none focus:bg-white focus:border-red-500 transition-all outline-none"
-                        >
-                            <option value={5}>5 por página</option>
-                            <option value={10}>10 por página</option>
-                            <option value={20}>20 por página</option>
-                            <option value={50}>50 por página</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                    <motion.table variants={containerVariants} initial="hidden" animate="show" className="w-full text-left table-auto hidden md:table">
-                        <thead className="bg-gray-50/70 text-gray-600 text-xs uppercase">
-                            <tr>
-                                <th className="px-4 py-3 font-semibold">Patrimônio</th>
-                                <th className="px-4 py-3 font-semibold">Título</th>
-                                <th className="px-4 py-3 font-semibold">Técnico Atribuído</th>
-                                <th className="px-4 py-3 font-semibold">Status</th>
-                                <th className="px-4 py-3 font-semibold text-right">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {currentItems.length > 0 ? currentItems.map((chamado, index) => {
-                                const isActionable = chamado.status === 'aberto' || chamado.status === 'em andamento';
-                                return (
-                                    <motion.tr variants={itemVariants} key={`${chamado.id}-${index}`} className="border-b border-gray-200/80 hover:bg-zinc-50/50 transition-colors">
-                                        <td className="px-4 py-4 font-mono text-sm text-gray-500">{chamado.numero_patrimonio || 'N/A'}</td>
-                                        <td className="px-4 py-4 font-medium text-gray-800">{chamado.titulo}</td>
-                                        <td className="px-4 py-4 text-gray-600">{chamado.tecnico ? chamado.tecnico.nome : 'Não atribuído'}</td>
-                                        <td className="px-4 py-4"><StatusBadge status={chamado.status} /></td>
-                                        <td className="px-4 py-4">
-                                            <div className="flex gap-2 justify-end">
-                                                {isActionable ? (
-                                                    <>
-                                                        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setEditingTicket({ ...chamado })} aria-label="Editar" className="p-2 cursor-pointer text-gray-400 hover:text-blue-600"><FiEdit size={18} /></motion.button>
-                                                        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setTicketToCancel(chamado)} aria-label="Cancelar" className="p-2 cursor-pointer text-gray-400 hover:text-red-600"><FiX size={18} /></motion.button>
-                                                    </>
-                                                ) : (
-                                                    <span className="text-xs text-gray-400 italic pr-4">N/A</span>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </motion.tr>
-                                )
-                            }) : (
-                                <motion.tr><td colSpan="5" className="text-center py-12 text-gray-500"><FiInbox className="mx-auto text-3xl mb-2" />Nenhum chamado encontrado.</td></motion.tr>
-                            )}
-                        </tbody>
-                    </motion.table>
-                </div>
-
-                {/* Paginação */}
-                {totalPages > 1 && (
-                    <Paginacao 
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={setCurrentPage}
+            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <ReportCard 
+                        title="Todos os Chamados"
+                        count={counts.todos}
+                        icon={<FiList size={24} />}
+                        color="red"
+                        isLoading={countsLoading}
+                        onClick={() => {
+                            setActiveTab('tabela');
+                            setFiltroStatus(''); 
+                            setCurrentPage(1);
+                        }}
+                        isActive={activeTab === 'tabela' && filtroStatus === ''}
                     />
-                )}
+                    <ReportCard 
+                        title="Chamados Em Andamento"
+                        count={counts.em_andamento}
+                        icon={<FiLoader size={24} />}
+                        color="yellow"
+                        isLoading={countsLoading}
+                        onClick={() => { // Reabilitado o clique
+                            setActiveTab('tabela');
+                            setFiltroStatus('em andamento'); 
+                            setCurrentPage(1);
+                        }}
+                        isClickable={true} // Definido explicitamente como clicável
+                        isActive={activeTab === 'tabela' && filtroStatus === 'em andamento'}
+                    />
+                    <ReportCard 
+                        title="Solicitações de Pedido"
+                        count={counts.solicitacao_pedido}
+                        icon={<FiBriefcase size={24} />}
+                        color="blue"
+                        isLoading={countsLoading}
+                        onClick={() => {
+                            setActiveTab('pedidos');
+                            setFiltroStatus('');
+                        }}
+                        isActive={activeTab === 'pedidos'}
+                    />
+                    <ReportCard 
+                        title="Solicitações de Fechamento"
+                        count={counts.solicitacao_fechamento}
+                        icon={<FiCheckSquare size={24} />}
+                        color="green"
+                        isLoading={countsLoading}
+                        onClick={() => {
+                            setActiveTab('fechamentos');
+                            setFiltroStatus('');
+                        }}
+                        isActive={activeTab === 'fechamentos'}
+                    />
+                </div>
+                
+                <motion.div key={activeTab} className="bg-white p-5 sm:p-8 rounded-2xl shadow-subtle border border-gray-200/80">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={activeTab}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="min-h-[400px]"
+                        >
+                            {renderContent()}
+                        </motion.div>
+                    </AnimatePresence>
+                </motion.div>
 
                 <AnimatePresence>
                     {(editingTicket || ticketToCancel) && (
@@ -364,7 +538,7 @@ export default function TabelaChamados({ setActiveTab, funcionario }) {
                     )}
                 </AnimatePresence>
             </motion.div>
-            <span className="hidden bg-red-100 text-red-800 bg-yellow-100 text-yellow-800 bg-green-100 text-green-800 bg-gray-100 text-gray-800"></span>
+            <span className="hidden bg-red-100 text-red-800 bg-yellow-100 text-yellow-800 bg-green-100 text-green-800 bg-gray-100 text-gray-800 ring-yellow-500/50 border-yellow-600/50 ring-blue-500/50 border-blue-600/50 ring-green-500/50 border-green-600/50"></span>
         </div>
     );
 }

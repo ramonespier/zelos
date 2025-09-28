@@ -27,14 +27,12 @@ export default function Header({
   const notificationsRef = useRef(null);
   const router = useRouter();
 
-  // Trava o scroll da página quando o menu mobile está aberto
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
     }
-    // Cleanup function
     return () => {
       document.body.style.overflow = 'auto';
     }
@@ -49,14 +47,11 @@ export default function Header({
     }, 1000);
   };
 
-  // Lógica de abas separada
   const tabs = [
     { id: 'inicio', label: 'Início' },
     { id: 'abrir', label: 'Abrir Chamado' },
     { id: 'gerenciar', label: 'Painel de Atribuição' },
     { id: 'atribuidos', label: 'Gerenciar Chamados' },
-    { id: 'pedidos', label: 'Gerenciar Pedidos' },
-    { id: 'fechamento', label: 'Gerenciar Fechamentos' },
     { id: 'patrimonio', label: 'Patrimonios' },
     { id: 'apontamentos', label: 'Apontamentos' },
     { id: 'mensagens', label: 'Mensagens' },
@@ -66,7 +61,7 @@ export default function Header({
 
   const handleSelecao = (opcao) => {
     setActiveTab(opcao);
-    setMobileMenuOpen(false); // Fecha o menu ao selecionar uma opção
+    setMobileMenuOpen(false); 
   };
 
   const getActiveTabLabel = () => {
@@ -77,11 +72,6 @@ export default function Header({
   return (
     <header className="bg-gradient-to-r from-gray-50 via-white to-gray-50 shadow-md h-20 flex items-center justify-between px-6 z-30 sticky top-0 backdrop-blur-sm">
       <div className="flex items-center space-x-4">
-        {/* ===== BOTÃO DO MENU MOBILE CORRIGIDO ===== */}
-        {/*
-          Por padrão, este botão é 'block' (visível).
-          A partir do breakpoint 'lg' em diante, ele se torna 'hidden' (escondido).
-        */}
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
@@ -90,7 +80,6 @@ export default function Header({
         >
           {isMobileMenuOpen ? <XMarkIcon className="w-7 h-7" /> : <Bars3Icon className="w-7 h-7" />}
         </motion.button>
-        {/* =========================================== */}
 
         <h2 className="text-2xl font-bold text-gray-800 tracking-tight drop-shadow-sm">
           {getActiveTabLabel()}
@@ -113,13 +102,12 @@ export default function Header({
           getInitials={getInitials}
           isProfileOpen={isProfileOpen}
           setProfileOpen={setProfileOpen}
-          handleSelecao={() => handleSelecao('info')} // Simplificado para ir sempre para 'info'
+          handleSelecao={() => handleSelecao('info')} 
           dropdownRef={dropdownRef}
           handleLogout={handleLogout}
         />
       </div>
 
-      {/* PAINEL DO MENU MOBILE */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>

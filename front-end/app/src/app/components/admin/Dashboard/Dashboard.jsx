@@ -15,11 +15,9 @@ import ProfileInfo from './ProfileInfo';
 import Inicio from '../Inicio/Inicio';
 import GerenciarChamados from '../GerenciarChamados/GerenciarChamados';
 import ChamadosAtribuidos from '../ChamadosAtribuidos/ChamadosAtribuidos';
-import GerenciarFechamentos from '../GerenciarFechamento/GerenciarFechamento';
 import Relatorio from '../Relatorios/Relatorios';
 import AbrirChamado from '../AbrirChamado/Chamado';
 import Mensagens from '../Contato/PainelChatAdmin';
-import GerenciarPedidos from '../GerenciarPedidos/GerenciarPedidos';
 import GerenciarPatrimonios from '../GerenciasPatrimonios/GerenciarPatrimonios';
 import Apontamentos from '../Apontamentos/Apontamentos';
 
@@ -110,8 +108,6 @@ export default function Dashboard() {
             case 'abrir': return <AbrirChamado funcionario={funcionario} />;
             case 'gerenciar': return <GerenciarChamados funcionario={funcionario} />;
             case 'atribuidos': return <ChamadosAtribuidos funcionario={funcionario} setActiveTab={setActiveTab} />;
-            case 'pedidos': return <GerenciarPedidos funcionario={funcionario} />;
-            case 'fechamento': return <GerenciarFechamentos funcionario={funcionario} />;
             case 'patrimonio': return <GerenciarPatrimonios funcionario={funcionario} />;
             case 'apontamentos': return <Apontamentos funcionario={funcionario} />;
             case 'mensagens': return <Mensagens funcionario={funcionario} />;

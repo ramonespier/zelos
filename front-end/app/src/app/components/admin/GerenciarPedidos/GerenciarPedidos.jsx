@@ -105,5 +105,5 @@ export default function GerenciarPedidos() {
                 </div>
             </motion.div>
         </div>
-    );
-}
+    );  
+}                                           
