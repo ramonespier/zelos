@@ -55,6 +55,7 @@ export default function Header({
     { id: 'atribuidos', label: 'Gerenciar Chamados' },
     { id: 'patrimonio', label: 'Patrimonios' },
     { id: 'apontamentos', label: 'Apontamentos' },
+    { id: 'relatorio', label: 'Relatorios' },
     { id: 'info', label: 'Perfil' },
   ];
   const profileTab = { id: 'info', label: 'Meu Perfil' };
