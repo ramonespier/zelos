@@ -1,9 +1,7 @@
 import Usuario from "../entities/Usuario.js";
-import bcrypt from "bcryptjs";
 
 class UsuarioController {
 
-    // listando users
     static async listar(req, res) {
         try {
             const usuarios = await Usuario.findAll();
@@ -24,7 +22,7 @@ class UsuarioController {
             res.status(500).json({ message: 'Erro ao buscar técnicos' });
         }
     }
-    // buscar user por id
+
     static async buscarPorId(req, res) {
         try {
             const { id } = req.params;
@@ -37,24 +35,39 @@ class UsuarioController {
             res.status(500).json({ message: 'Erro ao buscar usuário' });
         }
     }
-    // Adicione estes métodos ao seu controller
 
     static async atualizar(req, res) {
         try {
             const { id } = req.params;
             const { nome, email, funcao, especialidade } = req.body;
-
+            
+            const usuarioAutenticado = req.user;
+            
+            if (usuarioAutenticado.funcao !== 'admin' && usuarioAutenticado.id != id) {
+                 return res.status(403).json({ message: 'Acesso negado. Você só pode atualizar o seu próprio perfil.' });
+            }
+            
             const usuario = await Usuario.findByPk(id);
             if (!usuario) {
                 return res.status(404).json({ message: 'Usuário não encontrado' });
             }
 
-            await usuario.update({
-                nome,
-                email,
-                funcao,
-                especialidade: funcao === 'tecnico' ? especialidade : null
-            });
+            let dadosParaAtualizar = {};
+            
+            if (usuarioAutenticado.funcao === 'admin') {
+                dadosParaAtualizar = {
+                    nome,
+                    email,
+                    funcao,
+                    especialidade: funcao === 'tecnico' ? especialidade : null
+                };
+            } else {
+                dadosParaAtualizar = {
+                    especialidade: especialidade 
+                };
+            }
+
+            await usuario.update(dadosParaAtualizar);
 
             res.json(usuario);
         } catch (error) {
@@ -84,4 +97,4 @@ class UsuarioController {
 
 }
 
-export default UsuarioController;   
+export default UsuarioController;

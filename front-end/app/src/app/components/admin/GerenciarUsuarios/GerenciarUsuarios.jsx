@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { FiFilter, FiEdit, FiX, FiPlus, FiSearch, FiAlertTriangle, FiCheckCircle, FiChevronDown, FiInbox, FiSlash, FiLoader, FiChevronLeft, FiChevronRight, FiUser, FiUserCheck, FiUserX, FiMail, FiBriefcase, FiRefreshCw } from 'react-icons/fi';
+import { FiFilter, FiEdit, FiX, FiPlus, FiSearch, FiAlertTriangle, FiCheckCircle, FiChevronDown, FiInbox, FiSlash, FiLoader, FiChevronLeft, FiChevronRight, FiUser, FiUserCheck, FiUserX, FiMail, FiBriefcase, FiRefreshCw, FiInfo } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '../../../lib/api';
@@ -47,6 +47,58 @@ const FuncaoBadge = ({ funcao }) => {
 
 const Spinner = () => <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="w-5 h-5 border-2 border-white border-t-transparent rounded-full" />;
 
+// NOVO COMPONENTE: Modal de Visualização de Técnico
+const TechnicianInfoModal = ({ user, onClose }) => {
+    if (!user) return null;
+
+    const data = [
+        { label: 'Nome', value: user.nome },
+        { label: 'Username', value: user.username },
+        { label: 'Email', value: user.email },
+        { label: 'Função', value: <FuncaoBadge funcao={user.funcao} /> },
+        { label: 'Status', value: <StatusBadge status={user.status} /> },
+        { label: 'Especialidade', value: user.especialidade || 'Nenhuma especialidade definida' },
+    ];
+
+    return (
+        <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} className="bg-white rounded-xl w-full max-w-sm shadow-2xl overflow-hidden">
+            <div className="p-6">
+                <div className="flex justify-between items-center mb-6 border-b pb-4">
+                    <h3 className="font-bold text-xl text-blue-600 flex items-center gap-2">
+                        <FiBriefcase size={20} /> Detalhes do Técnico
+                    </h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-700 p-1 rounded-full">
+                        <FiX size={20} />
+                    </button>
+                </div>
+
+                <div className="space-y-4">
+                    {data.map((item, index) => (
+                        <div key={index} className="flex flex-col text-left">
+                            <span className="text-sm font-medium text-gray-500">{item.label}</span>
+                            <div className="text-gray-800 font-semibold mt-0.5">{item.value}</div>
+                            {item.label === 'Especialidade' && (
+                                <p className="text-xs text-gray-400 italic mt-1">Foco principal de atuação.</p>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <div className="bg-gray-50 px-6 py-4 flex justify-end">
+                <motion.button 
+                    type="button" 
+                    onClick={onClose} 
+                    whileHover={{ scale: 1.05 }} 
+                    whileTap={{ scale: 0.95 }}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                    Fechar
+                </motion.button>
+            </div>
+        </motion.div>
+    );
+};
+
 const ReportCard = ({ title, count, icon, color, onClick, isActive, isLoading, isClickable = true }) => {
     const baseClasses = "flex flex-col p-5 rounded-xl shadow-lg transition-all duration-300 transform bg-white";
     
@@ -56,8 +108,6 @@ const ReportCard = ({ title, count, icon, color, onClick, isActive, isLoading, i
     } else {
         clickClasses = "cursor-default";
     }
-
-    const borderColor = color === 'red' ? 'red' : color;
 
     const activeClasses = isActive 
         ? `border-2 border-red-500`
@@ -180,6 +230,9 @@ export default function GerenciarUsuarios() {
     const [countsLoading, setCountsLoading] = useState(true);
     const [editingUser, setEditingUser] = useState(null);
     const [userToToggle, setUserToToggle] = useState(null);
+    // NOVO ESTADO: Usuário para visualização
+    const [viewingUser, setViewingUser] = useState(null); 
+    
     const [filtroStatus, setFiltroStatus] = useState('');
     const [filtroFuncao, setFiltroFuncao] = useState('');
     const [pesquisa, setPesquisa] = useState('');
@@ -245,9 +298,8 @@ export default function GerenciarUsuarios() {
         if (!editingUser) return;
         setActionLoading(true);
         try {
+            // Apenas envia função e especialidade, mantendo nome e email inalterados no backend.
             await api.patch(`/usuarios/${editingUser.id}`, {
-                nome: editingUser.nome,
-                email: editingUser.email,
                 funcao: editingUser.funcao,
                 especialidade: editingUser.especialidade || null
             });
@@ -281,6 +333,15 @@ export default function GerenciarUsuarios() {
         }
     };
 
+    // NOVA FUNÇÃO: Abre o modal de visualização apenas para técnicos
+    const handleViewTechnician = (usuario) => {
+        if (usuario.funcao === 'tecnico') {
+            setViewingUser(usuario);
+        } else {
+            toast.info(`Detalhes avançados apenas para técnicos. Para editar, use o ícone ${<FiEdit size={16} />}`);
+        }
+    };
+
     const filteredUsers = useMemo(() => {
         return usuarios.filter(u => {
             const matchesSearch = u.nome.toLowerCase().includes(pesquisa.toLowerCase()) || 
@@ -309,7 +370,9 @@ export default function GerenciarUsuarios() {
     return (
         <div className="p-4 sm:p-6 lg:p-8 font-sans">
             <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="max-w-7xl mx-auto">
+                {/* Cards de Resumo (sem alteração) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    {/* ... ReportCards (sem alteração) ... */}
                     <ReportCard 
                         title="Todos os Usuários"
                         count={counts.todos}
@@ -390,6 +453,7 @@ export default function GerenciarUsuarios() {
                             </div>
                         </header>
 
+                        {/* Filtros e Pesquisa (sem alteração) */}
                         <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
                             <div className="relative w-full md:flex-1 group">
                                 <FiSearch className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400 group-focus-within:text-red-600 transition-colors" />
@@ -460,7 +524,13 @@ export default function GerenciarUsuarios() {
                                 </thead>
                                 <tbody>
                                     {currentItems.length > 0 ? currentItems.map((usuario, index) => (
-                                        <motion.tr variants={itemVariants} key={`${usuario.id}-${index}`} className="border-b border-gray-200/80 hover:bg-zinc-50/50 transition-colors">
+                                        <motion.tr 
+                                            variants={itemVariants} 
+                                            key={`${usuario.id}-${index}`} 
+                                            className={`border-b border-gray-200/80 transition-colors ${usuario.funcao === 'tecnico' ? 'hover:bg-blue-50/50 cursor-pointer' : 'hover:bg-zinc-50/50'}`}
+                                            // CLIQUE NA LINHA PARA VISUALIZAR O TÉCNICO
+                                            onClick={() => handleViewTechnician(usuario)}
+                                        >
                                             <td className="px-4 py-4 font-medium text-gray-800">{usuario.nome}</td>
                                             <td className="px-4 py-4 font-mono text-sm text-gray-500">{usuario.username}</td>
                                             <td className="px-4 py-4 text-gray-600 flex items-center gap-2">
@@ -472,10 +542,23 @@ export default function GerenciarUsuarios() {
                                             <td className="px-4 py-4"><StatusBadge status={usuario.status} /></td>
                                             <td className="px-4 py-4">
                                                 <div className="flex gap-2 justify-end">
+                                                    {/* BOTÃO DE VISUALIZAÇÃO SE FOR TÉCNICO */}
+                                                    {usuario.funcao === 'tecnico' && (
+                                                        <motion.button 
+                                                            whileHover={{ scale: 1.1 }} 
+                                                            whileTap={{ scale: 0.9 }} 
+                                                            onClick={(e) => { e.stopPropagation(); setViewingUser({ ...usuario }); }} // Impede a abertura duplicada do modal
+                                                            aria-label="Visualizar Detalhes" 
+                                                            className="p-2 cursor-pointer text-gray-400 hover:text-blue-600"
+                                                        >
+                                                            <FiInfo size={18} />
+                                                        </motion.button>
+                                                    )}
+                                                    
                                                     <motion.button 
                                                         whileHover={{ scale: 1.1 }} 
                                                         whileTap={{ scale: 0.9 }} 
-                                                        onClick={() => setEditingUser({ ...usuario })} 
+                                                        onClick={(e) => { e.stopPropagation(); setEditingUser({ ...usuario }); }} 
                                                         aria-label="Editar" 
                                                         className="p-2 cursor-pointer text-gray-400 hover:text-blue-600"
                                                     >
@@ -484,7 +567,7 @@ export default function GerenciarUsuarios() {
                                                     <motion.button 
                                                         whileHover={{ scale: 1.1 }} 
                                                         whileTap={{ scale: 0.9 }} 
-                                                        onClick={() => setUserToToggle(usuario)} 
+                                                        onClick={(e) => { e.stopPropagation(); setUserToToggle(usuario); }} 
                                                         aria-label={usuario.status === 'ativo' ? 'Inativar' : 'Ativar'} 
                                                         className={`p-2 cursor-pointer ${
                                                             usuario.status === 'ativo' 
@@ -519,125 +602,143 @@ export default function GerenciarUsuarios() {
                     </motion.div>
                 </motion.div>
 
+                {/* MODAIS: EDITAR, TOGGLE E VISUALIZAÇÃO */}
                 <AnimatePresence>
-                    {(editingUser || userToToggle) && (
+                    {(editingUser || userToToggle || viewingUser) && (
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-                            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} className="bg-white rounded-xl w-full max-w-md shadow-2xl overflow-hidden">
-                                {editingUser && (
-                                    <>
-                                        <div className="p-6">
-                                            <div className="flex justify-between items-center mb-6">
-                                                <h3 className="font-bold text-xl text-gray-800">Editar Usuário</h3>
-                                                <button onClick={() => setEditingUser(null)} className="text-gray-400 hover:text-gray-700 p-1 rounded-full">
-                                                    <FiX />
-                                                </button>
+                            
+                            {/* MODAL DE VISUALIZAÇÃO DE TÉCNICO */}
+                            {viewingUser && <TechnicianInfoModal user={viewingUser} onClose={() => setViewingUser(null)} />}
+
+                            {/* MODAL DE EDIÇÃO */}
+                            {editingUser && (
+                                <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} className="bg-white rounded-xl w-full max-w-md shadow-2xl overflow-hidden">
+                                    <div className="p-6">
+                                        <div className="flex justify-between items-center mb-6">
+                                            <h3 className="font-bold text-xl text-gray-800">Editar Usuário</h3>
+                                            <button onClick={() => setEditingUser(null)} className="text-gray-400 hover:text-gray-700 p-1 rounded-full">
+                                                <FiX />
+                                            </button>
+                                        </div>
+                                        <div className="space-y-4">
+                                            {/* CAMPO NOME - APENAS VISUALIZAÇÃO */}
+                                            <div>
+                                                <label className="text-sm font-medium text-gray-600 mb-1 block">Nome</label>
+                                                <div className="w-full bg-gray-100 text-gray-700 p-3 rounded-lg border border-gray-200 font-semibold">
+                                                    {editingUser.nome}
+                                                </div>
                                             </div>
-                                            <div className="space-y-4">
-                                                <div>
-                                                    <label className="text-sm font-medium text-gray-600 mb-1 block">Nome</label>
-                                                    <input 
-                                                        type="text"
-                                                        value={editingUser.nome}
-                                                        onChange={e => setEditingUser({ ...editingUser, nome: e.target.value })}
-                                                        className="w-full bg-zinc-100 border-2 border-transparent p-3 rounded-lg focus:outline-none focus:bg-white focus:border-red-500"
-                                                    />
+                                            {/* CAMPO EMAIL - APENAS VISUALIZAÇÃO */}
+                                            <div>
+                                                <label className="text-sm font-medium text-gray-600 mb-1 block">Email</label>
+                                                <div className="w-full bg-gray-100 text-gray-700 p-3 rounded-lg border border-gray-200 font-semibold">
+                                                    {editingUser.email}
                                                 </div>
-                                                <div>
-                                                    <label className="text-sm font-medium text-gray-600 mb-1 block">Email</label>
-                                                    <input 
-                                                        type="email"
-                                                        value={editingUser.email}
-                                                        onChange={e => setEditingUser({ ...editingUser, email: e.target.value })}
-                                                        className="w-full bg-zinc-100 border-2 border-transparent p-3 rounded-lg focus:outline-none focus:bg-white focus:border-red-500"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="text-sm font-medium text-gray-600 mb-1 block">Função</label>
-                                                    <select 
-                                                        value={editingUser.funcao} 
-                                                        onChange={e => setEditingUser({ ...editingUser, funcao: e.target.value })} 
-                                                        className="w-full bg-zinc-100 border-2 border-transparent p-3 rounded-lg appearance-none focus:outline-none focus:bg-white focus:border-red-500"
-                                                    >
-                                                        <option value="admin">Admin</option>
-                                                        <option value="tecnico">Técnico</option>
-                                                        <option value="usuario">Usuário</option>
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <label className="text-sm font-medium text-gray-600 mb-1 block">Especialidade</label>
-                                                    <input 
-                                                        type="text"
-                                                        value={editingUser.especialidade || ''}
-                                                        onChange={e => setEditingUser({ ...editingUser, especialidade: e.target.value })}
-                                                        placeholder="Opcional - apenas para técnicos"
-                                                        className="w-full bg-zinc-100 border-2 border-transparent p-3 rounded-lg focus:outline-none focus:bg-white focus:border-red-500"
-                                                    />
-                                                </div>
+                                            </div>
+                                            
+                                            {/* CAMPO FUNÇÃO - EDITÁVEL */}
+                                            <div>
+                                                <label className="text-sm font-medium text-gray-600 mb-1 block">Função</label>
+                                                <select 
+                                                    value={editingUser.funcao} 
+                                                    onChange={e => setEditingUser({ ...editingUser, funcao: e.target.value })} 
+                                                    className="w-full bg-zinc-100 border-2 border-transparent p-3 rounded-lg appearance-none focus:outline-none focus:bg-white focus:border-red-500"
+                                                >
+                                                    <option value="admin">Admin</option>
+                                                    <option value="tecnico">Técnico</option>
+                                                    <option value="usuario">Usuário</option>
+                                                </select>
+                                            </div>
+                                            
+                                            {/* CAMPO ESPECIALIDADE - EDITÁVEL */}
+                                            <div>
+                                                <label className="text-sm font-medium text-gray-600 mb-1 block">Especialidade</label>
+                                                <input 
+                                                    type="text"
+                                                    value={editingUser.especialidade || ''}
+                                                    onChange={e => setEditingUser({ ...editingUser, especialidade: e.target.value })}
+                                                    placeholder="Opcional - apenas para técnicos"
+                                                    className="w-full bg-zinc-100 border-2 border-transparent p-3 rounded-lg focus:outline-none focus:bg-white focus:border-red-500"
+                                                />
                                             </div>
                                         </div>
-                                        <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+                                    </div>
+                                    <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+                                        <motion.button 
+                                            type="button" 
+                                            onClick={() => setEditingUser(null)} 
+                                            whileHover={{ scale: 1.05 }} 
+                                            whileTap={{ scale: 0.95 }}
+                                            className="px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
+                                        >
+                                            Cancelar
+                                        </motion.button>
+                                        <motion.button 
+                                            type="button" 
+                                            onClick={handleSave} 
+                                            disabled={actionLoading}
+                                            whileHover={{ scale: 1.05 }} 
+                                            whileTap={{ scale: 0.95 }}
+                                            className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-wait"
+                                        >
+                                            {actionLoading ? <Spinner /> : <FiCheckCircle size={18} />}
+                                            <span className="ml-2">{actionLoading ? 'Salvando...' : 'Salvar Alterações'}</span>
+                                        </motion.button>
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {/* MODAL DE CONFIRMAÇÃO DE STATUS */}
+                            {userToToggle && (
+                                <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} className="bg-white rounded-xl w-full max-w-md shadow-2xl overflow-hidden">
+                                    <div className="p-6">
+                                        <div className="flex justify-between items-start mb-6">
+                                            <FiAlertTriangle size={24} className={`text-${userToToggle.status === 'ativo' ? 'red' : 'green'}-500 mr-3 inline-block`} />
+                                            <h3 className="font-bold text-xl text-gray-800 flex-1">
+                                                {userToToggle.status === 'ativo' ? 'Inativar Usuário' : 'Ativar Usuário'}
+                                            </h3>
+                                            <button onClick={() => setUserToToggle(null)} className="text-gray-400 hover:text-gray-700 p-1 rounded-full">
+                                                <FiX />
+                                            </button>
+                                        </div>
+                                        <p className="text-gray-600">
+                                            Tem certeza que deseja **{userToToggle.status === 'ativo' ? 'inativar' : 'ativar'}** o usuário **{userToToggle.nome}** ({userToToggle.username})?
+                                            {userToToggle.status === 'ativo' 
+                                                ? ' Ele perderá o acesso e não poderá ser atribuído a novos chamados.' 
+                                                : ' Ele voltará a ter acesso total ao sistema.'
+                                            }
+                                        </p>
+                                        <div className="mt-6 flex justify-end gap-3">
                                             <motion.button 
                                                 type="button" 
-                                                onClick={() => setEditingUser(null)} 
-                                                whileHover={{ scale: 1.05 }} 
-                                                whileTap={{ scale: 0.95 }} 
-                                                className="cursor-pointer py-2 px-5 rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-800 transition"
-                                            >
-                                                Voltar
-                                            </motion.button>
-                                            <motion.button 
-                                                onClick={handleSave} 
-                                                disabled={actionLoading} 
-                                                className="cursor-pointer py-2 px-5 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 flex justify-center items-center gap-2 disabled:bg-red-400" 
-                                                whileHover={{ scale: 1.05 }} 
-                                                whileTap={{ scale: 0.95 }}
-                                            >
-                                                {actionLoading ? <Spinner /> : 'Salvar Alterações'}
-                                            </motion.button>
-                                        </div>
-                                    </>
-                                )}
-                                {userToToggle && (
-                                    <div className="p-6 text-center">
-                                        <FiAlertTriangle className="mx-auto text-red-500 text-5xl mb-4" />
-                                        <h3 className="font-bold text-xl mb-2 text-gray-800">
-                                            {userToToggle.status === 'ativo' ? 'Confirmar Inativação' : 'Confirmar Ativação'}
-                                        </h3>
-                                        <p className="text-gray-600 mb-6">
-                                            Tem certeza de que deseja {userToToggle.status === 'ativo' ? 'inativar' : 'ativar'} o usuário "{userToToggle.nome}"?
-                                        </p>
-                                        <div className="flex gap-4 justify-center">
-                                            <motion.button 
                                                 onClick={() => setUserToToggle(null)} 
-                                                disabled={actionLoading} 
-                                                className="cursor-pointer py-2 px-6 rounded-lg bg-gray-200 hover:bg-gray-300 font-semibold text-gray-700" 
                                                 whileHover={{ scale: 1.05 }} 
                                                 whileTap={{ scale: 0.95 }}
+                                                className="px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
                                             >
-                                                Voltar
+                                                Cancelar
                                             </motion.button>
                                             <motion.button 
+                                                type="button" 
                                                 onClick={handleToggleStatus} 
-                                                disabled={actionLoading} 
-                                                className={`cursor-pointer py-2 px-6 rounded-lg text-white font-semibold flex items-center justify-center gap-2 min-w-[120px] ${
-                                                    userToToggle.status === 'ativo' 
-                                                        ? 'bg-red-600 hover:bg-red-700' 
-                                                        : 'bg-green-600 hover:bg-green-700'
-                                                }`} 
+                                                disabled={actionLoading}
                                                 whileHover={{ scale: 1.05 }} 
                                                 whileTap={{ scale: 0.95 }}
+                                                className={`px-4 py-2 ${userToToggle.status === 'ativo' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white font-semibold rounded-lg transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-wait`}
                                             >
-                                                {actionLoading ? <Spinner /> : (userToToggle.status === 'ativo' ? 'Inativar' : 'Ativar')}
+                                                {actionLoading ? <Spinner /> : (userToToggle.status === 'ativo' ? <FiUserX size={18} /> : <FiUserCheck size={18} />)}
+                                                <span className="ml-2">{actionLoading ? 'Aguarde...' : (userToToggle.status === 'ativo' ? 'Confirmar Inativação' : 'Confirmar Ativação')}</span>
                                             </motion.button>
                                         </div>
                                     </div>
-                                )}
-                            </motion.div>
+                                </motion.div>
+                            )}
                         </motion.div>
                     )}
                 </AnimatePresence>
             </motion.div>
-            <span className="hidden bg-red-100 text-red-800 bg-green-100 text-green-800 bg-blue-100 text-blue-800 bg-purple-100 text-purple-800"></span>
+            {/* Classes Tailwind para PurgeCSS */}
+            <span className="hidden bg-red-100 text-red-600 bg-yellow-100 text-yellow-600 bg-green-100 text-green-600 bg-blue-100 text-blue-600 bg-orange-100 text-orange-600 bg-purple-100 text-purple-600"></span>
         </div>
     );
 }
