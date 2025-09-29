@@ -31,7 +31,7 @@ router.get('/:id',
 
 router.get('/:id/apontamentos',
     AuthMiddleware.verifyToken,
-    permitir(['admin', 'tecnico']),
+    permitir(['admin', 'tecnico', 'usuario']), 
     ChamadoController.listarApontamentos
 );
 
@@ -65,12 +65,6 @@ router.patch('/:id/fechar',
     AuthMiddleware.verifyToken,
     permitir(['admin']),
     ChamadoController.fechar
-);
-
-router.get('/:id/apontamentos',
-    AuthMiddleware.verifyToken,
-    permitir(['admin', 'tecnico']),
-    ChamadoController.listarApontamentos
 );
 
 

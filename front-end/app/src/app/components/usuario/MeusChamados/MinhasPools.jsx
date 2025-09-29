@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PoolCard from './PoolCard';
 import PoolFiltros from './PoolFitros';
+import ChamadoDetalhesModal from './ChamadosDetalhesModal' // Importe o novo modal
 import api from '../../../lib/api';
 
 const statusConfig = {
@@ -18,6 +19,22 @@ export default function MinhasPools({ funcionario }) {
   const [termoBusca, setTermoBusca] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // 💡 ESTADOS PARA O MODAL
+  const [chamadoSelecionado, setChamadoSelecionado] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 💡 FUNÇÕES PARA O MODAL
+  const handleCardClick = (chamado) => {
+    setChamadoSelecionado(chamado);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setChamadoSelecionado(null);
+  };
+  // -----------------------
 
   useEffect(() => {
     if (funcionario && funcionario.id) {
@@ -25,7 +42,8 @@ export default function MinhasPools({ funcionario }) {
         setIsLoading(true);
         setError(null);
         try {
-          const response = await api.get(`/chamados`);
+          // Nota: O endpoint `/chamados` deve retornar dados como 'imagem_url' e 'apontamentos_tecnico'
+          const response = await api.get(`/chamados`); 
           const meusChamados = response.data.filter(chamado => chamado.usuario_id === funcionario.id);
           setChamados(meusChamados);
         } catch (err) {
@@ -84,7 +102,11 @@ export default function MinhasPools({ funcionario }) {
           {chamadosFiltrados.length > 0 ? (
             <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {chamadosFiltrados.map(chamado => (
-                <PoolCard key={chamado.id} chamado={chamado} />
+                <PoolCard 
+                    key={chamado.id} 
+                    chamado={chamado} 
+                    onClick={handleCardClick} // Passa a função de clique
+                />
               ))}
             </motion.div>
           ) : (
@@ -95,6 +117,17 @@ export default function MinhasPools({ funcionario }) {
           )}
         </AnimatePresence>
       </motion.div>
+      
+      {/* Renderização do Modal */}
+      <AnimatePresence>
+        {isModalOpen && chamadoSelecionado && (
+          <ChamadoDetalhesModal
+            chamado={chamadoSelecionado}
+            onClose={handleCloseModal}
+          />
+        )}
+      </AnimatePresence>
+      {/* Fim da Renderização do Modal */}
     </div>
   );
 }

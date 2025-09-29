@@ -18,7 +18,8 @@ const tituloConfig = {
   'outro': { label: 'Outro', icon: <CircleHelp size={18} /> }
 };
 
-export default function PoolCard({ chamado }) {
+// Adicione a prop 'onClick'
+export default function PoolCard({ chamado, onClick }) { 
   const [isExpanded, setIsExpanded] = useState(false);
   
   if (!chamado) return null;
@@ -27,8 +28,9 @@ export default function PoolCard({ chamado }) {
   const { label: tituloLabel, icon: tituloIcon } = tituloConfig[chamado.pool?.titulo] || tituloConfig.outro;
 
   const descricaoLonga = chamado.descricao.length > 100;
-  const textoDescricao = isExpanded ? chamado.descricao : `${chamado.descricao.substring(0, 100)}${descricaoLonga ? '...' : ''}`;
-
+  // Remova a lógica de expansão aqui, pois o clique abrirá o modal
+  const textoDescricao = `${chamado.descricao.substring(0, 100)}${descricaoLonga ? '...' : ''}`;
+  
   return (
     <motion.div
       layout
@@ -36,7 +38,8 @@ export default function PoolCard({ chamado }) {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.3 }}
-      className="bg-white rounded-xl shadow-md border border-gray-200/80 overflow-hidden flex flex-col h-full hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+      className="bg-white rounded-xl shadow-md border border-gray-200/80 overflow-hidden flex flex-col h-full hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer" // Adicionado 'cursor-pointer'
+      onClick={() => onClick(chamado)} // Chama a função onClick que passará o chamado para o pai
     >
       <div className="p-5 flex-grow">
         <header className="flex justify-between items-start mb-3">
@@ -56,14 +59,12 @@ export default function PoolCard({ chamado }) {
             {chamado.titulo}
         </p>
         <p className="text-sm text-gray-600 leading-relaxed">
+            {/* O modal irá mostrar a descrição completa */}
             {textoDescricao}
             {descricaoLonga && (
-                <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="text-blue-600 font-semibold hover:underline ml-1"
-                >
-                    {isExpanded ? 'Ver menos' : 'Ver mais'}
-                </button>
+                 <span className="text-blue-600 font-semibold ml-1">
+                    Ver detalhes
+                </span>
             )}
         </p>
 

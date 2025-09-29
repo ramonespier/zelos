@@ -21,7 +21,7 @@ router.post('/login', (req, res, next) => {
       nome: 'Usuário Desenvolvedor',
       email: 'dev@local.com',
       funcao: 'admin', 
-    };
+    };    
 
     const token = AuthController.gerarToken(mockUsuario);
 
