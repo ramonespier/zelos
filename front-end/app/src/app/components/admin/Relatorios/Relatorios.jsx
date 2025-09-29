@@ -1,18 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { 
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
     ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area
 } from 'recharts';
 import { 
     FiTrendingUp, FiCheckCircle, FiClock, FiUsers, FiPieChart, 
-    FiTag, FiLoader, FiTool, FiAlertTriangle, FiPackage
+    FiTag, FiLoader, FiTool, FiAlertTriangle, FiPackage, FiDownload, FiPrinter
 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner'; 
 import api from '../../../lib/api';
-    
-// --- CONSTANTES E UTILS ---
 
 const StatCard = ({ icon, title, value, color }) => (
     <motion.div
@@ -68,16 +67,42 @@ const CustomTooltip = ({ active, payload, label }) => {
     }
     return null;
 };
+const exportToCSV = (data, filename) => {
+    if (!data || data.length === 0) {
+        toast.warning("Nenhum dado para exportar.");
+        return;
+    }
 
-// --- COMPONENTE PRINCIPAL ---
+    const headers = Object.keys(data[0]);
+    const csvContent = [
+        headers.map(h => capitalize(h)).join(';'), // Cabeçalho
+        ...data.map(row => headers.map(h => {
+            const value = row[h] === null || row[h] === undefined ? '' : String(row[h]).replace(/"/g, '""');
+            return `"${value}"`;
+        }).join(';'))
+    ].join('\n');
+
+    const blob = new Blob(["\ufeff", csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${filename}_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Dados exportados para CSV!');
+};
+const exportToPrintAsPhoto = () => {
+    toast.info("Abrindo o diálogo de impressão. Escolha 'Salvar como PDF' ou 'Salvar como Imagem' nas opções de destino.");
+    window.print();
+    toast.success('Diálogo de impressão aberto!');
+};
 
 export default function DashboardPage() {
-    // --- ESTADOS ---
+    const dashboardRef = useRef(null); 
+    
     const [statusData, setStatusData] = useState([]);
     const [tipoData, setTipoData] = useState([]);
     const [tecnicoData, setTecnicoData] = useState([]);
-
-    // Novos Estados para os Novos Relatórios
     const [chamadosEspera, setChamadosEspera] = useState([]);
     const [eficienciaApontamento, setEficienciaApontamento] = useState([]);
     const [usoPatrimonio, setUsoPatrimonio] = useState([]);
@@ -91,86 +116,148 @@ export default function DashboardPage() {
     
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isExporting, setIsExporting] = useState(false);
+    const consolidatedData = useMemo(() => {
+        return [
+            { tipo: 'Estatísticas Gerais', total: generalStats.totalChamados, detalhe: 'Total Chamados' },
+            { tipo: 'Estatísticas Gerais', total: generalStats.chamadosConcluidos, detalhe: 'Concluídos' },
+            { tipo: 'Estatísticas Gerais', total: generalStats.tempoMedioGeral, detalhe: 'T. Médio Resolução (min)' },
+            { tipo: 'Estatísticas Gerais', total: generalStats.totalEmEspera, detalhe: 'Em Espera (Sem Técnico)' },
+            ...statusData.map(d => ({ tipo: 'Status', ...d })),
+            ...tipoData.map(d => ({ tipo: 'Tipo', ...d, total_chamado: d.total })),
+            ...tecnicoData.map(d => ({ tipo: 'Técnico Performance', ...d })),
+            ...chamadosEspera.map(d => ({ tipo: 'Chamados em Espera', ...d })),
+            ...eficienciaApontamento.map(d => ({ tipo: 'Eficiência Apontamento', ...d })),
+            ...usoPatrimonio.map(d => ({ tipo: 'Uso Patrimônio', ...d })),
+        ];
+    }, [generalStats, statusData, tipoData, tecnicoData, chamadosEspera, eficienciaApontamento, usoPatrimonio]);
+
+
+    const fetchAllReports = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const results = await Promise.allSettled([
+                api.get('/relatorios?tipo=status'),
+                api.get('/relatorios?tipo=tipo'),
+                api.get('/relatorios?tipo=tecnico'),
+                api.get('/relatorios?tipo=espera'),
+                api.get('/relatorios?tipo=eficienciaTecnico'),
+                api.get('/relatorios?tipo=usoPatrimonio')
+            ]);
+
+            const errors = results.filter(r => r.status === 'rejected');
+            if (errors.length > 0) {
+                const firstError = errors[0].reason;
+                const message = firstError.response?.data?.message || firstError.message;
+                throw new Error(`Falha ao buscar relatórios: ${message}`);
+            }
+
+            const [statusRes, tipoRes, tecnicoRes, esperaRes, eficienciaRes, patrimonioRes] = results.map(r => r.value.data);
+
+            setStatusData(statusRes);
+            setTipoData(tipoRes);
+            setTecnicoData(tecnicoRes);
+            setChamadosEspera(esperaRes);
+            setEficienciaApontamento(eficienciaRes);
+            setUsoPatrimonio(patrimonioRes);
+
+            const totalChamados = statusRes.reduce((sum, item) => sum + item.total, 0);
+            const chamadosConcluidos = statusRes.find(item => item.status === 'concluido')?.total || 0;
+            
+            const validTemposMedios = tecnicoRes.filter(item => item.tempo_medio_resolucao_minutos != null)
+                                                .map(item => parseFloat(item.tempo_medio_resolucao_minutos));
+            
+            const tempoMedioGeral = validTemposMedios.length > 0 
+                ? Math.round(validTemposMedios.reduce((sum, avg) => sum + avg, 0) / validTemposMedios.length) 
+                : 0;
+
+            const totalEmEspera = esperaRes.length;
+
+            setGeneralStats({ totalChamados, chamadosConcluidos, tempoMedioGeral, totalEmEspera });
+
+        } catch (err) {
+            console.error("Erro detalhado ao buscar relatórios:", err);
+            setError(err.message || "Falha ao carregar os dados dos relatórios.");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
-        const fetchAllReports = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                // Chamadas para os relatórios ORIGINAIS e NOVOS
-                const results = await Promise.allSettled([
-                    api.get('/relatorios?tipo=status'),
-                    api.get('/relatorios?tipo=tipo'),
-                    api.get('/relatorios?tipo=tecnico'), // vw_atividades_tecnicos (tempo_medio_resolucao_minutos)
-                    api.get('/relatorios?tipo=espera'), // vw_chamados_sem_tecnico (horas_em_espera)
-                    api.get('/relatorios?tipo=eficienciaTecnico'), // vw_eficiencia_apontamentos_tecnicos
-                    api.get('/relatorios?tipo=usoPatrimonio') // vw_uso_patrimonios_em_chamados
-                ]);
-
-                const errors = results.filter(r => r.status === 'rejected');
-                if (errors.length > 0) {
-                    const firstError = errors[0].reason;
-                    // Tenta extrair a mensagem de erro da resposta da API ou usa a mensagem genérica
-                    const message = firstError.response?.data?.message || firstError.message;
-                    throw new Error(`Falha ao buscar relatórios: ${message}`);
-                }
-
-                // Desestruturação dos resultados
-                const [statusRes, tipoRes, tecnicoRes, esperaRes, eficienciaRes, patrimonioRes] = results.map(r => r.value.data);
-
-                setStatusData(statusRes);
-                setTipoData(tipoRes);
-                setTecnicoData(tecnicoRes);
-                setChamadosEspera(esperaRes);
-                setEficienciaApontamento(eficienciaRes);
-                setUsoPatrimonio(patrimonioRes);
-
-                // Cálculo das Estatísticas Gerais
-                const totalChamados = statusRes.reduce((sum, item) => sum + item.total, 0);
-                const chamadosConcluidos = statusRes.find(item => item.status === 'concluido')?.total || 0;
-                
-                const validTemposMedios = tecnicoRes.filter(item => item.tempo_medio_resolucao_minutos != null)
-                                                    .map(item => parseFloat(item.tempo_medio_resolucao_minutos));
-                
-                const tempoMedioGeral = validTemposMedios.length > 0 
-                    ? Math.round(validTemposMedios.reduce((sum, avg) => sum + avg, 0) / validTemposMedios.length) 
-                    : 0;
-
-                const totalEmEspera = esperaRes.length;
-
-                setGeneralStats({ totalChamados, chamadosConcluidos, tempoMedioGeral, totalEmEspera });
-
-            } catch (err) {
-                console.error("Erro detalhado ao buscar relatórios:", err);
-                setError(err.message || "Falha ao carregar os dados dos relatórios.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        // Adiciona classes tailwind usadas dinamicamente para que o PurgeCSS as mantenha
-        const dummyClasses = "bg-red-100 text-red-600 bg-green-100 text-green-600 bg-yellow-100 text-yellow-600 bg-blue-100 text-blue-600 bg-orange-100 text-orange-600";
-
         fetchAllReports();
-    }, []);
+    }, [fetchAllReports]);
+
+    const handleExportCSV = () => {
+        setIsExporting(true);
+        exportToCSV(consolidatedData, "relatorio_dashboard_consolidado");
+        setIsExporting(false);
+    };
+
+    const handleExportPNG = async () => {
+        setIsExporting(true);
+        exportToPrintAsPhoto();
+        setIsExporting(false);
+    };
+
 
     if (loading) return <div className="flex justify-center items-center h-[50vh]"><FiLoader className="animate-spin text-4xl text-red-600"/></div>;
     if (error) return <div className="text-center p-10 font-semibold text-red-600 bg-red-50 rounded-lg max-w-7xl mx-auto">{error}</div>;
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 font-sans">
+            <style jsx global>{`
+                /* CSS Específico para Impressão (essencial para ocultar botões na "foto") */
+                @media print {
+                    /* Oculta o cabeçalho e os botões de exportação durante a impressão */
+                    .print-hide {
+                        display: none !important;
+                    }
+                    /* Remove margens e sombras desnecessárias para o formato A4/PDF */
+                    .dashboard-container {
+                        box-shadow: none !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+                }
+            `}</style>
+
             <motion.div 
+                ref={dashboardRef} 
                 initial={{ opacity: 0, scale: 0.98 }} 
                 animate={{ opacity: 1, scale: 1 }} 
-                className="bg-white p-5 sm:p-8 rounded-2xl shadow-lg max-w-7xl mx-auto border border-gray-200/80"
+                className="bg-white p-5 sm:p-8 rounded-2xl shadow-lg max-w-7xl mx-auto border border-gray-200/80 dashboard-container"
             >
                 
-                <header className="border-b border-gray-200/80 pb-6 mb-8">
-                    <h1 className="text-3xl font-extrabold text-red-600 drop-shadow-sm">Dashboard de Análise Operacional</h1>
-                    <p className="text-sm text-gray-600 mt-1">Visão geral dos chamados, performance da equipe e utilização de recursos.</p>
+                <header className="border-b border-gray-200/80 pb-6 mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center print-hide">
+                    <div>
+                        <h1 className="text-3xl font-extrabold text-red-600 drop-shadow-sm">Dashboard de Análise Operacional</h1>
+                        <p className="text-sm text-gray-600 mt-1">Visão geral dos chamados, performance da equipe e utilização de recursos.</p>
+                    </div>
+                    <div className="flex gap-3 mt-4 sm:mt-0">
+                        <motion.button
+                            onClick={handleExportCSV}
+                            disabled={isExporting}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="flex items-center gap-2 bg-green-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-wait text-sm"
+                        >
+                            {isExporting ? <FiLoader size={18} className="animate-spin" /> : <FiDownload size={18} />} 
+                            Exportar CSV
+                        </motion.button>
+                        <motion.button
+                            onClick={handleExportPNG}
+                            disabled={isExporting}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="flex items-center gap-2 bg-blue-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-wait text-sm"
+                        >
+                            {isExporting ? <FiLoader size={18} className="animate-spin" /> : <FiPrinter size={18} />} 
+                            Exportar Impressão/Foto
+                        </motion.button>
+                    </div>
                 </header>
 
-                {/* --- 1. Cartões de Estatísticas Gerais --- */}
                 <div className="space-y-8">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <StatCard icon={<FiTrendingUp size={24} />} title="Total de Chamados" value={generalStats.totalChamados} color="red" />
@@ -179,7 +266,6 @@ export default function DashboardPage() {
                         <StatCard icon={<FiAlertTriangle size={24} />} title="Chamados em Espera (Sem Técnico)" value={generalStats.totalEmEspera} color="orange" />
                     </div>
 
-                    {/* --- 2. Gráficos de Status e Tipo (PIE CHARTS) --- */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div className="bg-gray-50/50 p-6 rounded-xl shadow-inner border border-gray-100">
                             <div className="flex items-center gap-3 mb-4">
@@ -233,9 +319,7 @@ export default function DashboardPage() {
                         </div>
                     </div>
                     
-                    {/* --- 3. Gráficos de Performance e Utilização --- */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {/* --- NOVO GRÁFICO: EFICIÊNCIA DE APONTAMENTO --- */}
                         <div className="bg-gray-50/50 p-6 rounded-xl shadow-inner border border-gray-100">
                             <div className="flex items-center gap-3 mb-4">
                                 <FiTool className="text-red-600" size={20} />
@@ -263,7 +347,6 @@ export default function DashboardPage() {
                             </div>
                         </div>
 
-                        {/* --- NOVO GRÁFICO: UTILIZAÇÃO DE PATRIMÔNIO (Tabela para clareza) --- */}
                         <div className="bg-gray-50/50 p-6 rounded-xl shadow-inner border border-gray-100">
                             <div className="flex items-center gap-3 mb-4">
                                 <FiPackage className="text-red-600" size={20} />
@@ -296,14 +379,12 @@ export default function DashboardPage() {
                         </div>
                     </div>
 
-                    {/* --- 4. Performance dos Técnicos (ORIGINAL MELHORADO) --- */}
                     <div className="bg-gray-50/50 p-6 rounded-xl shadow-inner border border-gray-100">
                         <div className="flex items-center gap-3 mb-4">
                             <FiUsers className="text-red-600" size={20} />
                             <h2 className="font-bold text-lg text-gray-800">Performance Geral dos Técnicos</h2>
                         </div>
                         
-                        {/* Tabela para mobile */}
                         <div className="md:hidden">
                             <table className="w-full text-left text-sm">
                                 <thead className="border-b text-gray-500">
@@ -325,7 +406,6 @@ export default function DashboardPage() {
                             </table>
                         </div>
                         
-                        {/* Gráfico de Barras Duplas para desktop */}
                         <div className="hidden md:block" style={{ width: '100%', height: 350 }}>
                             <ResponsiveContainer>
                                 <BarChart data={tecnicoData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
@@ -343,7 +423,6 @@ export default function DashboardPage() {
                     </div>
                 </div>
             </motion.div>
-             {/* Classes hidden para o PurgeCSS */}
              <span className="hidden bg-red-100 text-red-600 bg-yellow-100 text-yellow-600 bg-green-100 text-green-600 bg-orange-100 text-orange-600"></span>
         </div>
     );
