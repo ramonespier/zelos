@@ -4,25 +4,26 @@ import { motion } from 'framer-motion';
 import {
   HomeIcon,
   PlusCircleIcon,
-  WrenchScrewdriverIcon,
-  PaperAirplaneIcon,
-  ChartBarIcon,
+  Cog6ToothIcon, 
+  UsersIcon,
+  TicketIcon, 
+  ArchiveBoxIcon, 
+  ClockIcon,
+  ChartPieIcon,
   UserCircleIcon,
-  ArchiveBoxIcon,
-  ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline';
 import Footer from '../../footer/page'; 
 
 const tabs = [
   { id: 'inicio', label: 'Início', icon: HomeIcon },
   { id: 'abrir', label: 'Abrir Chamado', icon: PlusCircleIcon },
-  { id: 'gerenciar', label: 'Painel de Atribuição', icon: WrenchScrewdriverIcon },
-  { id: 'usuarios', label: 'Gerenciar Usuários', icon: WrenchScrewdriverIcon },
-  { id: 'atribuidos', label: 'Gerenciar Chamados', icon: ClipboardDocumentCheckIcon },
-  { id: 'patrimonio', label: 'Patrimonios', icon: ArchiveBoxIcon },
-  { id: 'apontamentos', label: 'Apontamentos', icon: ArchiveBoxIcon },
-  { id: 'relatorio', label: 'Relatórios', icon: ChartBarIcon },
-  { id: 'info', label: 'Perfil', icon: UserCircleIcon },
+  { id: 'gerenciar', label: 'Painel de Atribuição', icon: Cog6ToothIcon }, 
+  { id: 'usuarios', label: 'Gerenciar Usuários', icon: UsersIcon }, 
+  { id: 'atribuidos', label: 'Gerenciar Chamados', icon: TicketIcon }, 
+  { id: 'patrimonio', label: 'Patrimonios', icon: ArchiveBoxIcon }, 
+  { id: 'apontamentos', label: 'Apontamentos', icon: ClockIcon }, 
+  { id: 'relatorio', label: 'Relatórios', icon: ChartPieIcon }, 
+  { id: 'info', label: 'Perfil', icon: UserCircleIcon }, 
 ];
 
 export default function Sidebar({ activeTab, setActiveTab }) {
