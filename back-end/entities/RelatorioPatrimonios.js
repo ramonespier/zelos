@@ -1,13 +1,13 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../configs/database.js";
 
-class RelatorioChamadoPatrimonio extends Model { }
+class UsoPatrimoniosEmChamados extends Model { }
 
-RelatorioChamadoPatrimonio.init({
+UsoPatrimoniosEmChamados.init({
     patrimonio: {
         type: DataTypes.STRING(255),
         allowNull: false,
-        primaryKey: true,
+        primaryKey: true, 
     },
     equipamento: {
         type: DataTypes.STRING(255),
@@ -23,9 +23,9 @@ RelatorioChamadoPatrimonio.init({
     }
 }, {
     sequelize,
-    modelName: 'RelatorioChamadoPatrimonio',
+    modelName: 'UsoPatrimoniosEmChamados',
     tableName: 'vw_uso_patrimonios_em_chamados',
     timestamps: false
 });
 
-export default RelatorioChamadoPatrimonio;
+export default UsoPatrimoniosEmChamados;
